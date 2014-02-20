@@ -19,6 +19,10 @@
 	<name>Runtime patcher to introduce extension points into ImageJ 1.x</name>
 	<description>This project offers extension points for use with ImageJ2 and it also offers (limited) support for headless operations.</description>
 
+	<properties>
+		<ij1-patcher.jar>${project.build.directory}/${project.build.finalName}.jar</ij1-patcher.jar>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>net.imagej</groupId>
@@ -48,6 +52,9 @@
 						<manifest>
 							<packageName>imagej.patcher</packageName>
 						</manifest>
+						<manifestEntries>
+							<Premain-Class>imagej.patcher.JavaAgent</Premain-Class>
+						</manifestEntries>
 					</archive>
 				</configuration>
 			</plugin>
@@ -62,6 +69,68 @@ Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
 Institute of Molecular Cell Biology and Genetics.</organizationName>
 					<projectName>ImageJ software for multidimensional image processing and analysis.</projectName>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.15</version>
+				<executions>
+					<execution>
+						<id>code-hacker</id>
+						<goals>
+							<goal>integration-test</goal>
+						</goals>
+						<configuration>
+							<argLine />
+							<includes>
+								<include>**/CodeHackerIT.java</include>
+							</includes>
+							<reportNameSuffix>code-hacker</reportNameSuffix>
+							<summaryFile>target/failsafe-reports/failsafe-summary-code-hacker.xml</summaryFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>debug</id>
+						<goals>
+							<goal>integration-test</goal>
+						</goals>
+						<configuration>
+							<argLine>-javaagent:${ij1-patcher.jar}=debug -Dij1-patcher.mode=debug</argLine>
+							<includes>
+								<include>**/JavaAgentIT.java</include>
+							</includes>
+							<reportNameSuffix>debug</reportNameSuffix>
+							<summaryFile>target/failsafe-reports/failsafe-summary-debug.xml</summaryFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>pre-init</id>
+						<goals>
+							<goal>integration-test</goal>
+						</goals>
+						<configuration>
+							<argLine>-javaagent:${ij1-patcher.jar}=init -Dij1-patcher.mode=init</argLine>
+							<includes>
+								<include>**/JavaAgentIT.java</include>
+							</includes>
+							<reportNameSuffix>pre-init</reportNameSuffix>
+							<summaryFile>target/failsafe-reports/failsafe-summary-pre-init.xml</summaryFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>verify</id>
+						<goals>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+							<summaryFiles>
+								<summaryFile>target/failsafe-reports/failsafe-summary-code-hacker.xml</summaryFile>
+								<summaryFile>target/failsafe-reports/failsafe-summary-debug.xml</summaryFile>
+								<summaryFile>target/failsafe-reports/failsafe-summary-pre-init.xml</summaryFile>
+							</summaryFiles>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
