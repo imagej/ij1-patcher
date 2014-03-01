@@ -68,7 +68,7 @@ package imagej.patcher;
  * 
  * @author Johannes Schindelin
  */
-public class LegacyHeadless  {
+class LegacyHeadless  {
 
 	private final CodeHacker hacker;
 

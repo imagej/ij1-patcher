@@ -62,7 +62,7 @@ package imagej.patcher;
  * 
  * @author Johannes Schindelin
  */
-public class LegacyExtensions {
+class LegacyExtensions {
 
 	/*
 	 * Extension points

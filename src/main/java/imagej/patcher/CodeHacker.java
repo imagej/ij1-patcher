@@ -92,7 +92,7 @@ import javassist.expr.NewExpr;
  * @author Rick Lentz
  * @author Johannes Schindelin
  */
-public class CodeHacker {
+class CodeHacker {
 
 	private final ClassPool pool;
 	protected final ClassLoader classLoader;
