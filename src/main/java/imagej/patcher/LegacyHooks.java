@@ -33,6 +33,7 @@ package imagej.patcher;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -50,7 +51,7 @@ import java.util.List;
  * 
  * @author Johannes Schindelin
  */
-public interface LegacyHooks {
+public abstract class LegacyHooks {
 
 	/**
 	 * Determines whether the image windows should be displayed or not.
@@ -58,7 +59,9 @@ public interface LegacyHooks {
 	 * @return false if ImageJ 1.x should be prevented from opening image
 	 *         windows.
 	 */
-	boolean isLegacyMode();
+	public boolean isLegacyMode() {
+		return true;
+	}
 
 	/**
 	 * Return the current context, if any.
@@ -69,28 +72,36 @@ public interface LegacyHooks {
 	 * 
 	 * @return the context, or null
 	 */
-	Object getContext();
+	public Object getContext() {
+		return null;
+	}
 
 	/**
 	 * Disposes and prepares for quitting.
 	 * 
 	 * @return whether ImageJ 1.x should be allowed to call System.exit()
 	 */
-	boolean quit();
+	public boolean quit() {
+		return true;
+	}
 
 	/**
 	 * Runs when the hooks are installed into an existing legacy environment.
 	 */
-	void installed();
+	public void installed() {
+		// ignore
+	}
 
 	/**
-	 * Disposes the hooks.
+	 * Disposes of the hooks.
 	 * <p>
 	 * This method is called when ImageJ 1.x is quitting or when new hooks are
 	 * installed.
 	 * </p>
 	 */
-	void dispose();
+	public void dispose() {
+		// ignore
+	}
 
 	/**
 	 * Intercepts the call to {@link ij.IJ#runPlugIn(String, String)}.
@@ -101,7 +112,9 @@ public interface LegacyHooks {
 	 *            the argument passed to the {@code runPlugIn} method
 	 * @return the object to return, or null to let ImageJ 1.x handle the call
 	 */
-	Object interceptRunPlugIn(String className, String arg);
+	public Object interceptRunPlugIn(String className, String arg) {
+		return null;
+	}
 
 	/**
 	 * Updates the progress bar, where 0 <= progress <= 1.0.
@@ -109,7 +122,8 @@ public interface LegacyHooks {
 	 * @param value
 	 *            between 0.0 and 1.0
 	 */
-	void showProgress(double progress);
+	public void showProgress(double progress) {
+	}
 
 	/**
 	 * Updates the progress bar, where the length of the bar is set to (
@@ -121,7 +135,8 @@ public interface LegacyHooks {
 	 * @param finalIndex
 	 *            the final step.
 	 */
-	void showProgress(int currentIndex, int finalIndex);
+	public void showProgress(int currentIndex, int finalIndex) {
+	}
 
 	/**
 	 * Shows a status message.
@@ -129,7 +144,8 @@ public interface LegacyHooks {
 	 * @param status
 	 *            the message
 	 */
-	void showStatus(String status);
+	public void showStatus(String status) {
+	}
 
 	/**
 	 * Logs a message.
@@ -137,7 +153,8 @@ public interface LegacyHooks {
 	 * @param message
 	 *            the message
 	 */
-	void log(String message);
+	public void log(String message) {
+	}
 
 	/**
 	 * Registers an image (possibly not seen before).
@@ -145,7 +162,8 @@ public interface LegacyHooks {
 	 * @param image
 	 *            the new image
 	 */
-	void registerImage(Object image);
+	public void registerImage(final Object image) {
+	}
 
 	/**
 	 * Releases an image.
@@ -153,7 +171,8 @@ public interface LegacyHooks {
 	 * @param imagej
 	 *            the image
 	 */
-	void unregisterImage(Object imagej);
+	public void unregisterImage(final Object image) {
+	}
 
 	/**
 	 * Logs a debug message (to be shown only in debug mode).
@@ -161,7 +180,9 @@ public interface LegacyHooks {
 	 * @param string
 	 *            the debug message
 	 */
-	void debug(String string);
+	public void debug(String string) {
+		System.err.println(string);
+	}
 
 	/**
 	 * Shows an exception.
@@ -169,21 +190,25 @@ public interface LegacyHooks {
 	 * @param t
 	 *            the exception
 	 */
-	void error(Throwable t);
+	public abstract void error(Throwable t);
 
 	/**
 	 * Returns the name to use in place of "ImageJ".
 	 * 
 	 * @return the application name
 	 */
-	String getAppName();
+	public String getAppName() {
+		return "ImageJ";
+	}
 
 	/**
 	 * Returns the icon to use in place of the ImageJ microscope.
 	 * 
 	 * @return the URL to the icon to use, or null
 	 */
-	URL getIconURL();
+	public URL getIconURL() {
+		return null;
+	}
 
 	/**
 	 * Extension point to override ImageJ 1.x' editor.
@@ -192,7 +217,9 @@ public interface LegacyHooks {
 	 *            the path to the file to open
 	 * @return true if the hook opened a different editor
 	 */
-	boolean openInEditor(String path);
+	public boolean openInEditor(String path) {
+		return false;
+	}
 
 	/**
 	 * Extension point to override ImageJ 1.x' editor.
@@ -203,19 +230,46 @@ public interface LegacyHooks {
 	 *            the initial content
 	 * @return true if the hook opened a different editor
 	 */
-	boolean createInEditor(String fileName, String content);
+	public boolean createInEditor(String fileName, String content) {
+		return false;
+	}
 
 	/**
 	 * Extension point to add to ImageJ 1.x' PluginClassLoader's class path.
 	 * 
 	 * @return a list of class path elements to add
 	 */
-	List<File> handleExtraPluginJars();
+	public List<File> handleExtraPluginJars() {
+		final List<File> result = new ArrayList<File>();
+		final String extraPluginDirs = System.getProperty("ij1.plugin.dirs");
+		if (extraPluginDirs != null) {
+			for (final String dir : extraPluginDirs.split(File.pathSeparator)) {
+				handleExtraPluginJars(new File(dir), result);
+			}
+			return result;
+		}
+		final String userHome = System.getProperty("user.home");
+		if (userHome != null) handleExtraPluginJars(new File(userHome, ".plugins"), result);
+		return result;
+	}
+
+	private void handleExtraPluginJars(final File directory, final List<File> result) {
+		final File[] list = directory.listFiles();
+		if (list == null) return;
+		for (final File file : list) {
+			if (file.isDirectory()) handleExtraPluginJars(file, result);
+			else if (file.isFile() && file.getName().endsWith(".jar")) {
+				result.add(file);
+			}
+		}
+	}
 
 	/**
 	 * Extension point to run after <i>Help&gt;Refresh Menus</i>
 	 */
-	void runAfterRefreshMenus();
+	public void runAfterRefreshMenus() {
+		// ignore
+	}
 
 	/**
 	 * Extension point to enhance ImageJ 1.x' error reporting upon
@@ -225,7 +279,7 @@ public interface LegacyHooks {
 	 *            the exception to handle
 	 * @return true if the error was handled by the legacy hook
 	 */
-	boolean handleNoSuchMethodError(NoSuchMethodError e);
+	public abstract boolean handleNoSuchMethodError(NoSuchMethodError e);
 
 	/**
 	 * Extension point to run after a new PluginClassLoader was initialized.
@@ -233,10 +287,12 @@ public interface LegacyHooks {
 	 * @param loader
 	 *            the PluginClassLoader instance
 	 */
-	void newPluginClassLoader(final ClassLoader loader);
+	public void newPluginClassLoader(final ClassLoader loader) {
+		// do nothing
+	}
 
 	/**
 	 * First extension point to run just after ImageJ 1.x spun up.
 	 */
-	void initialized();
+	public abstract void initialized();
 }

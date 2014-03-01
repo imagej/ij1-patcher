@@ -33,14 +33,11 @@ package imagej.patcher;
 
 import ij.IJ;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -60,114 +57,12 @@ import java.util.Set;
  * 
  * @author Johannes Schindelin
  */
-public class EssentialLegacyHooks implements LegacyHooks {
-
-	/** @inherit */
-	@Override
-	public boolean isLegacyMode() {
-		return true;
-	}
-
-	/** @inherit */
-	@Override
-	public Object getContext() {
-		return null;
-	}
-
-	/** @inherit */
-	@Override
-	public boolean quit() {
-		return true;
-	}
-
-	/** @inherit */
-	@Override
-	public void installed() {
-		// ignore
-	}
-
-	/** @inherit */
-	@Override
-	public void dispose() {
-		// ignore
-	}
-
-	/** @inherit */
-	@Override
-	public Object interceptRunPlugIn(String className, String arg) {
-		return null;
-	}
-
-	/** @inherit */
-	@Override
-	public void showProgress(double progress) {
-	}
-
-	/** @inherit */
-	@Override
-	public void showProgress(int currentIndex, int finalIndex) {
-	}
-
-	/** @inherit */
-	@Override
-	public void showStatus(String status) {
-	}
-
-	/** @inherit */
-	@Override
-	public void log(String message) {
-	}
-
-	/** @inherit */
-	@Override
-	public void registerImage(final Object image) {
-	}
-
-	/** @inherit */
-	@Override
-	public void unregisterImage(final Object image) {
-	}
-
-	/** @inherit */
-	@Override
-	public void debug(String string) {
-		System.err.println(string);
-	}
+public class EssentialLegacyHooks extends LegacyHooks {
 
 	/** @inherit */
 	@Override
 	public void error(Throwable t) {
 		IJ.handleException(t);
-	}
-
-	/** @inherit */
-	@Override
-	public String getAppName() {
-		return "ImageJ";
-	}
-
-	/** @inherit */
-	@Override
-	public URL getIconURL() {
-		return null;
-	}
-
-	/** @inherit */
-	@Override
-	public boolean openInEditor(String path) {
-		return false;
-	}
-
-	/** @inherit */
-	@Override
-	public boolean createInEditor(String fileName, String content) {
-		return false;
-	}
-
-	/** @inherit */
-	@Override
-	public void runAfterRefreshMenus() {
-		// ignore
 	}
 
 	/** @inherit */
@@ -218,39 +113,6 @@ public class EssentialLegacyHooks implements LegacyHooks {
 		IJ.log(buffer.toString());
 		IJ.error("Could not find method " + message + "\n(See Log for details)\n");
 		return true;
-	}
-
-	/** @inherit */
-	@Override
-	public List<File> handleExtraPluginJars() {
-		final List<File> result = new ArrayList<File>();
-		final String extraPluginDirs = System.getProperty("ij1.plugin.dirs");
-		if (extraPluginDirs != null) {
-			for (final String dir : extraPluginDirs.split(File.pathSeparator)) {
-				handleExtraPluginJars(new File(dir), result);
-			}
-			return result;
-		}
-		final String userHome = System.getProperty("user.home");
-		if (userHome != null) handleExtraPluginJars(new File(userHome, ".plugins"), result);
-		return result;
-	}
-
-	private void handleExtraPluginJars(final File directory, final List<File> result) {
-		final File[] list = directory.listFiles();
-		if (list == null) return;
-		for (final File file : list) {
-			if (file.isDirectory()) handleExtraPluginJars(file, result);
-			else if (file.isFile() && file.getName().endsWith(".jar")) {
-				result.add(file);
-			}
-		}
-	}
-
-	/** @inherit */
-	@Override
-	public void newPluginClassLoader(final ClassLoader loader) {
-		// do nothing
 	}
 
 	/** @inherit */
