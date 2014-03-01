@@ -248,8 +248,11 @@ class LegacyExtensions {
 			hacker.insertPrivateStaticField("ij.plugin.FolderOpener", Boolean.TYPE, "convertToGrayscale");
 			hacker.replaceCallInMethod("ij.plugin.FolderOpener", "public void run(java.lang.String arg)", "ij.io.Opener", "openImage",
 				"$_ = $0.openImage($1, $2);"
-				+ "if (convertToGrayscale)"
-				+ "  ij.IJ.run($_, \"8-bit\", \"\");");
+				+ "if (convertToGrayscale) {"
+				+ "  final String saved = ij.Macro.getOptions();"
+				+ "  ij.IJ.run($_, \"8-bit\", \"\");"
+				+ "  if (saved != null && !saved.equals(\"\")) ij.Macro.setOptions(saved);"
+				+ "}");
 			hacker.replaceCallInMethod("ij.plugin.FolderOpener", "boolean showDialog(ij.ImagePlus imp, java.lang.String[] list)",
 				"ij.plugin.FolderOpener$FolderOpenerDialog", "addCheckbox",
 				"$0.addCheckbox(\"Convert to 8-bit Grayscale\", convertToGrayscale);"
