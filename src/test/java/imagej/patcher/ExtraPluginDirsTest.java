@@ -77,7 +77,7 @@ public class ExtraPluginDirsTest {
 
 		final String key = "random-" + Math.random();
 		System.setProperty(key, "321");
-		final LegacyEnvironment ij1 = new LegacyEnvironment(null, false);
+		final LegacyEnvironment ij1 = new LegacyEnvironment(null, true);
 		ij1.run("Set Property", "key=" + key + " value=123");
 		assertEquals("123", System.getProperty(key));
 	}
@@ -88,7 +88,7 @@ public class ExtraPluginDirsTest {
 		assertTrue(pluginsDir.mkdirs());
 		final File jarsDir = new File(tmpDir, "jars");
 		assertTrue(jarsDir.mkdirs());
-		LegacyEnvironment ij1 = new LegacyEnvironment(null, false);
+		LegacyEnvironment ij1 = new LegacyEnvironment(null, true);
 		final String helperClassName = TestUtils.class.getName();
 		try {
 			assertNull(ij1.runPlugIn(helperClassName, null));
@@ -98,7 +98,7 @@ public class ExtraPluginDirsTest {
 		final File jarFile = new File(jarsDir, "helper.jar");
 		TestUtils.makeJar(jarFile, helperClassName);
 		System.setProperty("plugins.dir", pluginsDir.getAbsolutePath());
-		ij1 = new LegacyEnvironment(null, false);
+		ij1 = new LegacyEnvironment(null, true);
 		try {
 			assertNotNull(ij1.runPlugIn(helperClassName, null));
 		} catch (Throwable t) {
