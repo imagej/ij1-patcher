@@ -120,7 +120,9 @@ public class EssentialLegacyHooks extends LegacyHooks {
 	public void initialized() {
 		final String property = System.getProperty("ij1.patcher.initializer");
 		try {
-			final Class<?> runClass = IJ.getClassLoader().loadClass(property != null ? property
+			final ClassLoader loader = IJ.getClassLoader();
+			Thread.currentThread().setContextClassLoader(loader);
+			final Class<?> runClass = loader.loadClass(property != null ? property
 					: "imagej.legacy.plugin.LegacyInitializer");
 			final Runnable run = (Runnable)runClass.newInstance();
 			run.run();
