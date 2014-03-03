@@ -188,6 +188,10 @@ public class LegacyInjector {
 			+ "if (plugins.getName().equals(\"plugins\")) {"
 			+ "  java.io.File root = plugins.getParentFile();"
 			+ "  if (root != null) addRecursively(new java.io.File(root, \"jars\"));"
+			+ "}"
+			+ "final java.util.Iterator iter = ij.IJ._hooks._pluginClasspath.iterator();"
+			+ "while (iter.hasNext()) {"
+			+ "  addURL(((java.io.File) iter.next()).toURL());"
 			+ "}");
 		hacker.insertAtBottomOfMethod("ij.io.PluginClassLoader",
 			"void init(java.lang.String path)",

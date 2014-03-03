@@ -218,6 +218,8 @@ public abstract class LegacyHooks {
 		return false;
 	}
 
+	final public List<File> _pluginClasspath = new ArrayList<File>();
+
 	/**
 	 * Extension point to add to ImageJ 1.x' PluginClassLoader's class path.
 	 * 
@@ -225,6 +227,7 @@ public abstract class LegacyHooks {
 	 */
 	public List<File> handleExtraPluginJars() {
 		final List<File> result = new ArrayList<File>();
+		result.addAll(_pluginClasspath);
 		final String extraPluginDirs = System.getProperty("ij1.plugin.dirs");
 		if (extraPluginDirs != null) {
 			for (final String dir : extraPluginDirs.split(File.pathSeparator)) {

@@ -32,6 +32,7 @@
 package imagej.patcher;
 
 import java.awt.GraphicsEnvironment;
+import java.io.File;
 import java.lang.reflect.Method;
 
 /**
@@ -82,6 +83,44 @@ public class LegacyEnvironment {
 		}
 		// TODO: if we want to allow calling IJ#run(ImagePlus, String, String), we
 		// will need a data translator
+	}
+
+	/**
+	 * Adds extra elements to the class path of ImageJ 1.x' plugin class loader.
+	 * <p>
+	 * The typical use case for a {@link LegacyEnvironment} is to run specific
+	 * plugins in an encapsulated environment. However, in the case of multiple
+	 * one wants to use multiple legacy environments with separate sets of plugins
+	 * enabled, it becomes impractical to pass the location of the plugins'
+	 * {@code .jar} files via the {@code plugins.dir} system property (because of
+	 * threading issues).
+	 * </p>
+	 * <p>
+	 * In other cases, the plugins' {@code .jar} files are not located in a single
+	 * directory, or worse: they might be contained in a directory among
+	 * {@code .jar} files one might <i>not</i> want to add to the plugin class
+	 * loader's class path.
+	 * </p>
+	 * <p>
+	 * This method addresses that need by allowing to add individual {@code .jar}
+	 * files to the class path of the plugin class loader and ensuring that their
+	 * {@code plugins.config} files are parsed.
+	 * </p>
+	 * 
+	 * @param classpathEntries the class path entries containing ImageJ 1.x
+	 *          plugins
+	 */
+	public void addPluginClasspath(final File... classpathEntries) {
+		try {
+			final LegacyHooks hooks =
+				(LegacyHooks) loader.loadClass("ij.IJ").getField("_hooks").get(null);
+			for (final File file : classpathEntries) {
+				hooks._pluginClasspath.add(file);
+			}
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
