@@ -190,7 +190,9 @@ public abstract class LegacyHooks {
 	 * @param t
 	 *            the exception
 	 */
-	public abstract void error(Throwable t);
+	public void error(Throwable t) {
+		// ignore
+	}
 
 	/**
 	 * Returns the name to use in place of "ImageJ".
@@ -279,7 +281,9 @@ public abstract class LegacyHooks {
 	 *            the exception to handle
 	 * @return true if the error was handled by the legacy hook
 	 */
-	public abstract boolean handleNoSuchMethodError(NoSuchMethodError e);
+	public boolean handleNoSuchMethodError(NoSuchMethodError e) {
+		return false; // not handled
+	}
 
 	/**
 	 * Extension point to run after a new PluginClassLoader was initialized.
@@ -294,5 +298,7 @@ public abstract class LegacyHooks {
 	/**
 	 * First extension point to run just after ImageJ 1.x spun up.
 	 */
-	public abstract void initialized();
+	public void initialized() {
+		// do nothing by default
+	}
 }
