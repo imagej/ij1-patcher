@@ -406,6 +406,16 @@ class LegacyExtensions {
 						extraPluginJarsHandler(methodName + "(file);"));
 			}
 		}
+		// make sure that extra directories added to the plugin class path work, too
+		hacker.insertAtTopOfMethod("ij.Menus",
+			"InputStream getConfigurationFile(java.lang.String jar)",
+			"java.io.File isDir = new java.io.File($1);" +
+			"if (isDir.isDirectory()) {" +
+			"  java.io.File config = new java.io.File(isDir, \"plugins.config\");" +
+			"  if (config.exists()) return new java.io.FileInputStream(config);" +
+			"  System.err.println(\"WARNING: missing plugins.config in \" + isDir + \"; skipping\");" +
+			"  return null;" +
+			"}");
 		// add the extra .jar files to the list of plugin .jar files to be processed.
 		hacker.insertAtBottomOfMethod("ij.Menus",
 				"public static synchronized java.lang.String[] getPlugins()",
