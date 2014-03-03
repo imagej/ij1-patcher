@@ -47,7 +47,7 @@ import java.lang.reflect.Method;
 public class LegacyEnvironment {
 
 	final private ClassLoader loader;
-	final private Method setOptions, run, runMacro, runPlugIn, main;
+	final private Method setOptions, run, runMacro, runPlugIn, _hooks, main;
 
 	/**
 	 * Constructs a new legacy environment.
@@ -75,6 +75,7 @@ public class LegacyEnvironment {
 			run = ij.getMethod("run", String.class, String.class);
 			runMacro = ij.getMethod("runMacro", String.class, String.class);
 			runPlugIn = ij.getMethod("runPlugIn", String.class, String.class);
+			_hooks = ij.getMethod("_hooks", LegacyHooks.class);
 			main = imagej.getMethod("main", String[].class);
 		}
 		catch (Exception e) {
@@ -202,6 +203,45 @@ public class LegacyEnvironment {
 	 */
 	public ClassLoader getClassLoader() {
 		return loader;
+	}
+
+	/**
+	 * Installs new legacy hooks.
+	 * <p>
+	 * The {@link LegacyHooks} class allows augmenting and overriding certain
+	 * behavior in ImageJ 1.x. This function can be used to install different
+	 * hooks from the default ones.
+	 * <p>
+	 * <p>
+	 * <b>Note:</b> It is <b>essential</b> that the legacy hooks to be installed
+	 * either do <b>not</b> use any ImageJ 1.x class <b>or</b> that the legacy
+	 * hooks' implementing class be loaded in the class loader returned by
+	 * {@link #getClassLoader()}.
+	 * </p>
+	 * 
+	 * @param hooks the legacy hooks to be installed
+	 * @return 
+	 */
+	public LegacyHooks installHooks(final LegacyHooks hooks) {
+		try {
+			if ("debug".equals(System.getProperty("scijava.log.level")) &&
+				hooks != null)
+			{
+				ClassLoader loader = hooks.getClass().getClassLoader();
+				while (loader != null && loader != this.loader) {
+					loader = loader.getParent();
+				}
+				if (loader == null) {
+					System.err.println("WARNING! The legacy hooks " + hooks +
+						" might be incompatible with ImageJ 1.x loaded in " + this.loader);
+				}
+			}
+
+			return (LegacyHooks) _hooks.invoke(null, hooks);
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
