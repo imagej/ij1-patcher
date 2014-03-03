@@ -144,10 +144,10 @@ public class LegacyInjector {
 		// override behavior of PluginClassLoader
 		hacker.insertNewMethod("ij.io.PluginClassLoader",
 			"void addRecursively(java.io.File directory)",
-			"java.io.File[] list = $1.listFiles();"
+			"java.lang.String[] list = ij.IJ._hooks.addPluginDirectory($1, $1.list());"
 			+ "if (list == null) return;"
 			+ "for (int i = 0; i < list.length; i++) {"
-			+ "  java.io.File file = list[i];"
+			+ "  java.io.File file = new java.io.File($1, list[i]);"
 			+ "  if (file.isDirectory()) addRecursively(file);"
 			+ "  else if (file.getName().endsWith(\".jar\")) addURL(file.toURI().toURL());"
 			+ "}");
@@ -161,6 +161,11 @@ public class LegacyInjector {
 		hacker.insertAtBottomOfMethod("ij.io.PluginClassLoader",
 			"void init(java.lang.String path)",
 			"ij.IJ._hooks.newPluginClassLoader(this);");
+		// handle fat .jar files in jars/ by demoting them to the end
+		hacker.replaceCallInMethod("ij.io.PluginClassLoader",
+			"private void addDirectory(java.io.File f)",
+			"java.io.File", "list",
+			"$_ = ij.IJ._hooks.addPluginDirectory($0, $proceed($$));");
 
 		// override behavior of MacAdapter, if needed
 		if (Utils.hasClass("com.apple.eawt.ApplicationListener")) {
