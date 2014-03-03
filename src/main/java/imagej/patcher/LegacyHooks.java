@@ -34,7 +34,10 @@ package imagej.patcher;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Extension points for ImageJ 1.x.
@@ -273,6 +276,45 @@ public abstract class LegacyHooks {
 	 */
 	public void newPluginClassLoader(final ClassLoader loader) {
 		// do nothing
+	}
+
+	/**
+	 * Extension point to modify the order in which .jar files are added to the
+	 * PluginClassLoader.
+	 * <p>
+	 * There is a problem which only strikes large distributions of ImageJ such as
+	 * Fiji: some .jar files try to be helpful and bundle classes which are
+	 * actually not theirs, causing problems when newer versions of those .jar
+	 * files which they shadow are present in the <i>plugins/</i> or <i>jars/</i>
+	 * directory but are not respected by the class loader.
+	 * </p>
+	 * <p>
+	 * The default hook of this extension point therefore hard-codes a few file
+	 * names of known offenders (which we politely will call fat .jar files
+	 * normally) and just pushes them back to the end of the list.
+	 * </p>
+	 * 
+	 * @param directory the directory which ImageJ 1.x looked at
+	 * @param names the list of file names in the order ImageJ 1.x discovered them
+	 * @return the ordered, filtered and/or augmented list
+	 */
+	public String[]
+		addPluginDirectory(final File directory, final String[] names)
+	{
+		if (names != null) {
+			final Pattern pattern =
+				Pattern.compile("(batik|jython|jruby)(-[0-9].*)?\\.jar");
+			Arrays.sort(names, new Comparator<String>() {
+
+				@Override
+				public int compare(final String a, final String b) {
+					return (pattern.matcher(a).matches() ? 1 : 0) -
+						(pattern.matcher(b).matches() ? 1 : 0);
+				}
+
+			});
+		}
+		return names;
 	}
 
 	/**
