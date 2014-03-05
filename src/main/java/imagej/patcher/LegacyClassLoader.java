@@ -48,9 +48,9 @@ import java.security.ProtectionDomain;
  */
 public class LegacyClassLoader extends URLClassLoader {
 	private final Class<?>[] knownClasses = new Class<?>[] {
-		LegacyHooks.class, EssentialLegacyHooks.class, HeadlessGenericDialog.class
+		LegacyHooks.class, LegacyHooks.FatJarNameComparator.class, EssentialLegacyHooks.class, HeadlessGenericDialog.class
 	};
-	private final int sharedClassCount = 1;
+	private final int sharedClassCount = 2;
 
 	public LegacyClassLoader(final boolean headless) throws ClassNotFoundException {
 		super(getImageJ1Jar(), determineParent());

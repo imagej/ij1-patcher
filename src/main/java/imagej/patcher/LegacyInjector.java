@@ -59,6 +59,7 @@ public class LegacyInjector {
 		// NB: Override class behavior before class loading gets too far along.
 		hacker.insertPublicStaticField("ij.IJ", LegacyHooks.class, "_hooks", null);
 		hacker.commitClass(LegacyHooks.class);
+		hacker.commitClass(LegacyHooks.FatJarNameComparator.class);
 		hacker.commitClass(EssentialLegacyHooks.class);
 		final String legacyHooksClass = LegacyHooks.class.getName();
 		final String essentialHooksClass = EssentialLegacyHooks.class.getName();
