@@ -1256,6 +1256,7 @@ class CodeHacker {
 		final JarOutputStream jar = new JarOutputStream(new FileOutputStream(path));
 		final DataOutputStream dataOut = new DataOutputStream(jar);
 		for (final CtClass clazz : handledClasses) {
+			if (!clazz.isModified() && !clazz.getName().startsWith("imagej.patcher.")) continue;
 			final ZipEntry entry =
 				new ZipEntry(clazz.getName().replace('.', '/') + ".class");
 			jar.putNextEntry(entry);
