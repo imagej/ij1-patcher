@@ -46,12 +46,21 @@ import javassist.ClassPool;
  */
 public class LegacyInjector {
 
-	/** Overrides class behavior of ImageJ1 classes by injecting method hooks. */
+	/**
+	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
+	 * 
+	 * @param classLoader the class loader into which to load the patched classes
+	 */
 	public void injectHooks(final ClassLoader classLoader) {
 		injectHooks(classLoader, GraphicsEnvironment.isHeadless());
 	}
 
-	/** Overrides class behavior of ImageJ1 classes by injecting method hooks. */
+	/**
+	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
+	 * 
+	 * @param classLoader the class loader into which to load the patched classes
+	 * @param headless whether to include headless patches
+	 */
 	public void injectHooks(final ClassLoader classLoader, boolean headless) {
 		if (alreadyPatched(classLoader)) return;
 		final CodeHacker hacker = new CodeHacker(classLoader, new ClassPool(false));
