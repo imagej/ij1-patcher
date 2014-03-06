@@ -86,7 +86,7 @@ class LegacyExtensions {
 	 * 
 	 * @param hacker the {@link CodeHacker} instance
 	 */
-	public static void injectHooks(final CodeHacker hacker) {
+	public static void injectHooks(final CodeHacker hacker, boolean headless) {
 		//
 		// Below are patches to make ImageJ 1.x more backwards-compatible
 		//

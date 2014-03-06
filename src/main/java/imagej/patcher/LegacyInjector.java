@@ -183,7 +183,7 @@ public class LegacyInjector {
 			"public void setVisible(boolean b)",
 			"if (ij.IJ._hooks.isLegacyMode()) { super.setVisible($1); }");
 
-		LegacyExtensions.injectHooks(hacker);
+		LegacyExtensions.injectHooks(hacker, headless);
 
 		// commit patches
 		hacker.loadClasses();
