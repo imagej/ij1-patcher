@@ -658,6 +658,22 @@ class CodeHacker {
 				}
 
 				@Override
+				public void edit(final ConstructorCall call) throws CannotCompileException {
+					if (debug) {
+						System.err.println("editing ctor " + call.getClassName() + "#" +
+							call.getMethodName() + " (wanted " + calledClass + "#" +
+							calledMethodName + ")");
+					}
+					if (call.getMethodName().equals(calledMethodName) &&
+						call.getClassName().equals(calledClass))
+					{
+						if (onlyNth > 0 && ++counter != onlyNth) return;
+						call.replace(newCode);
+						markEdited();
+					}
+				}
+
+				@Override
 				public void edit(final NewExpr expr) throws CannotCompileException {
 					if (debug) {
 						System.err.println("editing call " + expr.getClassName() + "#" +
