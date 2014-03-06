@@ -182,6 +182,14 @@ class LegacyExtensions {
 		// tell the showStatus() method to show the version() instead of empty status
 		hacker.insertAtTopOfMethod("ij.ImageJ", "void showStatus(java.lang.String s)", "if ($1 == null || \"\".equals($1)) $1 = version();");
 
+		// make sure that the GenericDialog does not make a hidden main window visible
+		if (!headless) {
+			hacker.replaceCallInMethod("ij.gui.GenericDialog",
+				"public <init>(java.lang.String title, java.awt.Frame f)",
+				"java.awt.Dialog", "super",
+				"$proceed($1 != null && $1.isVisible() ? $1 : null, $2, $3);");
+		}
+
 		// handle custom icon (e.g. for Fiji)
 		addIconHooks(hacker);
 
