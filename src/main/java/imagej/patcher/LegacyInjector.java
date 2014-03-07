@@ -245,7 +245,10 @@ public class LegacyInjector {
 			hacker.writeJar(outputJar);
 		}
 		else {
-			final URL location = Utils.getLocation(loader.loadClass("ij.IJ"));
+			URL location = Utils.getLocation(loader.loadClass("ij.IJ"));
+			if (location.getPath().endsWith(".jar")) {
+				location = new URL("jar:" + location.toString() + "!/");
+			}
 			hacker.writeJar(location, outputJar);
 		}
 	}
