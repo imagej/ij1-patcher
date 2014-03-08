@@ -304,17 +304,24 @@ public abstract class LegacyHooks {
 		if (names != null) {
 			final Pattern pattern =
 				Pattern.compile("(batik|jython|jruby)(-[0-9].*)?\\.jar");
-			Arrays.sort(names, new Comparator<String>() {
-
-				@Override
-				public int compare(final String a, final String b) {
-					return (pattern.matcher(a).matches() ? 1 : 0) -
-						(pattern.matcher(b).matches() ? 1 : 0);
-				}
-
-			});
+			Arrays.sort(names, new FatJarNameComparator(pattern));
 		}
 		return names;
+	}
+
+	final static class FatJarNameComparator implements Comparator<String> {
+
+		private final Pattern pattern;
+
+		private FatJarNameComparator(Pattern pattern) {
+			this.pattern = pattern;
+		}
+
+		@Override
+		public int compare(final String a, final String b) {
+			return (pattern.matcher(a).matches() ? 1 : 0) -
+				(pattern.matcher(b).matches() ? 1 : 0);
+		}
 	}
 
 	/**

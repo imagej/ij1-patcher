@@ -36,6 +36,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -50,6 +51,7 @@ import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javassist.CannotCompileException;
 import javassist.ClassClassPath;
@@ -1272,6 +1274,51 @@ class CodeHacker {
 		final JarOutputStream jar = new JarOutputStream(new FileOutputStream(path));
 		final DataOutputStream dataOut = new DataOutputStream(jar);
 		for (final CtClass clazz : handledClasses) {
+			if (!clazz.isModified() && !clazz.getName().startsWith("imagej.patcher.")) continue;
+			final ZipEntry entry =
+				new ZipEntry(clazz.getName().replace('.', '/') + ".class");
+			jar.putNextEntry(entry);
+			clazz.getClassFile().write(dataOut);
+			dataOut.flush();
+		}
+		jar.close();
+	}
+
+	public void writeJar(final URL directory, final File jarFile)
+		throws IOException, NotFoundException
+	{
+		final int prefixLength = directory.getPath().length();
+		final Collection<URL> urls = Utils.listContents(directory);
+
+		final byte[] buffer = new byte[16384];
+		final ZipOutputStream jar =
+			new ZipOutputStream(new FileOutputStream(jarFile));
+		final DataOutputStream dataOut = new DataOutputStream(jar);
+
+		for (final URL url : urls) {
+			final String path = url.getPath().substring(prefixLength);
+			final ZipEntry entry = new ZipEntry(path);
+			jar.putNextEntry(entry);
+			if (path.endsWith(".class")) {
+				final String classname =
+					path.substring(0, path.length() - 6).replace('/', '.');
+				final CtClass clazz = pool.get(classname);
+				clazz.getClassFile().write(dataOut);
+				handledClasses.remove(clazz);
+			}
+			else {
+				final InputStream in = url.openStream();
+				for (;;) {
+					int count = in.read(buffer);
+					if (count < 0) break;
+					dataOut.write(buffer, 0, count);
+				}
+				in.close();
+			}
+			dataOut.flush();
+		}
+		for (final CtClass clazz : handledClasses) {
+			if (!clazz.isModified() && !clazz.getName().startsWith("imagej.patcher.")) continue;
 			final ZipEntry entry =
 				new ZipEntry(clazz.getName().replace('.', '/') + ".class");
 			jar.putNextEntry(entry);

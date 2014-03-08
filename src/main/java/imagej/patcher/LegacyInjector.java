@@ -32,10 +32,14 @@
 package imagej.patcher;
 
 import java.awt.GraphicsEnvironment;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URL;
 
 import javassist.ClassPool;
+import javassist.NotFoundException;
 
 /**
  * Overrides class behavior of ImageJ1 classes using bytecode manipulation. This
@@ -46,19 +50,46 @@ import javassist.ClassPool;
  */
 public class LegacyInjector {
 
-	/** Overrides class behavior of ImageJ1 classes by injecting method hooks. */
+	/**
+	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
+	 * 
+	 * @param classLoader the class loader into which to load the patched classes
+	 */
 	public void injectHooks(final ClassLoader classLoader) {
 		injectHooks(classLoader, GraphicsEnvironment.isHeadless());
 	}
 
-	/** Overrides class behavior of ImageJ1 classes by injecting method hooks. */
+	/**
+	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
+	 * 
+	 * @param classLoader the class loader into which to load the patched classes
+	 * @param headless whether to include headless patches
+	 */
 	public void injectHooks(final ClassLoader classLoader, boolean headless) {
 		if (alreadyPatched(classLoader)) return;
+
+		final CodeHacker hacker = inject(classLoader, headless);
+
+		// commit patches
+		hacker.loadClasses();
+	}
+
+	/**
+	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
+	 * 
+	 * @param classLoader the class loader into which to load the patched classes
+	 * @param headless whether to include headless patches
+	 * @return the CodeHacker instance for further patching or .jar writing
+	 */
+	private CodeHacker inject(final ClassLoader classLoader, boolean headless) {
 		final CodeHacker hacker = new CodeHacker(classLoader, new ClassPool(false));
+
+		if (hacker.hasField("ij.IJ", "_hooks")) return hacker; // pre-patched
 
 		// NB: Override class behavior before class loading gets too far along.
 		hacker.insertPublicStaticField("ij.IJ", LegacyHooks.class, "_hooks", null);
 		hacker.commitClass(LegacyHooks.class);
+		hacker.commitClass(LegacyHooks.FatJarNameComparator.class);
 		hacker.commitClass(EssentialLegacyHooks.class);
 		final String legacyHooksClass = LegacyHooks.class.getName();
 		final String essentialHooksClass = EssentialLegacyHooks.class.getName();
@@ -185,8 +216,43 @@ public class LegacyInjector {
 
 		LegacyExtensions.injectHooks(hacker, headless);
 
-		// commit patches
-		hacker.loadClasses();
+		return hacker;
+	}
+
+	/**
+	 * Writes a .jar file with the patched classes.
+	 * 
+	 * @param outputJar the .jar file to write to
+	 * @param headless whether to include the headless patches
+	 * @param fullIJJar whether to include unpatched ImageJ 1.x classes and
+	 *          resources, too
+	 * @throws ClassNotFoundException
+	 * @throws IOException
+	 * @throws NotFoundException
+	 */
+	public static void writeJar(final File outputJar, final boolean headless,
+		final boolean fullIJJar) throws ClassNotFoundException,
+		IOException, NotFoundException
+	{
+		final File parentDirectory = outputJar.getParentFile();
+		if (parentDirectory != null && !parentDirectory.isDirectory() &&
+			!parentDirectory.mkdirs())
+		{
+			throw new IOException("Could not make directory: " + parentDirectory);
+		}
+		final LegacyInjector injector = new LegacyInjector();
+		final ClassLoader loader = new LegacyClassLoader(headless);
+		final CodeHacker hacker = injector.inject(loader, headless);
+		if (!fullIJJar) {
+			hacker.writeJar(outputJar);
+		}
+		else {
+			URL location = Utils.getLocation(loader.loadClass("ij.IJ"));
+			if (location.getPath().endsWith(".jar")) {
+				location = new URL("jar:" + location.toString() + "!/");
+			}
+			hacker.writeJar(location, outputJar);
+		}
 	}
 
 	public static void preinit() {
