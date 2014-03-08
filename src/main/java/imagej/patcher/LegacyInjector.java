@@ -84,6 +84,8 @@ public class LegacyInjector {
 	private CodeHacker inject(final ClassLoader classLoader, boolean headless) {
 		final CodeHacker hacker = new CodeHacker(classLoader, new ClassPool(false));
 
+		if (hacker.hasField("ij.IJ", "_hooks")) return hacker; // pre-patched
+
 		// NB: Override class behavior before class loading gets too far along.
 		hacker.insertPublicStaticField("ij.IJ", LegacyHooks.class, "_hooks", null);
 		hacker.commitClass(LegacyHooks.class);
