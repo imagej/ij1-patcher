@@ -84,10 +84,12 @@ public class FatJarTest {
 		// At this point, we expect batik.jar to be discovered before xalan.jar
 		String expect = "2";
 		if (!jars.list()[0].equals("batik.jar")) {
+			System.err.println("first entry is " + jars.list()[0]);
 			// if not, make it so!
 			assertTrue(new File(jars, "batik.jar").renameTo(new File(jars, "xalan-0.1.0.jar")));
 			assertTrue(new File(jars, "xalan.jar").renameTo(new File(jars, "batik.jar")));
 			assertTrue(new File(jars, "xalan-0.1.0.jar").renameTo(new File(jars, "xalan.jar")));
+			System.err.println("Now, first entry is " + jars.list()[0]);
 			assertTrue(jars.list()[0].equals("batik.jar"));
 			expect = "1";
 		}
