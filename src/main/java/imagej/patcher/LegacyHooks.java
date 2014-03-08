@@ -309,7 +309,7 @@ public abstract class LegacyHooks {
 		return names;
 	}
 
-	final static class FatJarNameComparator implements Comparator<String> {
+	public final static class FatJarNameComparator implements Comparator<String> {
 
 		private final Pattern pattern;
 
