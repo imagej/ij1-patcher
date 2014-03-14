@@ -406,6 +406,12 @@ class LegacyExtensions {
 						extraPluginJarsHandler(methodName + "(file);"));
 			}
 		}
+		// avoid parsing ij.jar for plugins
+		hacker.replaceCallInMethod("ij.Menus",
+			"InputStream autoGenerateConfigFile(java.lang.String jar)",
+			"java.util.zip.ZipEntry", "getName",
+			"$_ = $proceed($$);" +
+			"if (\"IJ_Props.txt\".equals($_)) return null;");
 		// make sure that extra directories added to the plugin class path work, too
 		hacker.insertAtTopOfMethod("ij.Menus",
 			"InputStream getConfigurationFile(java.lang.String jar)",
