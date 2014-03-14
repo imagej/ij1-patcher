@@ -34,6 +34,8 @@ package imagej.patcher;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 /**
  * Encapsulates an ImageJ 1.x "instance".
@@ -83,6 +85,44 @@ public class LegacyEnvironment {
 		}
 		// TODO: if we want to allow calling IJ#run(ImagePlus, String, String), we
 		// will need a data translator
+	}
+
+	/**
+	 * Adds the class path of a given {@link ClassLoader} to the plugin class
+	 * loader.
+	 * <p>
+	 * This method is intended to be used in unit tests as well as interactive
+	 * debugging from inside an Integrated Development Environment where the
+	 * plugin's classes are not available inside a {@code .jar} file.
+	 * </p>
+	 * <p>
+	 * At the moment, the only supported parameters are {@link URLClassLoader}s.
+	 * </p>
+	 * 
+	 * @param fromClassLoader the class path donor
+	 */
+	public void addPluginClasspath(final ClassLoader fromClassLoader) {
+		if (fromClassLoader == null) return;
+		for (ClassLoader loader = fromClassLoader; loader != null; loader =
+			loader.getParent())
+		{
+			if (loader == this.loader || loader == this.loader.getParent()) {
+				break;
+			}
+			if (!(loader instanceof URLClassLoader)) {
+				if (loader != fromClassLoader) continue;
+				throw new IllegalArgumentException(
+					"Cannot add class path from ClassLoader of type " +
+						fromClassLoader.getClass().getName());
+			}
+
+			for (final URL url : ((URLClassLoader) loader).getURLs()) {
+				if (!"file".equals(url.getProtocol())) {
+					throw new RuntimeException("Not a file URL! " + url);
+				}
+				addPluginClasspath(new File(url.getPath()));
+			}
+		}
 	}
 
 	/**
