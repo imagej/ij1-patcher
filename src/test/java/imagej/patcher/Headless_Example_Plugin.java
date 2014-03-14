@@ -48,6 +48,18 @@ public class Headless_Example_Plugin implements PlugIn {
 
 	@Override
 	public void run(String arg) {
+		if ("ClassfileURL".equals(arg)) {
+			final GenericDialog dialog = new GenericDialog("Property");
+			dialog.addStringField("property", "");
+			dialog.showDialog();
+			if (dialog.wasCanceled()) return;
+
+			final String property = dialog.getNextString();
+			final String path = "/" + getClass().getName().replace('.', '/') + ".class";
+			final String url = getClass().getResource(path).toString();
+			System.setProperty(property, url);
+			return;
+		}
 		if ("SaveDialog".equals(arg)) {
 			final SaveDialog dialog = new SaveDialog("File to save to", "default", "txt");
 			final String fileName = dialog.getFileName();

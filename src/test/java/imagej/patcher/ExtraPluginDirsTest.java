@@ -37,7 +37,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 import org.junit.After;
 import org.junit.Before;
@@ -105,5 +109,42 @@ public class ExtraPluginDirsTest {
 			t.printStackTrace();
 			assertNull("Should have found " + helperClassName + " in " + jarFile);
 		}
+	}
+
+	@Test
+	public void extraDirectory() throws Exception {
+		// empty tmpDir
+		for (final File file : tmpDir.listFiles()) {
+			if (file.isDirectory()) TestUtils.deleteRecursively(file);
+			else file.delete();
+		}
+
+		// copy plugin and write plugins.config into plain directory
+		final String path = Headless_Example_Plugin.class.getName().replace('.', '/') + ".class";
+		final File output = new File(tmpDir, path);
+		assertTrue(output.getParentFile().mkdirs());
+		final OutputStream out = new FileOutputStream(output);
+		final InputStream in = getClass().getResource("/" + path).openStream();
+		final byte[] buffer = new byte[65536];
+		for (;;) {
+			int count = in.read(buffer);
+			if (count < 0) break;
+			out.write(buffer, 0, count);
+		}
+		in.close();
+		out.close();
+		final PrintStream print = new PrintStream(new File(tmpDir, "plugins.config"));
+		final String menuLabel = "Set Classfile URL property";
+		print.println("Plugins, \"" + menuLabel + "\", " + Headless_Example_Plugin.class.getName() + "(\"ClassfileURL\")");
+		print.close();
+
+		// run that plugin
+		final String property = "ij.patcher.test." + Math.random();
+		System.clearProperty(property);
+		assertNull(System.getProperty(property));
+		final LegacyEnvironment ij1 = new LegacyEnvironment(null, true);
+		ij1.addPluginClasspath(tmpDir);
+		ij1.run(menuLabel, "property=" + property);
+		assertEquals(tmpDir.toURI().toURL().toString() + path, System.getProperty(property));
 	}
 }
