@@ -419,8 +419,7 @@ class LegacyExtensions {
 			"if (isDir.isDirectory()) {" +
 			"  java.io.File config = new java.io.File(isDir, \"plugins.config\");" +
 			"  if (config.exists()) return new java.io.FileInputStream(config);" +
-			"  System.err.println(\"WARNING: missing plugins.config in \" + isDir + \"; skipping\");" +
-			"  return null;" +
+			"  return ij.IJ._hooks.autoGenerateConfigFile(isDir);" +
 			"}");
 		// add the extra .jar files to the list of plugin .jar files to be processed.
 		hacker.insertAtBottomOfMethod("ij.Menus",

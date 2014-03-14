@@ -31,7 +31,9 @@
 
 package imagej.patcher;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -334,5 +336,40 @@ public abstract class LegacyHooks {
 	 */
 	public void initialized() {
 		// do nothing by default
+	}
+
+	public InputStream autoGenerateConfigFile(final File directory) {
+		// skip unpacked ImageJ 1.x
+		if (new File(directory, "IJ_Props.txt").exists()) return null;
+		return new ByteArrayInputStream(autoGenerateConfigFile(directory,
+			directory, "Plugins", "", new StringBuilder()).toString().getBytes());
+	}
+
+	protected StringBuilder autoGenerateConfigFile(final File topLevelDirectory,
+		final File directory, final String menuPath, final String packageName,
+		final StringBuilder builder)
+	{
+		final File[] list = directory.listFiles();
+		if (list == null) return builder;
+		// make order consistent
+		Arrays.sort(list);
+		for (final File file : list) {
+			String name = file.getName();
+			if (name.startsWith("_")) continue;
+			if (file.isDirectory()) {
+				autoGenerateConfigFile(topLevelDirectory, file, menuPath + ">" +
+					name.replace('_', ' '), packageName + name + ".", builder);
+			}
+			else if (name.endsWith(".class") && name.contains("_") &&
+				!name.contains("$"))
+			{
+				if (topLevelDirectory == directory &&
+					Character.isLowerCase(name.charAt(0))) continue;
+				final String className = packageName + name.substring(0, name.length() - 6);
+				name = name.substring(0, name.length() - 6).replace('_', ' ');
+				builder.append(menuPath + ", \"" + name + "\", " + className + "\n");
+			}
+		}
+		return builder;
 	}
 }
