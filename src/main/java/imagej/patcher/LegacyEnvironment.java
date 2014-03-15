@@ -33,9 +33,14 @@ package imagej.patcher;
 
 import java.awt.GraphicsEnvironment;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+import java.util.jar.Attributes.Name;
 
 /**
  * Encapsulates an ImageJ 1.x "instance".
@@ -121,6 +126,32 @@ public class LegacyEnvironment {
 					throw new RuntimeException("Not a file URL! " + url);
 				}
 				addPluginClasspath(new File(url.getPath()));
+				final String path = url.getPath();
+				if (path.matches(".*/target/surefire/surefirebooter[0-9]*\\.jar")) try {
+					final JarFile jar = new JarFile(path);
+					Manifest manifest = jar.getManifest();
+					if (manifest != null) {
+						final String classPath =
+							manifest.getMainAttributes().getValue(Name.CLASS_PATH);
+						if (classPath != null) {
+							for (final String element : classPath.split(" +"))
+								try {
+									final URL url2 = new URL(element);
+									if (!"file".equals(url2.getProtocol())) continue;
+									addPluginClasspath(new File(url2.getPath()));
+								}
+								catch (MalformedURLException e) {
+									e.printStackTrace();
+								}
+						}
+					}
+				}
+				catch (final IOException e) {
+					System.err
+						.println("Warning: could not add plugin class path due to ");
+					e.printStackTrace();
+				}
+
 			}
 		}
 	}
