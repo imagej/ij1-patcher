@@ -35,7 +35,9 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -218,7 +220,7 @@ public abstract class LegacyHooks {
 		return false;
 	}
 
-	final public List<File> _pluginClasspath = new ArrayList<File>();
+	final public Collection<File> _pluginClasspath = new LinkedHashSet<File>();
 
 	/**
 	 * Extension point to add to ImageJ 1.x' PluginClassLoader's class path.
