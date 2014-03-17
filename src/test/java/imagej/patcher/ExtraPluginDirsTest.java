@@ -35,7 +35,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+import ij.ImageJ;
 
+import java.applet.Applet;
+import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -146,5 +150,24 @@ public class ExtraPluginDirsTest {
 		ij1.addPluginClasspath(tmpDir);
 		ij1.run(menuLabel, "property=" + property);
 		assertEquals(tmpDir.toURI().toURL().toString() + path, System.getProperty(property));
+	}
+
+	@Test
+	public void correctSubmenu() throws Exception {
+		assumeTrue(!GraphicsEnvironment.isHeadless());
+		final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+		try {
+			final File jarFile = new File(tmpDir, "Submenu_Test.jar");
+			TestUtils.makeJar(jarFile, "Submenu_Test");
+			assertTrue(jarFile.getAbsolutePath() + " exists", jarFile.exists());
+			System.setProperty("ij1.plugin.dirs", tmpDir.getAbsolutePath());
+
+			final LegacyEnvironment ij1 = new LegacyEnvironment(null, false);
+			final Class<?> imagej = ij1.getClassLoader().loadClass(ImageJ.class.getName());
+			imagej.getConstructor(Applet.class, Integer.TYPE).newInstance(null, ImageJ.NO_SHOW);
+			ij1.run("Submenu Test", "menupath=[Plugins>Submenu Test] class=Submenu_Test");
+		} finally {
+			Thread.currentThread().setContextClassLoader(contextClassLoader);
+		}
 	}
 }
