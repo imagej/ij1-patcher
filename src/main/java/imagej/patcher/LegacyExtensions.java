@@ -31,6 +31,8 @@
 
 package imagej.patcher;
 
+import java.util.Set;
+
 
 /**
  * Assorted legacy patches / extension points for use in the legacy mode.
@@ -403,7 +405,8 @@ class LegacyExtensions {
 					+ methodName + "(java.io.File file)")) {
 				hacker.insertAtTopOfMethod("ij.io.PluginClassLoader",
 						"void init(java.lang.String path)",
-						extraPluginJarsHandler(methodName + "(file);"));
+						extraPluginJarsHandler("if (file.isDirectory()) addDirectory(file);" +
+								"else " + methodName + "(file);"));
 			}
 		}
 		// avoid parsing ij.jar for plugins
