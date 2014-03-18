@@ -101,6 +101,9 @@ public class LegacyHeadlessTest {
 			assertEquals(expectedValue, value);
 			return true;
 		} catch (final Throwable t) {
+			if (t instanceof Error) {
+				throw (Error) t;
+			}
 			if (!(t instanceof InvocationTargetException)
 					|| t.getCause() == null
 					|| !(t.getCause() instanceof HeadlessException)) {
