@@ -58,6 +58,16 @@ public class Headless_Example_Plugin implements PlugIn {
 			value = "true";
 			return;
 		}
+		if ("BooleanParameter".equals(arg)) {
+			final GenericDialog dialog = new GenericDialog("Test boolean parameter");
+			dialog.addStringField("key", "No!");
+			dialog.addCheckbox("key", false);
+			dialog.showDialog();
+			if (dialog.wasCanceled()) return;
+
+			value = dialog.getNextString() + " " + dialog.getNextBoolean();
+			return;
+		}
 
 		final GenericDialog dialog = new GenericDialog("Example");
 		dialog.addStringField("prefix", "(prefix)");
