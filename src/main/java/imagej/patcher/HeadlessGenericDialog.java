@@ -250,30 +250,40 @@ public class HeadlessGenericDialog {
 	/**
 	 * Looks whether a boolean was specified in the macro parameters.
 	 * 
-	 * @param label the label to look for
+	 * @param label
+	 *            the label to look for
 	 * @return whether the label was found
 	 */
-	private static boolean findBooleanMacroParameter(String label) {
-		final String options = Macro.getOptions();
-		if (options.equals(label) || options.startsWith(label + " ")) return true;
-		label = " " + label;
-		int optionsLength = options.length();
-		int labelLength = label.length();
-		boolean match, inLiteral = false;
-		for (int i = 0; i < optionsLength - labelLength + 1; i++) {
-			char c = options.charAt(i);
-			if (inLiteral && c == ']') inLiteral = false;
-			else if (c == '[') inLiteral = true;
-			if (c != label.charAt(0) || inLiteral ||
-				(i > 1 && options.charAt(i - 1) == '=')) continue;
-			match = true;
-			for (int j = 0; j < labelLength; j++) {
-				if (label.charAt(j) != options.charAt(i + j)) {
+	private static boolean findBooleanMacroParameter(final String labelString) {
+		final String optionsString = Macro.getOptions();
+		if (optionsString == null) {
+			return false;
+		}
+		final char[] options = optionsString.toCharArray();
+		final char[] label = Macro.trimKey(labelString).toCharArray();
+		for (int i = 0; i < options.length; i++) {
+			boolean match = true;
+			// match at start or after space
+			for (char c : label) {
+				if (c != options[i]) {
 					match = false;
 					break;
 				}
+				i++;
 			}
-			if (match) return true;
+			if (match && (i >= options.length || options[i] == ' ')) {
+				return true;
+			}
+			// look for next space
+			while (i < options.length && options[i] != ' ') {
+				// skip literal
+				if (options[i] == '[') {
+					while (i < options.length && options[i] != ']') {
+						i++;
+					}
+				}
+				i++;
+			}
 		}
 		return false;
 	}
