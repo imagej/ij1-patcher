@@ -243,7 +243,38 @@ public class HeadlessGenericDialog {
 	 * @return the boolean value
 	 */
 	private static boolean getMacroParameter(String label, boolean defaultValue) {
-		return getMacroParameter(label) != null || defaultValue;
+		return findBooleanMacroParameter(label) || defaultValue;
+	}
+
+	/**
+	 * Looks whether a boolean was specified in the macro parameters.
+	 * 
+	 * @param label the label to look for
+	 * @return whether the label was found
+	 */
+	private static boolean findBooleanMacroParameter(String label) {
+		final String options = Macro.getOptions();
+		if (options.equals(label) || options.startsWith(label + " ")) return true;
+		label = " " + label;
+		int optionsLength = options.length();
+		int labelLength = label.length();
+		boolean match, inLiteral = false;
+		for (int i = 0; i < optionsLength - labelLength + 1; i++) {
+			char c = options.charAt(i);
+			if (inLiteral && c == ']') inLiteral = false;
+			else if (c == '[') inLiteral = true;
+			if (c != label.charAt(0) || inLiteral ||
+				(i > 1 && options.charAt(i - 1) == '=')) continue;
+			match = true;
+			for (int j = 0; j < labelLength; j++) {
+				if (label.charAt(j) != options.charAt(i + j)) {
+					match = false;
+					break;
+				}
+			}
+			if (match) return true;
+		}
+		return false;
 	}
 
 	/**
@@ -271,16 +302,5 @@ public class HeadlessGenericDialog {
 	 */
 	private static String getMacroParameter(String label, String defaultValue) {
 		return Macro.getValue(Macro.getOptions(), label, defaultValue);
-	}
-
-	/**
-	 * Gets a macro parameter of type {@link String}.
-	 * 
-	 * @param label
-	 *            the name of the macro parameter
-	 * @return the value, <code>null</code> if the parameter was not specified
-	 */
-	private static String getMacroParameter(String label) {
-		return Macro.getValue(Macro.getOptions(), label, null);
 	}
 }
