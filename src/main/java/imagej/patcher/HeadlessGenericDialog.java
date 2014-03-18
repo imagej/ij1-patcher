@@ -207,6 +207,7 @@ public class HeadlessGenericDialog {
 	public void addPreviewCheckbox(PlugInFilterRunner pfr) {}
 	public void addPreviewCheckbox(PlugInFilterRunner pfr, String label) {}
 	public void centerDialog(boolean b) {}
+	public void setSmartRecording(boolean smartRecording) {}
 	public void enableYesNoCancel() {}
 	public void enableYesNoCancel(String yesLabel, String noLabel) {}
 	public void focusGained(FocusEvent e) {}
