@@ -86,6 +86,9 @@ public class LegacyHeadlessTest {
 	@Test
 	public void booleanTest() throws Exception {
 		runExamplePlugin(true, "BooleanParameter", "key=[This is the key!] key", "This is the key! true");
+		runExamplePlugin(true, "BooleanParameter", "key=[This is the key!] key ", "This is the key! true");
+		runExamplePlugin(true, "BooleanParameter", "key=[This is the key!] key=1", "This is the key! false");
+		runExamplePlugin(true, "BooleanParameter", "key=[This is the key!] key1", "This is the key! false");
 		runExamplePlugin(true, "BooleanParameter", "key=[This is the next key!]", "This is the next key! false");
 	}
 
