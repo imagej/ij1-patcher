@@ -188,6 +188,10 @@ public class LegacyInjector {
 			+ "if (plugins.getName().equals(\"plugins\")) {"
 			+ "  java.io.File root = plugins.getParentFile();"
 			+ "  if (root != null) addRecursively(new java.io.File(root, \"jars\"));"
+			+ "}"
+			+ "final java.util.Iterator iter = ij.IJ._hooks._pluginClasspath.iterator();"
+			+ "while (iter.hasNext()) {"
+			+ "  addURL(((java.io.File) iter.next()).toURL());"
 			+ "}");
 		hacker.insertAtBottomOfMethod("ij.io.PluginClassLoader",
 			"void init(java.lang.String path)",
@@ -197,6 +201,13 @@ public class LegacyInjector {
 			"private void addDirectory(java.io.File f)",
 			"java.io.File", "list",
 			"$_ = ij.IJ._hooks.addPluginDirectory($0, $proceed($$));");
+
+		// fix NullPointerException
+		hacker.replaceCallInMethod("ij.Menus",
+			"void installJarPlugin(java.lang.String jar, java.lang.String s)",
+			"java.lang.String", "startsWith",
+			"if ($1 == null) $_ = false;" +
+			"else $_ = $proceed($$);");
 
 		// override behavior of MacAdapter, if needed
 		if (Utils.hasClass("com.apple.eawt.ApplicationListener")) {

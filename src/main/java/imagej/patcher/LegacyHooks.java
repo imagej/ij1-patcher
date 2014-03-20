@@ -31,11 +31,15 @@
 
 package imagej.patcher;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -218,6 +222,8 @@ public abstract class LegacyHooks {
 		return false;
 	}
 
+	final public Collection<File> _pluginClasspath = new LinkedHashSet<File>();
+
 	/**
 	 * Extension point to add to ImageJ 1.x' PluginClassLoader's class path.
 	 * 
@@ -225,16 +231,22 @@ public abstract class LegacyHooks {
 	 */
 	public List<File> handleExtraPluginJars() {
 		final List<File> result = new ArrayList<File>();
+		result.addAll(_pluginClasspath);
 		final String extraPluginDirs = System.getProperty("ij1.plugin.dirs");
 		if (extraPluginDirs != null) {
 			for (final String dir : extraPluginDirs.split(File.pathSeparator)) {
-				handleExtraPluginJars(new File(dir), result);
+				final File directory = new File(dir);
+				result.add(directory);
+				handleExtraPluginJars(directory, result);
 			}
 			return result;
 		}
 		final String userHome = System.getProperty("user.home");
-		if (userHome != null) handleExtraPluginJars(new File(userHome, ".plugins"),
-			result);
+		if (userHome != null) {
+			final File dir = new File(userHome, ".plugins");
+			result.add(dir);
+			handleExtraPluginJars(dir, result);
+		}
 		return result;
 	}
 
@@ -329,5 +341,40 @@ public abstract class LegacyHooks {
 	 */
 	public void initialized() {
 		// do nothing by default
+	}
+
+	public InputStream autoGenerateConfigFile(final File directory) {
+		// skip unpacked ImageJ 1.x
+		if (new File(directory, "IJ_Props.txt").exists()) return null;
+		return new ByteArrayInputStream(autoGenerateConfigFile(directory,
+			directory, "Plugins", "", new StringBuilder()).toString().getBytes());
+	}
+
+	protected StringBuilder autoGenerateConfigFile(final File topLevelDirectory,
+		final File directory, final String menuPath, final String packageName,
+		final StringBuilder builder)
+	{
+		final File[] list = directory.listFiles();
+		if (list == null) return builder;
+		// make order consistent
+		Arrays.sort(list);
+		for (final File file : list) {
+			String name = file.getName();
+			if (name.startsWith("_")) continue;
+			if (file.isDirectory()) {
+				autoGenerateConfigFile(topLevelDirectory, file, menuPath + ">" +
+					name.replace('_', ' '), packageName + name + ".", builder);
+			}
+			else if (name.endsWith(".class") && name.contains("_") &&
+				!name.contains("$"))
+			{
+				if (topLevelDirectory == directory &&
+					Character.isLowerCase(name.charAt(0))) continue;
+				final String className = packageName + name.substring(0, name.length() - 6);
+				name = name.substring(0, name.length() - 6).replace('_', ' ');
+				builder.append(menuPath + ", \"" + name + "\", " + className + "\n");
+			}
+		}
+		return builder;
 	}
 }

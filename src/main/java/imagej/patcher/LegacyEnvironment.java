@@ -32,7 +32,15 @@
 package imagej.patcher;
 
 import java.awt.GraphicsEnvironment;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+import java.util.jar.Attributes.Name;
 
 /**
  * Encapsulates an ImageJ 1.x "instance".
@@ -82,6 +90,108 @@ public class LegacyEnvironment {
 		}
 		// TODO: if we want to allow calling IJ#run(ImagePlus, String, String), we
 		// will need a data translator
+	}
+
+	/**
+	 * Adds the class path of a given {@link ClassLoader} to the plugin class
+	 * loader.
+	 * <p>
+	 * This method is intended to be used in unit tests as well as interactive
+	 * debugging from inside an Integrated Development Environment where the
+	 * plugin's classes are not available inside a {@code .jar} file.
+	 * </p>
+	 * <p>
+	 * At the moment, the only supported parameters are {@link URLClassLoader}s.
+	 * </p>
+	 * 
+	 * @param fromClassLoader the class path donor
+	 */
+	public void addPluginClasspath(final ClassLoader fromClassLoader) {
+		if (fromClassLoader == null) return;
+		for (ClassLoader loader = fromClassLoader; loader != null; loader =
+			loader.getParent())
+		{
+			if (loader == this.loader || loader == this.loader.getParent()) {
+				break;
+			}
+			if (!(loader instanceof URLClassLoader)) {
+				if (loader != fromClassLoader) continue;
+				throw new IllegalArgumentException(
+					"Cannot add class path from ClassLoader of type " +
+						fromClassLoader.getClass().getName());
+			}
+
+			for (final URL url : ((URLClassLoader) loader).getURLs()) {
+				if (!"file".equals(url.getProtocol())) {
+					throw new RuntimeException("Not a file URL! " + url);
+				}
+				addPluginClasspath(new File(url.getPath()));
+				final String path = url.getPath();
+				if (path.matches(".*/target/surefire/surefirebooter[0-9]*\\.jar")) try {
+					final JarFile jar = new JarFile(path);
+					Manifest manifest = jar.getManifest();
+					if (manifest != null) {
+						final String classPath =
+							manifest.getMainAttributes().getValue(Name.CLASS_PATH);
+						if (classPath != null) {
+							for (final String element : classPath.split(" +"))
+								try {
+									final URL url2 = new URL(element);
+									if (!"file".equals(url2.getProtocol())) continue;
+									addPluginClasspath(new File(url2.getPath()));
+								}
+								catch (MalformedURLException e) {
+									e.printStackTrace();
+								}
+						}
+					}
+				}
+				catch (final IOException e) {
+					System.err
+						.println("Warning: could not add plugin class path due to ");
+					e.printStackTrace();
+				}
+
+			}
+		}
+	}
+
+	/**
+	 * Adds extra elements to the class path of ImageJ 1.x' plugin class loader.
+	 * <p>
+	 * The typical use case for a {@link LegacyEnvironment} is to run specific
+	 * plugins in an encapsulated environment. However, in the case of multiple
+	 * one wants to use multiple legacy environments with separate sets of plugins
+	 * enabled, it becomes impractical to pass the location of the plugins'
+	 * {@code .jar} files via the {@code plugins.dir} system property (because of
+	 * threading issues).
+	 * </p>
+	 * <p>
+	 * In other cases, the plugins' {@code .jar} files are not located in a single
+	 * directory, or worse: they might be contained in a directory among
+	 * {@code .jar} files one might <i>not</i> want to add to the plugin class
+	 * loader's class path.
+	 * </p>
+	 * <p>
+	 * This method addresses that need by allowing to add individual {@code .jar}
+	 * files to the class path of the plugin class loader and ensuring that their
+	 * {@code plugins.config} files are parsed.
+	 * </p>
+	 * 
+	 * @param classpathEntries the class path entries containing ImageJ 1.x
+	 *          plugins
+	 */
+	public void addPluginClasspath(final File... classpathEntries) {
+		try {
+			final LegacyHooks hooks =
+				(LegacyHooks) loader.loadClass("ij.IJ").getField("_hooks").get(null);
+			for (final File file : classpathEntries) {
+				hooks._pluginClasspath.add(file);
+			}
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**

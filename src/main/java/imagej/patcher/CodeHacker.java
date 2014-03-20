@@ -734,7 +734,8 @@ class CodeHacker {
 			// DefaultLegacyService
 			// class is loaded, which is when the CodeHacker is run
 			if (e.getCause() != null && e.getCause() instanceof LinkageError) {
-				throw javaAgentHint("Cannot load class: " + classRef.getName(), e.getCause());
+				throw javaAgentHint("Cannot load class: " + classRef.getName() +
+					" (loader: " + classLoader + ")", e.getCause());
 			}
 			System.err.println("Warning: Cannot load class: " + classRef.getName() +
 				" into " + classLoader);
