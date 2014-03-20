@@ -123,7 +123,7 @@ public abstract class LegacyHooks {
 	/**
 	 * Updates the progress bar, where 0 <= progress <= 1.0.
 	 * 
-	 * @param value between 0.0 and 1.0
+	 * @param progress between 0.0 and 1.0
 	 */
 	public void showProgress(final double progress) {}
 
@@ -161,7 +161,7 @@ public abstract class LegacyHooks {
 	/**
 	 * Releases an image.
 	 * 
-	 * @param imagej the image
+	 * @param image the image
 	 */
 	public void unregisterImage(final Object image) {}
 
