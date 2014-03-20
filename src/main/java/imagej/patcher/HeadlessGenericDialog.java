@@ -53,6 +53,7 @@ import java.util.Vector;
  * 
  * @author Johannes Schindelin
  */
+@SuppressWarnings("unused")
 public class HeadlessGenericDialog {
 	protected List<Double> numbers;
 	protected List<String> strings;
