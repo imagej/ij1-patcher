@@ -236,16 +236,20 @@ public abstract class LegacyHooks {
 		if (extraPluginDirs != null) {
 			for (final String dir : extraPluginDirs.split(File.pathSeparator)) {
 				final File directory = new File(dir);
-				result.add(directory);
-				handleExtraPluginJars(directory, result);
+				if (directory.isDirectory()) {
+					result.add(directory);
+					handleExtraPluginJars(directory, result);
+				}
 			}
 			return result;
 		}
 		final String userHome = System.getProperty("user.home");
 		if (userHome != null) {
 			final File dir = new File(userHome, ".plugins");
-			result.add(dir);
-			handleExtraPluginJars(dir, result);
+			if (dir.isDirectory()) {
+				result.add(dir);
+				handleExtraPluginJars(dir, result);
+			}
 		}
 		return result;
 	}
