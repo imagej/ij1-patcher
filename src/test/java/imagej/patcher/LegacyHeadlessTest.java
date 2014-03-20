@@ -83,6 +83,15 @@ public class LegacyHeadlessTest {
 		assertTrue(runExamplePlugin(true, "SaveDialog", "file=README.txt", "true"));
 	}
 
+	@Test
+	public void booleanTest() throws Exception {
+		runExamplePlugin(true, "BooleanParameter", "key=[This is the key!] key", "This is the key! true");
+		runExamplePlugin(true, "BooleanParameter", "key=[This is the key!] key ", "This is the key! true");
+		runExamplePlugin(true, "BooleanParameter", "key=[This is the key!] key=1", "This is the key! false");
+		runExamplePlugin(true, "BooleanParameter", "key=[This is the key!] key1", "This is the key! false");
+		runExamplePlugin(true, "BooleanParameter", "key=[This is the next key!]", "This is the next key! false");
+	}
+
 	private static boolean runExampleDialogPlugin(final boolean patchHeadless) throws Exception {
 		return runExamplePlugin(patchHeadless, "the argument", "prefix=[*** ]", "*** the argument");
 	}
@@ -101,6 +110,9 @@ public class LegacyHeadlessTest {
 			assertEquals(expectedValue, value);
 			return true;
 		} catch (final Throwable t) {
+			if (t instanceof Error) {
+				throw (Error) t;
+			}
 			if (!(t instanceof InvocationTargetException)
 					|| t.getCause() == null
 					|| !(t.getCause() instanceof HeadlessException)) {

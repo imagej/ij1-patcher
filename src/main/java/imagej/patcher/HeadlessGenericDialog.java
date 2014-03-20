@@ -207,6 +207,7 @@ public class HeadlessGenericDialog {
 	public void addPreviewCheckbox(PlugInFilterRunner pfr) {}
 	public void addPreviewCheckbox(PlugInFilterRunner pfr, String label) {}
 	public void centerDialog(boolean b) {}
+	public void setSmartRecording(boolean smartRecording) {}
 	public void enableYesNoCancel() {}
 	public void enableYesNoCancel(String yesLabel, String noLabel) {}
 	public void focusGained(FocusEvent e) {}
@@ -243,7 +244,48 @@ public class HeadlessGenericDialog {
 	 * @return the boolean value
 	 */
 	private static boolean getMacroParameter(String label, boolean defaultValue) {
-		return getMacroParameter(label) != null || defaultValue;
+		return findBooleanMacroParameter(label) || defaultValue;
+	}
+
+	/**
+	 * Looks whether a boolean was specified in the macro parameters.
+	 * 
+	 * @param label
+	 *            the label to look for
+	 * @return whether the label was found
+	 */
+	private static boolean findBooleanMacroParameter(final String labelString) {
+		final String optionsString = Macro.getOptions();
+		if (optionsString == null) {
+			return false;
+		}
+		final char[] options = optionsString.toCharArray();
+		final char[] label = Macro.trimKey(labelString).toCharArray();
+		for (int i = 0; i < options.length; i++) {
+			boolean match = true;
+			// match at start or after space
+			for (char c : label) {
+				if (c != options[i]) {
+					match = false;
+					break;
+				}
+				i++;
+			}
+			if (match && (i >= options.length || options[i] == ' ')) {
+				return true;
+			}
+			// look for next space
+			while (i < options.length && options[i] != ' ') {
+				// skip literal
+				if (options[i] == '[') {
+					while (i < options.length && options[i] != ']') {
+						i++;
+					}
+				}
+				i++;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -271,16 +313,5 @@ public class HeadlessGenericDialog {
 	 */
 	private static String getMacroParameter(String label, String defaultValue) {
 		return Macro.getValue(Macro.getOptions(), label, defaultValue);
-	}
-
-	/**
-	 * Gets a macro parameter of type {@link String}.
-	 * 
-	 * @param label
-	 *            the name of the macro parameter
-	 * @return the value, <code>null</code> if the parameter was not specified
-	 */
-	private static String getMacroParameter(String label) {
-		return Macro.getValue(Macro.getOptions(), label, null);
 	}
 }
