@@ -419,6 +419,7 @@ class LegacyExtensions {
 		hacker.insertAtTopOfMethod("ij.Menus",
 			"InputStream getConfigurationFile(java.lang.String jar)",
 			"java.io.File isDir = new java.io.File($1);" +
+			"if (!isDir.exists()) return null;" +
 			"if (isDir.isDirectory()) {" +
 			"  java.io.File config = new java.io.File(isDir, \"plugins.config\");" +
 			"  if (config.exists()) return new java.io.FileInputStream(config);" +
