@@ -52,7 +52,13 @@ import org.junit.Test;
 public class LegacyHeadlessTest {
 
 	static {
-		LegacyInjector.preinit();
+		try {
+			LegacyInjector.preinit();
+		}
+		catch (Throwable t) {
+			t.printStackTrace();
+			throw new RuntimeException("Got exception (see error log)");
+		}
 	}
 
 	private String threadName;

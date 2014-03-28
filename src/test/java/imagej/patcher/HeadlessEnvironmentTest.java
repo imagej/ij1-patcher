@@ -42,7 +42,13 @@ import org.junit.Test;
 
 public class HeadlessEnvironmentTest {
 	static {
-		LegacyInjector.preinit();
+		try {
+			LegacyInjector.preinit();
+		}
+		catch (Throwable t) {
+			t.printStackTrace();
+			throw new RuntimeException("Got exception (see error log)");
+		}
 	}
 
 	@Test

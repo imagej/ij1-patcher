@@ -59,7 +59,13 @@ import org.junit.Test;
 public class ExtraPluginDirsTest {
 
 	static {
-		LegacyInjector.preinit();
+		try {
+			LegacyInjector.preinit();
+		}
+		catch (Throwable t) {
+			t.printStackTrace();
+			throw new RuntimeException("Got exception (see error log)");
+		}
 	}
 
 	private File tmpDir;
