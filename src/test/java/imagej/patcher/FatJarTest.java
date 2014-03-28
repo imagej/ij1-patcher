@@ -60,6 +60,19 @@ import org.junit.Test;
  */
 public class FatJarTest {
 
+	static {
+		try {
+			LegacyInjector.preinit();
+		}
+		catch (NoClassDefFoundError e) {
+			// ignore: LegacyInjector not in *this* classpath
+		}
+		catch (Throwable t) {
+			t.printStackTrace();
+			throw new RuntimeException("Got exception (see error log)");
+		}
+	}
+
 	@Test
 	public void testFatJars() throws Exception {
 		final File tmp = TestUtils.createTemporaryDirectory("fat-jars-");

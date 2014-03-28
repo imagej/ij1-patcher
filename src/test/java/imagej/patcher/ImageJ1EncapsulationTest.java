@@ -62,6 +62,16 @@ import org.junit.Test;
  */
 public class ImageJ1EncapsulationTest {
 
+	static {
+		try {
+			LegacyInjector.preinit();
+		}
+		catch (Throwable t) {
+			t.printStackTrace();
+			throw new RuntimeException("Got exception (see error log)");
+		}
+	}
+
 	@Test
 	public void verifyEncapsulation() throws Exception {
 		final ClassPool pool = ClassPool.getDefault();
