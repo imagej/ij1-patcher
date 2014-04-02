@@ -62,6 +62,18 @@ public class HeadlessEnvironmentTest {
 		}
 	}
 
+	private String threadName;
+
+	@Before
+	public void saveThreadName() {
+		threadName = Thread.currentThread().getName();
+	}
+
+	@After
+	public void restoreThreadName() {
+		if (threadName != null) Thread.currentThread().setName(threadName);
+	}
+
 	@Test
 	public void testMacro() throws Exception {
 		final LegacyEnvironment ij1 = new LegacyEnvironment(null, true);
@@ -80,34 +92,16 @@ public class HeadlessEnvironmentTest {
 		 * ImageJ 1.x' ij.Macro.getOptions() always returns null unless the
 		 * thread name starts with "Run$_".
 		 */
-		final Thread thread = Thread.currentThread();
-		final String savedName = thread.getName();
-		thread.setName("Run$_" + savedName);
-		try {
-			Macro.setOptions("(unset)");
-			assertEquals("(unset) ", Macro.getOptions());
-			final LegacyEnvironment ij1 = new LegacyEnvironment(null, true);
-			ij1.runMacro("call(\"ij.Macro.setOptions\", \"Hello, world!\");",
-					null);
-			assertEquals("(unset) ", Macro.getOptions());
-			final Method getOptions = ij1.getClassLoader()
-					.loadClass("ij.Macro").getMethod("getOptions");
-			assertEquals("Hello, world! ", getOptions.invoke(null));
-		} finally {
-			thread.setName(savedName);
-		}
-	}
-
-	private String threadName;
-
-	@Before
-	public void saveThreadName() {
-		threadName = Thread.currentThread().getName();
-	}
-
-	@After
-	public void restoreThreadName() {
-		if (threadName != null) Thread.currentThread().setName(threadName);
+		Thread.currentThread().setName("Run$_" + threadName);
+		Macro.setOptions("(unset)");
+		assertEquals("(unset) ", Macro.getOptions());
+		final LegacyEnvironment ij1 = new LegacyEnvironment(null, true);
+		ij1.runMacro("call(\"ij.Macro.setOptions\", \"Hello, world!\");",
+				null);
+		assertEquals("(unset) ", Macro.getOptions());
+		final Method getOptions = ij1.getClassLoader()
+				.loadClass("ij.Macro").getMethod("getOptions");
+		assertEquals("Hello, world! ", getOptions.invoke(null));
 	}
 
 	@Test
