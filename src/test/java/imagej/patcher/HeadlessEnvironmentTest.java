@@ -33,13 +33,25 @@ package imagej.patcher;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
+import java.awt.GraphicsEnvironment;
+import java.awt.HeadlessException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import ij.Macro;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests that the legacy headless code works as expected.
+ * 
+ * @author Johannes Schindelin
+ */
 public class HeadlessEnvironmentTest {
 	static {
 		try {
@@ -86,4 +98,72 @@ public class HeadlessEnvironmentTest {
 			thread.setName(savedName);
 		}
 	}
+
+	private String threadName;
+
+	@Before
+	public void saveThreadName() {
+		threadName = Thread.currentThread().getName();
+	}
+
+	@After
+	public void restoreThreadName() {
+		if (threadName != null) Thread.currentThread().setName(threadName);
+	}
+
+	@Test
+	public void testHeadless() throws Exception {
+		assertTrue(runExampleDialogPlugin(true));
+	}
+
+	@Test
+	public void testPatchIsRequired() throws Exception {
+		assumeTrue(GraphicsEnvironment.isHeadless());
+		assertFalse(runExampleDialogPlugin(false));
+	}
+
+	@Test
+	public void saveDialog() throws Exception {
+		assertTrue(runExamplePlugin(true, "SaveDialog", "file=README.txt", "true"));
+	}
+
+	@Test
+	public void booleanTest() throws Exception {
+		runExamplePlugin(true, "BooleanParameter", "key=[This is the key!] key", "This is the key! true");
+		runExamplePlugin(true, "BooleanParameter", "key=[This is the key!] key ", "This is the key! true");
+		runExamplePlugin(true, "BooleanParameter", "key=[This is the key!] key=1", "This is the key! false");
+		runExamplePlugin(true, "BooleanParameter", "key=[This is the key!] key1", "This is the key! false");
+		runExamplePlugin(true, "BooleanParameter", "key=[This is the next key!]", "This is the next key! false");
+	}
+
+	private static boolean runExampleDialogPlugin(final boolean patchHeadless) throws Exception {
+		return runExamplePlugin(patchHeadless, "the argument", "prefix=[*** ]", "*** the argument");
+	}
+
+	private static boolean runExamplePlugin(final boolean patchHeadless, final String arg, final String macroOptions, final String expectedValue) throws Exception {
+		final ClassLoader loader = new LegacyClassLoader(patchHeadless) {
+			{
+				addURL(Utils.getLocation(Headless_Example_Plugin.class));
+			}
+		};
+		final LegacyEnvironment ij1 = new LegacyEnvironment(loader, patchHeadless);
+		try {
+			ij1.setMacroOptions(macroOptions);
+			final String value = ij1.runPlugIn(
+					Headless_Example_Plugin.class.getName(), arg).toString();
+			assertEquals(expectedValue, value);
+			return true;
+		} catch (final Throwable t) {
+			if (t instanceof Error) {
+				throw (Error) t;
+			}
+			if (!(t instanceof InvocationTargetException)
+					|| t.getCause() == null
+					|| !(t.getCause() instanceof HeadlessException)) {
+				t.printStackTrace();
+			}
+			return false;
+		}
+	}
+
 }
