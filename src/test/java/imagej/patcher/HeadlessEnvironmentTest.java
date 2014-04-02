@@ -35,13 +35,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
+import ij.Macro;
 
 import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
-import ij.Macro;
 
 import org.junit.After;
 import org.junit.Before;
@@ -141,12 +140,8 @@ public class HeadlessEnvironmentTest {
 	}
 
 	private static boolean runExamplePlugin(final boolean patchHeadless, final String arg, final String macroOptions, final String expectedValue) throws Exception {
-		final ClassLoader loader = new LegacyClassLoader(patchHeadless) {
-			{
-				addURL(Utils.getLocation(Headless_Example_Plugin.class));
-			}
-		};
-		final LegacyEnvironment ij1 = new LegacyEnvironment(loader, patchHeadless);
+		final LegacyEnvironment ij1 = new LegacyEnvironment(null, patchHeadless);
+		ij1.addPluginClasspath(HeadlessEnvironmentTest.class.getClassLoader());
 		try {
 			ij1.setMacroOptions(macroOptions);
 			final String value = ij1.runPlugIn(
