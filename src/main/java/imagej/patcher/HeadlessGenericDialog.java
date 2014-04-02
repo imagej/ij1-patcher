@@ -234,6 +234,7 @@ public class HeadlessGenericDialog {
 	protected void setup() {}
 	public void accessTextFields() {}
 	public void showHelp() {}
+	public void setLocation(int x, int y) {}
 
 	/**
 	 * Gets a macro parameter of type <i>boolean</i>.
