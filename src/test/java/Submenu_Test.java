@@ -29,7 +29,6 @@
  * #L%
  */
 import ij.IJ;
-import ij.ImageJ;
 import ij.Menus;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
