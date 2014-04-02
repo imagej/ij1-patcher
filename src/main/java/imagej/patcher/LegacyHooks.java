@@ -381,4 +381,17 @@ public abstract class LegacyHooks {
 		}
 		return builder;
 	}
+
+	/**
+	 * Callback for ImageJ 1.x' menu parsing machinery.
+	 * <p>
+	 * This method is called whenever ImageJ 1.x adds a command to the menu structure.
+	 * </p>
+	 * 
+	 * @param menuPath the menu path of the menu item, or null when reinitializing
+	 * @param command the command associated with the menu item, or null when reinitializing
+	 */
+	public void addMenuItem(final String menuPath, final String command) {
+		// do nothing for the moment
+	}
 }
