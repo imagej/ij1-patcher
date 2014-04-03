@@ -35,6 +35,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
@@ -227,4 +230,103 @@ public class TestUtils {
 		}
 		jar.close();
 	}
+
+	/**
+	 * Instantiates a class loaded in the given class loader.
+	 * 
+	 * @param loader the class loader with which to load the class
+	 * @param className the name of the class to be instantiated
+	 * @param parameters the parameters to pass to the constructor
+	 * @return the new instance
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 * @throws ClassNotFoundException
+	 * @throws InstantiationException
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T construct(final ClassLoader loader,
+		final String className, final Object... parameters)
+		throws SecurityException, NoSuchMethodException, IllegalArgumentException,
+		IllegalAccessException, InvocationTargetException, ClassNotFoundException,
+		InstantiationException
+	{
+		final Class<?> clazz = loader.loadClass(className);
+		for (final Constructor<?> constructor : clazz.getConstructors()) {
+			if (doParametersMatch(constructor.getParameterTypes(), parameters)) {
+				return (T) constructor.newInstance(parameters);
+			}
+		}
+		throw new NoSuchMethodException("No matching method found");
+	}
+
+	/**
+	 * Invokes a static method of a given class.
+	 * <p>
+	 * This method tries to find a static method matching the given name and the
+	 * parameter list. Just like {@link #newInstance(String, Object...)}, this
+	 * works via reflection to avoid a compile-time dependency on ImageJ2.
+	 * </p>
+	 * 
+	 * @param loader the class loader with which to load the class
+	 * @param className the name of the class whose static method is to be called
+	 * @param methodName the name of the static method to be called
+	 * @param parameters the parameters to pass to the static method
+	 * @return the return value of the static method, if any
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 * @throws ClassNotFoundException
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T
+		invokeStatic(final ClassLoader loader, final String className,
+			final String methodName, final Object... parameters)
+			throws SecurityException, NoSuchMethodException,
+			IllegalArgumentException, IllegalAccessException,
+			InvocationTargetException, ClassNotFoundException
+	{
+		final Class<?> clazz = loader.loadClass(className);
+		for (final Method method : clazz.getMethods()) {
+			if (method.getName().equals(methodName) &&
+				doParametersMatch(method.getParameterTypes(), parameters))
+			{
+				return (T) method.invoke(null, parameters);
+			}
+		}
+		throw new NoSuchMethodException("No matching method found");
+	}
+
+	/**
+	 * Check whether a list of parameters matches a list of parameter types. This
+	 * is used to find matching constructors and (possibly static) methods.
+	 * 
+	 * @param types the parameter types
+	 * @param parameters the parameters
+	 * @return whether the parameters match the types
+	 */
+	private static boolean
+		doParametersMatch(Class<?>[] types, Object[] parameters)
+	{
+		if (types.length != parameters.length) return false;
+		for (int i = 0; i < types.length; i++)
+			if (parameters[i] != null) {
+				Class<?> clazz = parameters[i].getClass();
+				if (types[i].isPrimitive()) {
+					if (types[i] != Long.TYPE && types[i] != Integer.TYPE &&
+						types[i] != Boolean.TYPE) throw new RuntimeException(
+						"unsupported primitive type " + clazz);
+					if (types[i] == Long.TYPE && clazz != Long.class) return false;
+					else if (types[i] == Integer.TYPE && clazz != Integer.class) return false;
+					else if (types[i] == Boolean.TYPE && clazz != Boolean.class) return false;
+				}
+				else if (!types[i].isAssignableFrom(clazz)) return false;
+			}
+		return true;
+	}
+
 }
