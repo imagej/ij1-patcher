@@ -31,11 +31,20 @@
 
 package imagej.patcher;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import imagej.patcher.HeadlessGenericDialog;
-import imagej.patcher.LegacyInjector;
+import static org.junit.Assume.assumeTrue;
+import static imagej.patcher.TestUtils.construct;
+import static imagej.patcher.TestUtils.invokeStatic;
+import ij.ImageJ;
 
+import java.awt.Frame;
+import java.awt.GraphicsEnvironment;
+import java.awt.Menu;
+import java.awt.MenuBar;
+import java.awt.MenuItem;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 import javassist.ClassClassPath;
@@ -115,4 +124,45 @@ public class HeadlessCompletenessTest {
 		}
 	}
 
+	@Test
+	public void testMenuStructure() throws Exception {
+		assumeTrue(!GraphicsEnvironment.isHeadless());
+		final LegacyEnvironment headlessIJ1 = new LegacyEnvironment(null, true);
+		headlessIJ1.runMacro("", "");
+		final Map<String, String> menuItems =
+			new HashMap<String, String>(headlessIJ1.getMenuStructure());
+
+		final LegacyEnvironment ij1 = new LegacyEnvironment(null, false);
+		final Frame ij1Frame = construct(ij1.getClassLoader(), "ij.ImageJ", ImageJ.NO_SHOW);
+		final MenuBar menuBar = ij1Frame.getMenuBar();
+
+		final Hashtable<String, String> commands =
+			invokeStatic(ij1.getClassLoader(), "ij.Menus", "getCommands");
+		for (int i = 0; i < menuBar.getMenuCount(); i++) {
+			final Menu menu = menuBar.getMenu(i);
+			assertMenuItems(menuItems, commands, menu.getLabel() + ">", menu);
+		}
+		assertTrue("Left-over menu items: " + menuItems.keySet(),
+			menuItems.size() == 0);
+	}
+
+	private void assertMenuItems(final Map<String, String> menuItems,
+		final Hashtable<String, String> commands, final String prefix,
+		final Menu menu)
+	{
+		for (int i = 0; i < menu.getItemCount(); i++) {
+			final MenuItem item = menu.getItem(i);
+			final String label = item.getLabel();
+			String menuPath = prefix + label;
+			if (item instanceof Menu) {
+				assertMenuItems(menuItems, commands, menuPath + ">", (Menu) item);
+			}
+			else if (!"-".equals(label) && !menuPath.startsWith("File>Open Recent>")){
+				assertTrue("Not found: " + menuPath, menuItems.containsKey(menuPath));
+				assertEquals("Command for menu path: " + menuPath, commands.get(label),
+					menuItems.get(menuPath));
+				menuItems.remove(menuPath);
+			}
+		}
+	}
 }
