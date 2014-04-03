@@ -34,13 +34,15 @@ package imagej.patcher;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Map;
+import java.util.jar.Attributes.Name;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.jar.Attributes.Name;
 
 /**
  * Encapsulates an ImageJ 1.x "instance".
@@ -55,6 +57,7 @@ import java.util.jar.Attributes.Name;
 public class LegacyEnvironment {
 
 	final private ClassLoader loader;
+	final private Field _hooks;
 	final private Method setOptions, run, runMacro, runPlugIn, main;
 
 	/**
@@ -79,6 +82,7 @@ public class LegacyEnvironment {
 		final Class<?> imagej = this.loader.loadClass("ij.ImageJ");
 		final Class<?> macro = this.loader.loadClass("ij.Macro");
 		try {
+			_hooks = ij.getField("_hooks");
 			setOptions = macro.getMethod("setOptions", String.class);
 			run = ij.getMethod("run", String.class, String.class);
 			runMacro = ij.getMethod("runMacro", String.class, String.class);
@@ -312,6 +316,20 @@ public class LegacyEnvironment {
 	 */
 	public ClassLoader getClassLoader() {
 		return loader;
+	}
+
+	/**
+	 * Gets the ImageJ 1.x menu structure as a map
+	 */
+	public Map<String, String> getMenuStructure() {
+		try {
+			final LegacyHooks hooks = (LegacyHooks) _hooks.get(null);
+			return hooks.getMenuStructure();
+		} catch (RuntimeException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**

@@ -74,16 +74,14 @@ public class Submenu_Test implements PlugIn {
 				}
 				throw new RuntimeException("Top-level menu " + list[i] + " not found!"); 
 			}
-			else {
-				for (int j = 0; j < ((Menu) menu).getItemCount(); j++) {
-					final MenuItem candidate = ((Menu) menu).getItem(j);
-					if (list[i].equals(candidate.getLabel())) {
-						menu = candidate;
-						continue outer;
-					}
+			for (int j = 0; j < ((Menu) menu).getItemCount(); j++) {
+				final MenuItem candidate = ((Menu) menu).getItem(j);
+				if (list[i].equals(candidate.getLabel())) {
+					menu = candidate;
+					continue outer;
 				}
-				throw new RuntimeException("Submenu " + list[i] + " not found!"); 
 			}
+			throw new RuntimeException("Submenu " + list[i] + " not found!");
 		}
 		return menu.getLabel();
 	}
