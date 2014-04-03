@@ -38,9 +38,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -382,6 +385,8 @@ public abstract class LegacyHooks {
 		return builder;
 	}
 
+	private Map<String, String> menuStructure = new LinkedHashMap<String, String>();
+
 	/**
 	 * Callback for ImageJ 1.x' menu parsing machinery.
 	 * <p>
@@ -392,6 +397,20 @@ public abstract class LegacyHooks {
 	 * @param command the command associated with the menu item, or null when reinitializing
 	 */
 	public void addMenuItem(final String menuPath, final String command) {
-		// do nothing for the moment
+		if (menuPath == null) {
+			menuStructure.clear();
+		}
+		else {
+			menuStructure.put(menuPath, command);
+		}
+	}
+
+	/**
+	 * Returns ImageJ 1.x' menu structure as a map.
+	 * 
+	 * @return the menu structure
+	 */
+	public Map<String, String> getMenuStructure() {
+		return Collections.unmodifiableMap(menuStructure);
 	}
 }
