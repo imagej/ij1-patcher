@@ -289,6 +289,7 @@ class LegacyExtensions {
 		insertRefreshMenusHook(hacker);
 		overrideStartupMacrosForFiji(hacker);
 		handleMacAdapter(hacker);
+		handleMenuCallbacks(hacker);
 	}
 
 	/**
@@ -488,6 +489,86 @@ class LegacyExtensions {
 
 		hacker.insertAtTopOfMethod("MacAdapter", "public void run(java.lang.String arg)",
 			"return;");
+	}
+
+	private static void handleMenuCallbacks(CodeHacker hacker) {
+		hacker.insertAtTopOfMethod("ij.Menus",
+			"java.lang.String addMenuBar()",
+			"ij.IJ._hooks.addMenuItem(null, null);");
+		hacker.insertPrivateStaticField("ij.Menus", String.class, "_currentMenuPath");
+		// so that addSubMenu() has the correct menu path -- even in headless mode
+		hacker.insertAtTopOfMethod("ij.Menus",
+				"private static java.awt.Menu getMenu(java.lang.String menuName, boolean readFromProps)",
+				"_currentMenuPath = $1;");
+		// so that addPlugInItem() has the correct menu path -- even in headless mode
+		hacker.insertAtBottomOfMethod("ij.Menus",
+				"private static java.awt.Menu getMenu(java.lang.String menuName, boolean readFromProps)",
+				"_currentMenuPath = $1;");
+		hacker.insertAtTopOfMethod("ij.Menus",
+				"static java.awt.Menu addSubMenu(java.awt.Menu menu, java.lang.String name)",
+				"_currentMenuPath += \">\" + $2.replace('_', ' ');");
+		hacker.replaceCallInMethod("ij.Menus",
+				"void addPluginsMenu()",
+				"ij.Menus",
+				"addPluginItem",
+				"_currentMenuPath = \"Plugins\";" +
+				"$_ = $proceed($$);");
+		hacker.replaceCallInMethod("ij.Menus",
+				"void addPluginsMenu()",
+				"ij.Menus",
+				"addSubMenu",
+				"_currentMenuPath = \"Plugins\";" +
+				"$_ = $proceed($$);");
+		hacker.replaceCallInMethod("ij.Menus",
+				"java.lang.String addMenuBar()",
+				"ij.Menus",
+				"addPlugInItem",
+				"if (\"Quit\".equals($2) || \"Open...\".equals($2) || \"Close\".equals($2) || \"Revert\".equals($2))" +
+				"  _currentMenuPath = \"File\";" +
+				"else if(\"Show Info...\".equals($2) || \"Crop\".equals($2))" +
+				"  _currentMenuPath = \"Image\";" +
+				"else if (\"Image Calculator...\".equals($2))" +
+				"  _currentMenuPath = \"Process\";" +
+				"else if (\"About ImageJ...\".equals($2))" +
+				"  _currentMenuPath = \"Help\";" +
+				"$_ = $proceed($$);");
+		// Wow. There are so many different ways ImageJ 1.x adds menu entries. See e.g. "Repeat Command".
+		hacker.replaceCallInMethod("ij.Menus",
+				"java.lang.String addMenuBar()",
+				"ij.Menus",
+				"addItem",
+				"ij.IJ._hooks.addMenuItem(_currentMenuPath + \">\" + $2, null);" +
+				"$_ = $proceed($$);");
+		hacker.insertAtTopOfMethod("ij.Menus",
+				"void installJarPlugin(java.lang.String jar, java.lang.String s)",
+				"_currentMenuPath = \"Plugins\";");
+		hacker.replaceCallInMethod("ij.Menus",
+				"void installJarPlugin(java.lang.String jar, java.lang.String s)",
+				"java.lang.String", "substring",
+				"$_ = $proceed($$);" +
+				"ij.IJ._hooks.addMenuItem(_currentMenuPath, $_);",
+				4);
+		hacker.insertAtTopOfMethod("ij.Menus",
+				"void addPlugInItem(java.awt.Menu menu, java.lang.String label, java.lang.String className, int shortcut, boolean shift)",
+				"ij.IJ._hooks.addMenuItem(_currentMenuPath + \">\" + $2, $3);");
+		hacker.insertAtTopOfMethod("ij.Menus",
+				"static void addPluginItem(java.awt.Menu submenu, java.lang.String s)",
+				"int comma = $2.lastIndexOf(',');" +
+				"if (comma > 0) {" +
+				"  java.lang.String label = $2.substring(1, comma - 1);" +
+				"  if (label.endsWith(\"]\")) {" +
+				"    int open = label.indexOf(\"[\");" +
+				"    if (open > 0 && label.substring(open + 1, comma - 3).matches(\"[A-Za-z0-9]\"))" +
+				"      label = label.substring(0, open);" +
+				"  }" +
+				"  while (comma + 2 < $2.length() && $2.charAt(comma + 1) == ' ')" +
+				"    comma++;" +
+				"  ij.IJ._hooks.addMenuItem(_currentMenuPath + \">\" + label," +
+				"    $2.substring(comma + 1));" +
+				"}");
+		hacker.insertAtTopOfMethod("ij.Menus",
+				"java.awt.CheckboxMenuItem addCheckboxItem(java.awt.Menu menu, java.lang.String label, java.lang.String className)",
+				"ij.IJ._hooks.addMenuItem(_currentMenuPath + \">\" + $2, $3);");
 	}
 
 }
