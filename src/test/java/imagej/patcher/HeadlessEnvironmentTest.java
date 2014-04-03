@@ -63,15 +63,18 @@ public class HeadlessEnvironmentTest {
 	}
 
 	private String threadName;
+	private ClassLoader threadLoader;
 
 	@Before
 	public void saveThreadName() {
 		threadName = Thread.currentThread().getName();
+		threadLoader = Thread.currentThread().getContextClassLoader();
 	}
 
 	@After
 	public void restoreThreadName() {
 		if (threadName != null) Thread.currentThread().setName(threadName);
+		if (threadLoader != null) Thread.currentThread().setContextClassLoader(threadLoader);
 	}
 
 	@Test

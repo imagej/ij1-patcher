@@ -52,6 +52,8 @@ import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -69,6 +71,21 @@ public class HeadlessCompletenessTest {
 			t.printStackTrace();
 			throw new RuntimeException("Got exception (see error log)");
 		}
+	}
+
+	private String threadName;
+	private ClassLoader threadLoader;
+
+	@Before
+	public void saveThreadName() {
+		threadName = Thread.currentThread().getName();
+		threadLoader = Thread.currentThread().getContextClassLoader();
+	}
+
+	@After
+	public void restoreThreadName() {
+		if (threadName != null) Thread.currentThread().setName(threadName);
+		if (threadLoader != null) Thread.currentThread().setContextClassLoader(threadLoader);
 	}
 
 	@Test
