@@ -569,6 +569,65 @@ class LegacyExtensions {
 		hacker.insertAtTopOfMethod("ij.Menus",
 				"java.awt.CheckboxMenuItem addCheckboxItem(java.awt.Menu menu, java.lang.String label, java.lang.String className)",
 				"ij.IJ._hooks.addMenuItem(_currentMenuPath + \">\" + $2, $3);");
-	}
+		// handle separators (we cannot simply look for java.awt.Menu#addSeparator
+		// because we might be running in headless mode)
+		hacker.replaceCallInMethod("ij.Menus",
+				"java.lang.String addMenuBar()",
+				"ij.Menus",
+				"addPlugInItem",
+				"if (\"Cache Sample Images \".equals($2))" +
+				"  ij.IJ._hooks.addMenuItem(\"File>Open Samples>-\", null);" +
+				"else if (\"Close\".equals($2) || \"Page Setup...\".equals($2) || \"Cut\".equals($2) ||" +
+				"    \"Clear\".equals($2) || \"Crop\".equals($2) || \"Set Scale...\".equals($2) ||" +
+				"    \"Dev. Resources...\".equals($2) || \"Update ImageJ...\".equals($2) ||" +
+				"    \"Quit\".equals($2)) {" +
+				"  int separator = _currentMenuPath.indexOf('>');" +
+				"  if (separator < 0) separator = _currentMenuPath.length();" +
+				"  ij.IJ._hooks.addMenuItem(_currentMenuPath.substring(0, separator) + \">-\", null);" +
+				"}" +
+				"$_ = $proceed($$);" +
+				"if (\"Tile\".equals($2))" +
+				"  ij.IJ._hooks.addMenuItem(\"Window>-\", null);");
+		hacker.replaceCallInMethod("ij.Menus",
+				"java.lang.String addMenuBar()",
+				"ij.Menus",
+				"addCheckboxItem",
+				"if (\"RGB Stack\".equals($2))" +
+				"  ij.IJ._hooks.addMenuItem(_currentMenuPath + \">-\", null);" +
+				"$_ = $proceed($$);");
+		hacker.replaceCallInMethod("ij.Menus",
+				"java.lang.String addMenuBar()",
+				"ij.Menus",
+				"getMenu",
+				"if (\"Edit>Selection\".equals($1) || \"Image>Adjust\".equals($1) || \"Image>Lookup Tables\".equals($1) ||" +
+				"    \"Process>Batch\".equals($1) || \"Help>About Plugins\".equals($1)) {" +
+				"  int separator = $1.indexOf('>');" +
+				"  ij.IJ._hooks.addMenuItem($1.substring(0, separator) + \">-\", null);" +
+				"}" +
+				"$_ = $proceed($$);");
+		hacker.replaceCallInMethod("ij.Menus",
+				"static java.awt.Menu addSubMenu(java.awt.Menu menu, java.lang.String name)",
+				"java.lang.String",
+				"equals",
+				"$_ = $proceed($$);" +
+				"if ($_ && \"-\".equals($1))" +
+				"  ij.IJ._hooks.addMenuItem(_currentMenuPath + \">-\", null);");
+		hacker.replaceCallInMethod("ij.Menus",
+				"static void addLuts(java.awt.Menu submenu)",
+				"ij.IJ",
+				"isLinux",
+				"ij.IJ._hooks.addMenuItem(_currentMenuPath + \">-\", null);" +
+				"$_ = $proceed($$);");
+		hacker.replaceCallInMethod("ij.Menus",
+				"void addPluginsMenu()",
+				"ij.Prefs",
+				"getString",
+				"$_ = $proceed($$);" +
+				"if ($_ != null && $_.startsWith(\"-\"))" +
+				"  ij.IJ._hooks.addMenuItem(\"Plugins>-\", null);");
+		hacker.insertAtTopOfMethod("ij.Menus",
+				"static void addSeparator(java.awt.Menu menu)",
+				"ij.IJ._hooks.addMenuItem(_currentMenuPath + \">-\", null);");
+		}
 
 }

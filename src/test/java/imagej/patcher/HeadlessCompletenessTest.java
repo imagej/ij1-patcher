@@ -150,6 +150,7 @@ public class HeadlessCompletenessTest {
 		final Hashtable<String, String> commands, final String prefix,
 		final Menu menu)
 	{
+		int separatorCounter = 0;
 		for (int i = 0; i < menu.getItemCount(); i++) {
 			final MenuItem item = menu.getItem(i);
 			final String label = item.getLabel();
@@ -157,7 +158,12 @@ public class HeadlessCompletenessTest {
 			if (item instanceof Menu) {
 				assertMenuItems(menuItems, commands, menuPath + ">", (Menu) item);
 			}
-			else if (!"-".equals(label) && !menuPath.startsWith("File>Open Recent>")){
+			else if ("-".equals(label)) {
+				final String menuPath2 = menuPath + ++separatorCounter;
+				assertTrue("Not found: " + menuPath2, menuItems.containsKey(menuPath2));
+				menuItems.remove(menuPath2);
+			}
+			else if (!menuPath.startsWith("File>Open Recent>")){
 				assertTrue("Not found: " + menuPath, menuItems.containsKey(menuPath));
 				assertEquals("Command for menu path: " + menuPath, commands.get(label),
 					menuItems.get(menuPath));

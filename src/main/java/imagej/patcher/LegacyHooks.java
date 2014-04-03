@@ -400,6 +400,13 @@ public abstract class LegacyHooks {
 		if (menuPath == null) {
 			menuStructure.clear();
 		}
+		else if (menuPath.endsWith(">-")) {
+			int i = 1;
+			while (menuStructure.containsKey(menuPath + i)) {
+				i++;
+			}
+			menuStructure.put(menuPath + i, command);
+		}
 		else {
 			menuStructure.put(menuPath, command);
 		}
