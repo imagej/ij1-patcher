@@ -28,6 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package imagej.patcher;
 
 import java.io.File;
@@ -39,6 +40,7 @@ import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
 public class TestUtils {
+
 	/**
 	 * Makes a temporary directory for use with unit tests.
 	 * <p>
@@ -51,7 +53,9 @@ public class TestUtils {
 	 * @return the reference to the newly-created temporary directory
 	 * @throws IOException
 	 */
-	public static File createTemporaryDirectory(final String prefix) throws IOException {
+	public static File createTemporaryDirectory(final String prefix)
+		throws IOException
+	{
 		return createTemporaryDirectory(prefix, getCallingClass(null));
 	}
 
@@ -99,13 +103,15 @@ public class TestUtils {
 	 */
 	public static Class<?> getCallingClass(final Class<?> excluding) {
 		final String thisClassName = TestUtils.class.getName();
-		final String thisClassName2 = excluding == null ? null : excluding.getName();
+		final String thisClassName2 =
+			excluding == null ? null : excluding.getName();
 		final Thread currentThread = Thread.currentThread();
 		for (final StackTraceElement element : currentThread.getStackTrace()) {
 			final String thatClassName = element.getClassName();
 			if (thatClassName == null || thatClassName.equals(thisClassName) ||
 				thatClassName.equals(thisClassName2) ||
-				thatClassName.startsWith("java.lang.")) {
+				thatClassName.startsWith("java.lang."))
+			{
 				continue;
 			}
 			final ClassLoader loader = currentThread.getContextClassLoader();
@@ -118,7 +124,8 @@ public class TestUtils {
 					loader + ")!");
 			}
 		}
-		throw new UnsupportedOperationException("No calling class outside " + thisClassName + " found!");
+		throw new UnsupportedOperationException("No calling class outside " +
+			thisClassName + " found!");
 	}
 
 	/**
@@ -188,23 +195,28 @@ public class TestUtils {
 	 * @param classNames the classes to include
 	 * @throws IOException
 	 */
-	public static void makeJar(final File jarFile, final String... classNames) throws IOException {
-		final JarOutputStream jar = new JarOutputStream(new FileOutputStream(jarFile));
+	public static void makeJar(final File jarFile, final String... classNames)
+		throws IOException
+	{
+		final JarOutputStream jar =
+			new JarOutputStream(new FileOutputStream(jarFile));
 		final byte[] buffer = new byte[16384];
 		final StringBuilder pluginsConfig = new StringBuilder();
 		for (final String className : classNames) {
-			final String path = className.replace('.',  '/') + ".class";
+			final String path = className.replace('.', '/') + ".class";
 			final InputStream in = TestUtils.class.getResourceAsStream("/" + path);
 			final ZipEntry entry = new ZipEntry(path);
 			jar.putNextEntry(entry);
 			for (;;) {
 				int count = in.read(buffer);
 				if (count < 0) break;
-				jar.write(buffer,  0, count);
+				jar.write(buffer, 0, count);
 			}
 			if (className.indexOf('_') >= 0) {
-				final String name = className.substring(className.lastIndexOf('.') + 1).replace('_', ' ');
-				pluginsConfig.append("Plugins, \"").append(name).append("\", ").append(className).append("\n");
+				final String name =
+					className.substring(className.lastIndexOf('.') + 1).replace('_', ' ');
+				pluginsConfig.append("Plugins, \"").append(name).append("\", ").append(
+					className).append("\n");
 			}
 			in.close();
 		}
