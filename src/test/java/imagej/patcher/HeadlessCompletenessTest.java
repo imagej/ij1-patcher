@@ -145,6 +145,7 @@ public class HeadlessCompletenessTest {
 	@Test
 	public void testMenuStructure() throws Exception {
 		assumeTrue(!GraphicsEnvironment.isHeadless());
+		System.setProperty("ij1.plugin.dirs", "/no-no-no/");
 		final LegacyEnvironment headlessIJ1 = new LegacyEnvironment(null, true);
 		headlessIJ1.runMacro("", "");
 		final Map<String, String> menuItems =
