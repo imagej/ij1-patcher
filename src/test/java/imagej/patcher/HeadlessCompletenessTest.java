@@ -45,6 +45,7 @@ import java.awt.MenuBar;
 import java.awt.MenuItem;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javassist.ClassClassPath;
@@ -147,7 +148,8 @@ public class HeadlessCompletenessTest {
 		final LegacyEnvironment headlessIJ1 = new LegacyEnvironment(null, true);
 		headlessIJ1.runMacro("", "");
 		final Map<String, String> menuItems =
-			new HashMap<String, String>(headlessIJ1.getMenuStructure());
+			new LinkedHashMap<String, String>(headlessIJ1.getMenuStructure());
+
 
 		final LegacyEnvironment ij1 = new LegacyEnvironment(null, false);
 		final Frame ij1Frame = construct(ij1.getClassLoader(), "ij.ImageJ", ImageJ.NO_SHOW);
