@@ -69,16 +69,22 @@ public class ExtraPluginDirsTest {
 	}
 
 	private File tmpDir;
+	private String threadName;
+	private ClassLoader threadLoader;
 
 	@After
-	public void rmRFTmpDir() {
+	public void after() {
+		if (threadName != null) Thread.currentThread().setName(threadName);
+		if (threadLoader != null) Thread.currentThread().setContextClassLoader(threadLoader);
 		if (tmpDir != null && tmpDir.isDirectory()) {
 			TestUtils.deleteRecursively(tmpDir);
 		}
 	}
 
 	@Before
-	public void makeTmpDir() throws IOException {
+	public void before() throws IOException {
+		threadName = Thread.currentThread().getName();
+		threadLoader = Thread.currentThread().getContextClassLoader();
 		tmpDir = TestUtils.createTemporaryDirectory("legacy-");
 	}
 

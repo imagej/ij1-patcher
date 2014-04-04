@@ -35,11 +35,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
 import javassist.ClassPool;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -71,6 +74,21 @@ public class FatJarTest {
 			t.printStackTrace();
 			throw new RuntimeException("Got exception (see error log)");
 		}
+	}
+
+	private String threadName;
+	private ClassLoader threadLoader;
+
+	@After
+	public void after() {
+		if (threadName != null) Thread.currentThread().setName(threadName);
+		if (threadLoader != null) Thread.currentThread().setContextClassLoader(threadLoader);
+	}
+
+	@Before
+	public void before() throws IOException {
+		threadName = Thread.currentThread().getName();
+		threadLoader = Thread.currentThread().getContextClassLoader();
 	}
 
 	@Test
