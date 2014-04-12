@@ -31,6 +31,7 @@
 
 package imagej.patcher;
 
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -539,8 +540,11 @@ class LegacyExtensions {
 				"addItem",
 				"ij.IJ._hooks.addMenuItem(_currentMenuPath + \">\" + $2, null);" +
 				"$_ = $proceed($$);");
+		hacker.insertPrivateStaticField("ij.Menus",
+				HashSet.class, "_separators");
 		hacker.insertAtTopOfMethod("ij.Menus",
 				"void installJarPlugin(java.lang.String jar, java.lang.String s)",
+				"  if (_separators == null) _separators = new java.util.HashSet();" +
 				"_currentMenuPath = \"Plugins\";");
 		hacker.replaceCallInMethod("ij.Menus",
 				"void installJarPlugin(java.lang.String jar, java.lang.String s)",
@@ -563,6 +567,12 @@ class LegacyExtensions {
 				"  }" +
 				"  while (comma + 2 < $2.length() && $2.charAt(comma + 1) == ' ')" +
 				"    comma++;" +
+				"  if (mbar == null && _separators != null) {" +
+				"    if (!_separators.contains(_currentMenuPath)) {" +
+				"      _separators.add(_currentMenuPath);" +
+				"      ij.IJ._hooks.addMenuItem(_currentMenuPath + \">-\", null);" +
+				"    }" +
+				"  }" +
 				"  ij.IJ._hooks.addMenuItem(_currentMenuPath + \">\" + label," +
 				"    $2.substring(comma + 1));" +
 				"}");
