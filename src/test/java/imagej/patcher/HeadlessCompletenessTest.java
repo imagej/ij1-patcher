@@ -31,11 +31,11 @@
 
 package imagej.patcher;
 
+import static imagej.patcher.TestUtils.construct;
+import static imagej.patcher.TestUtils.invokeStatic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
-import static imagej.patcher.TestUtils.construct;
-import static imagej.patcher.TestUtils.invokeStatic;
 import ij.ImageJ;
 
 import java.awt.Frame;
@@ -43,6 +43,8 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
@@ -74,19 +76,24 @@ public class HeadlessCompletenessTest {
 		}
 	}
 
+	private File tmpDir;
 	private String threadName;
 	private ClassLoader threadLoader;
 
 	@Before
-	public void saveThreadName() {
+	public void before() throws IOException {
 		threadName = Thread.currentThread().getName();
 		threadLoader = Thread.currentThread().getContextClassLoader();
+		tmpDir = TestUtils.createTemporaryDirectory("legacy-");
 	}
 
 	@After
-	public void restoreThreadName() {
+	public void after() {
 		if (threadName != null) Thread.currentThread().setName(threadName);
 		if (threadLoader != null) Thread.currentThread().setContextClassLoader(threadLoader);
+		if (tmpDir != null && tmpDir.isDirectory()) {
+			TestUtils.deleteRecursively(tmpDir);
+		}
 	}
 
 	@Test
@@ -145,14 +152,21 @@ public class HeadlessCompletenessTest {
 	@Test
 	public void testMenuStructure() throws Exception {
 		assumeTrue(!GraphicsEnvironment.isHeadless());
+
+		final File jarFile = new File(tmpDir, "Set_Property.jar");
+		TestUtils.makeJar(jarFile, Set_Property.class.getName());
+
 		System.setProperty("ij1.plugin.dirs", "/no-no-no/");
 		final LegacyEnvironment headlessIJ1 = new LegacyEnvironment(null, true);
+		headlessIJ1.addPluginClasspath(jarFile);
 		headlessIJ1.runMacro("", "");
 		final Map<String, String> menuItems =
 			new LinkedHashMap<String, String>(headlessIJ1.getMenuStructure());
 
+		assertTrue("does not have 'Set Property'", menuItems.containsKey("Plugins>Set Property"));
 
 		final LegacyEnvironment ij1 = new LegacyEnvironment(null, false);
+		ij1.addPluginClasspath(jarFile);
 		final Frame ij1Frame = construct(ij1.getClassLoader(), "ij.ImageJ", ImageJ.NO_SHOW);
 		final MenuBar menuBar = ij1Frame.getMenuBar();
 
