@@ -31,11 +31,11 @@
 
 package imagej.patcher;
 
+import static imagej.patcher.TestUtils.construct;
+import static imagej.patcher.TestUtils.invokeStatic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
-import static imagej.patcher.TestUtils.construct;
-import static imagej.patcher.TestUtils.invokeStatic;
 import ij.ImageJ;
 
 import java.awt.Frame;
