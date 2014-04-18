@@ -235,6 +235,7 @@ public class HeadlessGenericDialog {
 	public void accessTextFields() {}
 	public void showHelp() {}
 	public void setLocation(int x, int y) {}
+	public boolean isPreviewActive() { return false; }
 
 	/**
 	 * Gets a macro parameter of type <i>boolean</i>.
