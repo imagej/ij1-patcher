@@ -56,9 +56,10 @@ import java.util.jar.Manifest;
  */
 public class LegacyEnvironment {
 
-	final private ClassLoader loader;
-	final private Field _hooks;
-	final private Method setOptions, run, runMacro, runPlugIn, main;
+	final private boolean headless;
+	private ClassLoader loader;
+	private Method setOptions, run, runMacro, runPlugIn, main;
+	private Field _hooks;
 
 	/**
 	 * Constructs a new legacy environment.
@@ -74,14 +75,24 @@ public class LegacyEnvironment {
 	public LegacyEnvironment(final ClassLoader loader, boolean headless)
 		throws ClassNotFoundException
 	{
+		this.headless = headless;
+		this.loader = loader;
+	}
+
+	private boolean isInitialized() {
+		return _hooks != null;
+	}
+
+	private synchronized void initialize() {
+		if (isInitialized()) return;
 		if (loader != null) {
 			new LegacyInjector().injectHooks(loader, headless);
 		}
-		this.loader = loader != null ? loader : new LegacyClassLoader(headless);
-		final Class<?> ij = this.loader.loadClass("ij.IJ");
-		final Class<?> imagej = this.loader.loadClass("ij.ImageJ");
-		final Class<?> macro = this.loader.loadClass("ij.Macro");
 		try {
+			this.loader = loader != null ? loader : new LegacyClassLoader(headless);
+			final Class<?> ij = this.loader.loadClass("ij.IJ");
+			final Class<?> imagej = this.loader.loadClass("ij.ImageJ");
+			final Class<?> macro = this.loader.loadClass("ij.Macro");
 			_hooks = ij.getField("_hooks");
 			setOptions = macro.getMethod("setOptions", String.class);
 			run = ij.getMethod("run", String.class, String.class);
@@ -90,7 +101,7 @@ public class LegacyEnvironment {
 			main = imagej.getMethod("main", String[].class);
 		}
 		catch (Exception e) {
-			throw new ClassNotFoundException("Found incompatible ij.IJ class", e);
+			throw new RuntimeException("Found incompatible ij.IJ class", e);
 		}
 		// TODO: if we want to allow calling IJ#run(ImagePlus, String, String), we
 		// will need a data translator
@@ -112,6 +123,7 @@ public class LegacyEnvironment {
 	 */
 	public void addPluginClasspath(final ClassLoader fromClassLoader) {
 		if (fromClassLoader == null) return;
+		initialize();
 		for (ClassLoader loader = fromClassLoader; loader != null; loader =
 			loader.getParent())
 		{
@@ -186,6 +198,7 @@ public class LegacyEnvironment {
 	 *          plugins
 	 */
 	public void addPluginClasspath(final File... classpathEntries) {
+		initialize();
 		try {
 			final LegacyHooks hooks =
 				(LegacyHooks) loader.loadClass("ij.IJ").getField("_hooks").get(null);
@@ -229,6 +242,7 @@ public class LegacyEnvironment {
 	 * @param options the options to pass to the command
 	 */
 	public void run(final String command, final String options) {
+		initialize();
 		final Thread thread = Thread.currentThread();
 		final ClassLoader savedLoader = thread.getContextClassLoader();
 		thread.setContextClassLoader(loader);
@@ -251,6 +265,7 @@ public class LegacyEnvironment {
 	 *          via {@code getArgument()})
 	 */
 	public void runMacro(final String macro, final String arg) {
+		initialize();
 		final Thread thread = Thread.currentThread();
 		final String savedName = thread.getName();
 		thread.setName("Run$_" + savedName);
@@ -276,6 +291,7 @@ public class LegacyEnvironment {
 	 *          {@code setup()} method of the plugin)
 	 */
 	public Object runPlugIn(final String className, final String arg) {
+		initialize();
 		final Thread thread = Thread.currentThread();
 		final String savedName = thread.getName();
 		thread.setName("Run$_" + savedName);
@@ -299,6 +315,7 @@ public class LegacyEnvironment {
 	 * @param args the arguments to pass to the main() method
 	 */
 	public void main(final String... args) {
+		initialize();
 		Thread.currentThread().setContextClassLoader(loader);
 		try {
 			main.invoke(null, (Object) args);
@@ -315,6 +332,7 @@ public class LegacyEnvironment {
 	 * @return the class loader
 	 */
 	public ClassLoader getClassLoader() {
+		initialize();
 		return loader;
 	}
 
@@ -322,6 +340,7 @@ public class LegacyEnvironment {
 	 * Gets the ImageJ 1.x menu structure as a map
 	 */
 	public Map<String, String> getMenuStructure() {
+		initialize();
 		try {
 			final LegacyHooks hooks = (LegacyHooks) _hooks.get(null);
 			return hooks.getMenuStructure();
