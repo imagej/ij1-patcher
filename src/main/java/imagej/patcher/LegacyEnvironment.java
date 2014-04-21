@@ -34,6 +34,8 @@ package imagej.patcher;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -58,6 +60,7 @@ public class LegacyEnvironment {
 
 	final private boolean headless;
 	final private LegacyInjector injector = new LegacyInjector();
+	private Throwable initializationStackTrace;
 	private ClassLoader loader;
 	private Method setOptions, run, runMacro, runPlugIn, main;
 	private Field _hooks;
@@ -86,6 +89,7 @@ public class LegacyEnvironment {
 
 	private synchronized void initialize() {
 		if (isInitialized()) return;
+		initializationStackTrace = new Throwable("Initialized here:");
 		if (loader != null) {
 			injector.injectHooks(loader, headless);
 		}
@@ -110,7 +114,12 @@ public class LegacyEnvironment {
 
 	private void ensureUninitialized() {
 		if (isInitialized()) {
-			throw new RuntimeException("LegacyEnvironment was already initialized!");
+			final StringWriter string = new StringWriter();
+			final PrintWriter writer = new PrintWriter(string);
+			initializationStackTrace.printStackTrace(writer);
+			writer.close();
+			throw new RuntimeException("LegacyEnvironment was already initialized:\n\n" +
+					string.toString().replaceAll("(?m)^", "\t"));
 		}
 	}
 
