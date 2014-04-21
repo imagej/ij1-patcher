@@ -638,6 +638,6 @@ class LegacyExtensions {
 		hacker.insertAtTopOfMethod("ij.Menus",
 				"static void addSeparator(java.awt.Menu menu)",
 				"ij.IJ._hooks.addMenuItem(_currentMenuPath + \">-\", null);");
-		}
+	}
 
 }
