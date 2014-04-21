@@ -137,7 +137,7 @@ public class HeadlessEnvironmentTest {
 	}
 
 	private static boolean runExamplePlugin(final boolean patchHeadless, final String arg, final String macroOptions, final String expectedValue) throws Exception {
-		final LegacyEnvironment ij1 = new LegacyEnvironment(null, patchHeadless);
+		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment(patchHeadless, false);
 		ij1.addPluginClasspath(HeadlessEnvironmentTest.class.getClassLoader());
 		try {
 			ij1.setMacroOptions(macroOptions);

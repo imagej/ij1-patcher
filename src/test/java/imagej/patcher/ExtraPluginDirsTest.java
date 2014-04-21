@@ -97,7 +97,7 @@ public class ExtraPluginDirsTest {
 
 		final String key = "random-" + Math.random();
 		System.setProperty(key, "321");
-		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment();
+		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment(true, true);
 		ij1.run("Set Property", "key=" + key + " value=123");
 		assertEquals("123", System.getProperty(key));
 	}
@@ -174,7 +174,7 @@ public class ExtraPluginDirsTest {
 			assertTrue(jarFile.getAbsolutePath() + " exists", jarFile.exists());
 			System.setProperty("ij1.plugin.dirs", tmpDir.getAbsolutePath());
 
-			final LegacyEnvironment ij1 = new LegacyEnvironment(null, false);
+			final LegacyEnvironment ij1 = TestUtils.getTestEnvironment(false, true);
 			final Class<?> imagej = ij1.getClassLoader().loadClass(ImageJ.class.getName());
 			imagej.getConstructor(Applet.class, Integer.TYPE).newInstance(null, ImageJ.NO_SHOW);
 			ij1.run("Submenu Test", "menupath=[Plugins>Submenu Test] class=Submenu_Test");
