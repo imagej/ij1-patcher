@@ -53,12 +53,16 @@ public class LegacyClassLoader extends URLClassLoader {
 	private final int sharedClassCount = 2;
 
 	public LegacyClassLoader(final boolean headless) throws ClassNotFoundException {
+		this(headless, new LegacyInjector());
+	}
+
+	LegacyClassLoader(final boolean headless, final LegacyInjector injector) throws ClassNotFoundException {
 		super(getImageJ1Jar(), determineParent());
 		final ClassLoader loader = this;
 		final Thread thread = new Thread() {
 			public void run() {
 				setContextClassLoader(loader);
-				new LegacyInjector().injectHooks(loader, headless);
+				injector.injectHooks(loader, headless);
 			}
 		};
 		thread.start();

@@ -57,6 +57,7 @@ import java.util.jar.Manifest;
 public class LegacyEnvironment {
 
 	final private boolean headless;
+	final private LegacyInjector injector = new LegacyInjector();
 	private ClassLoader loader;
 	private Method setOptions, run, runMacro, runPlugIn, main;
 	private Field _hooks;
@@ -86,10 +87,10 @@ public class LegacyEnvironment {
 	private synchronized void initialize() {
 		if (isInitialized()) return;
 		if (loader != null) {
-			new LegacyInjector().injectHooks(loader, headless);
+			injector.injectHooks(loader, headless);
 		}
 		try {
-			this.loader = loader != null ? loader : new LegacyClassLoader(headless);
+			this.loader = loader != null ? loader : new LegacyClassLoader(headless, injector);
 			final Class<?> ij = this.loader.loadClass("ij.IJ");
 			final Class<?> imagej = this.loader.loadClass("ij.ImageJ");
 			final Class<?> macro = this.loader.loadClass("ij.Macro");
