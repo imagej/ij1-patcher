@@ -108,6 +108,17 @@ public class LegacyEnvironment {
 		// will need a data translator
 	}
 
+	private void ensureUninitialized() {
+		if (isInitialized()) {
+			throw new RuntimeException("LegacyEnvironment was already initialized!");
+		}
+	}
+
+	public void disableIJ1PluginDirs() {
+		ensureUninitialized();
+		injector.disableIJ1PluginDirsHandling();
+	}
+
 	/**
 	 * Adds the class path of a given {@link ClassLoader} to the plugin class
 	 * loader.

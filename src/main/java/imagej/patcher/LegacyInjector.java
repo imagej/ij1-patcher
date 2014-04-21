@@ -50,6 +50,12 @@ import javassist.NotFoundException;
  */
 public class LegacyInjector {
 
+	private boolean enableIJ1PluginDirs = true;
+
+	public void disableIJ1PluginDirsHandling() {
+		enableIJ1PluginDirs = false;
+	}
+
 	/**
 	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
 	 * 
@@ -100,7 +106,9 @@ public class LegacyInjector {
 				+ "_hooks = $1 == null ? new " + essentialHooksClass + "() : $1;"
 				+ "_hooks.installed();"
 				+ "return previous;");
-		hacker.addToClassInitializer("ij.IJ", "_hooks(null);");
+		hacker.addToClassInitializer("ij.IJ",
+				"_hooks(null);" +
+				(enableIJ1PluginDirs ? "" : "_hooks.enableIJ1PluginDirs = false;"));
 
 		if (headless) {
 			new LegacyHeadless(hacker).patch();
