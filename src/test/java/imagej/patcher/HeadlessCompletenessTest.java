@@ -157,7 +157,7 @@ public class HeadlessCompletenessTest {
 		TestUtils.makeJar(jarFile, Set_Property.class.getName());
 
 		System.setProperty("ij1.plugin.dirs", "/no-no-no/");
-		final LegacyEnvironment headlessIJ1 = new LegacyEnvironment(null, true);
+		final LegacyEnvironment headlessIJ1 = TestUtils.getTestEnvironment();
 		headlessIJ1.addPluginClasspath(jarFile);
 		headlessIJ1.runMacro("", "");
 		final Map<String, String> menuItems =

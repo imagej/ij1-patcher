@@ -128,7 +128,7 @@ public class FatJarTest {
 
 		try {
 			System.setProperty("plugins.dir", tmp.getAbsolutePath());
-			final LegacyEnvironment ij1 = new LegacyEnvironment(null, true);
+			final LegacyEnvironment ij1 = TestUtils.getTestEnvironment();
 			assertEquals(expect, ij1.runPlugIn(getClass().getName(), "").toString());
 		}
 		finally {
