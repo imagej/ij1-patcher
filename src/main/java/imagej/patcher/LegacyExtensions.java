@@ -290,7 +290,7 @@ class LegacyExtensions {
 		insertRefreshMenusHook(hacker);
 		overrideStartupMacrosForFiji(hacker);
 		handleMacAdapter(hacker);
-		handleMenuCallbacks(hacker);
+		handleMenuCallbacks(hacker, headless);
 	}
 
 	/**
@@ -492,7 +492,7 @@ class LegacyExtensions {
 			"return;");
 	}
 
-	private static void handleMenuCallbacks(CodeHacker hacker) {
+	private static void handleMenuCallbacks(final CodeHacker hacker, boolean headless) {
 		hacker.insertAtTopOfMethod("ij.Menus",
 			"java.lang.String addMenuBar()",
 			"ij.IJ._hooks.addMenuItem(null, null);");
@@ -638,6 +638,30 @@ class LegacyExtensions {
 		hacker.insertAtTopOfMethod("ij.Menus",
 				"static void addSeparator(java.awt.Menu menu)",
 				"ij.IJ._hooks.addMenuItem(_currentMenuPath + \">-\", null);");
+		hacker.replaceCallInMethod("ij.Menus", "void installPlugins()",
+				"ij.Prefs", "getString",
+				"$_ = $proceed($$);" +
+				"if ($_ != null && $_.length() > 0) {" +
+				"  String className = $_.substring($_.lastIndexOf(',') + 1);" +
+				"  if (!className.startsWith(\"ij.\")) _currentMenuPath = null;" +
+				"  else {" +
+				"    char c = $_.charAt(0);" +
+				"    if (c == IMPORT_MENU) _currentMenuPath = \"File>Import\";" +
+				"    else if (c == SAVE_AS_MENU) _currentMenuPath = \"File>Save As\";" +
+				"    else if (c == SHORTCUTS_MENU) _currentMenuPath = \"Plugins>Shortcuts\";" +
+				"    else if (c == ABOUT_MENU) _currentMenuPath = \"Help>About Plugins\";" +
+				"    else if (c == FILTERS_MENU) _currentMenuPath = \"Process>Filters\";" +
+				"    else if (c == TOOLS_MENU) _currentMenuPath = \"Analyze>Tools\";" +
+				"    else if (c == UTILITIES_MENU) _currentMenuPath = \"Plugins>Utilities\";" +
+				"    else _currentMenuPath = \"Plugins\";" +
+				"  }" +
+				"}");
+		if (headless) {
+			hacker.replaceCallInMethod("ij.Menus", "void installPlugins()",
+					"java.lang.String", "substring",
+					"$_ = $proceed($$);" +
+					"if (_currentMenuPath != null) addPluginItem((java.awt.Menu) null, $_);", 2);
+		}
 	}
 
 }
