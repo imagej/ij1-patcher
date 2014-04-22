@@ -788,8 +788,19 @@ class CodeHacker {
 		}
 	}
 
+	/** Gets the list of patched classes. */
+	Collection<CtClass> getPatchedClasses() {
+		final Set<CtClass> result = new HashSet<CtClass>();
+		for (final CtClass clazz : handledClasses) {
+			if (!clazz.isFrozen() && clazz.isModified()) {
+				result.add(clazz);
+			}
+		}
+		return result;
+	}
+
 	/** Gets the Javassist class object corresponding to the given class name. */
-	private CtClass getClass(final String fullClass) {
+	CtClass getClass(final String fullClass) {
 		try {
 			final CtClass classRef = pool.get(fullClass);
 			if (classRef.getClassPool() == pool) handledClasses.add(classRef);

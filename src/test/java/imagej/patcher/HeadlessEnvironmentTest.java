@@ -79,7 +79,7 @@ public class HeadlessEnvironmentTest {
 
 	@Test
 	public void testMacro() throws Exception {
-		final LegacyEnvironment ij1 = new LegacyEnvironment(null, true);
+		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment();
 		final String propertyName = "headless.test.property" + Math.random();
 		final String propertyValue = "Hello, world!";
 		System.setProperty(propertyName, "(unset)");
@@ -98,7 +98,7 @@ public class HeadlessEnvironmentTest {
 		Thread.currentThread().setName("Run$_" + threadName);
 		Macro.setOptions("(unset)");
 		assertEquals("(unset) ", Macro.getOptions());
-		final LegacyEnvironment ij1 = new LegacyEnvironment(null, true);
+		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment();
 		ij1.runMacro("call(\"ij.Macro.setOptions\", \"Hello, world!\");",
 				null);
 		assertEquals("(unset) ", Macro.getOptions());
@@ -137,7 +137,7 @@ public class HeadlessEnvironmentTest {
 	}
 
 	private static boolean runExamplePlugin(final boolean patchHeadless, final String arg, final String macroOptions, final String expectedValue) throws Exception {
-		final LegacyEnvironment ij1 = new LegacyEnvironment(null, patchHeadless);
+		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment(patchHeadless, false);
 		ij1.addPluginClasspath(HeadlessEnvironmentTest.class.getClassLoader());
 		try {
 			ij1.setMacroOptions(macroOptions);

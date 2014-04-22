@@ -225,6 +225,7 @@ public abstract class LegacyHooks {
 		return false;
 	}
 
+	public boolean enableIJ1PluginDirs = true;
 	final public Collection<File> _pluginClasspath = new LinkedHashSet<File>();
 
 	/**
@@ -235,6 +236,7 @@ public abstract class LegacyHooks {
 	public List<File> handleExtraPluginJars() {
 		final List<File> result = new ArrayList<File>();
 		result.addAll(_pluginClasspath);
+		if (!enableIJ1PluginDirs) return result;
 		final String extraPluginDirs = System.getProperty("ij1.plugin.dirs");
 		if (extraPluginDirs != null) {
 			for (final String dir : extraPluginDirs.split(File.pathSeparator)) {

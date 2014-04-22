@@ -34,6 +34,8 @@ package imagej.patcher;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -56,9 +58,12 @@ import java.util.jar.Manifest;
  */
 public class LegacyEnvironment {
 
-	final private ClassLoader loader;
-	final private Field _hooks;
-	final private Method setOptions, run, runMacro, runPlugIn, main;
+	final private boolean headless;
+	final private LegacyInjector injector;
+	private Throwable initializationStackTrace;
+	private ClassLoader loader;
+	private Method setOptions, run, runMacro, runPlugIn, main;
+	private Field _hooks;
 
 	/**
 	 * Constructs a new legacy environment.
@@ -74,14 +79,32 @@ public class LegacyEnvironment {
 	public LegacyEnvironment(final ClassLoader loader, boolean headless)
 		throws ClassNotFoundException
 	{
+		this(loader, headless, new LegacyInjector());
+	}
+
+	LegacyEnvironment(final ClassLoader loader, boolean headless,
+			final LegacyInjector injector) throws ClassNotFoundException
+		{
+		this.headless = headless;
+		this.loader = loader;
+		this.injector = injector;
+	}
+
+	private boolean isInitialized() {
+		return _hooks != null;
+	}
+
+	private synchronized void initialize() {
+		if (isInitialized()) return;
+		initializationStackTrace = new Throwable("Initialized here:");
 		if (loader != null) {
-			new LegacyInjector().injectHooks(loader, headless);
+			injector.injectHooks(loader, headless);
 		}
-		this.loader = loader != null ? loader : new LegacyClassLoader(headless);
-		final Class<?> ij = this.loader.loadClass("ij.IJ");
-		final Class<?> imagej = this.loader.loadClass("ij.ImageJ");
-		final Class<?> macro = this.loader.loadClass("ij.Macro");
 		try {
+			this.loader = loader != null ? loader : new LegacyClassLoader(headless, injector);
+			final Class<?> ij = this.loader.loadClass("ij.IJ");
+			final Class<?> imagej = this.loader.loadClass("ij.ImageJ");
+			final Class<?> macro = this.loader.loadClass("ij.Macro");
 			_hooks = ij.getField("_hooks");
 			setOptions = macro.getMethod("setOptions", String.class);
 			run = ij.getMethod("run", String.class, String.class);
@@ -90,10 +113,26 @@ public class LegacyEnvironment {
 			main = imagej.getMethod("main", String[].class);
 		}
 		catch (Exception e) {
-			throw new ClassNotFoundException("Found incompatible ij.IJ class", e);
+			throw new RuntimeException("Found incompatible ij.IJ class", e);
 		}
 		// TODO: if we want to allow calling IJ#run(ImagePlus, String, String), we
 		// will need a data translator
+	}
+
+	private void ensureUninitialized() {
+		if (isInitialized()) {
+			final StringWriter string = new StringWriter();
+			final PrintWriter writer = new PrintWriter(string);
+			initializationStackTrace.printStackTrace(writer);
+			writer.close();
+			throw new RuntimeException("LegacyEnvironment was already initialized:\n\n" +
+					string.toString().replaceAll("(?m)^", "\t"));
+		}
+	}
+
+	public void disableIJ1PluginDirs() {
+		ensureUninitialized();
+		injector.disableIJ1PluginDirsHandling();
 	}
 
 	/**
@@ -112,6 +151,7 @@ public class LegacyEnvironment {
 	 */
 	public void addPluginClasspath(final ClassLoader fromClassLoader) {
 		if (fromClassLoader == null) return;
+		initialize();
 		for (ClassLoader loader = fromClassLoader; loader != null; loader =
 			loader.getParent())
 		{
@@ -186,6 +226,7 @@ public class LegacyEnvironment {
 	 *          plugins
 	 */
 	public void addPluginClasspath(final File... classpathEntries) {
+		initialize();
 		try {
 			final LegacyHooks hooks =
 				(LegacyHooks) loader.loadClass("ij.IJ").getField("_hooks").get(null);
@@ -229,6 +270,7 @@ public class LegacyEnvironment {
 	 * @param options the options to pass to the command
 	 */
 	public void run(final String command, final String options) {
+		initialize();
 		final Thread thread = Thread.currentThread();
 		final ClassLoader savedLoader = thread.getContextClassLoader();
 		thread.setContextClassLoader(loader);
@@ -251,6 +293,7 @@ public class LegacyEnvironment {
 	 *          via {@code getArgument()})
 	 */
 	public void runMacro(final String macro, final String arg) {
+		initialize();
 		final Thread thread = Thread.currentThread();
 		final String savedName = thread.getName();
 		thread.setName("Run$_" + savedName);
@@ -276,6 +319,7 @@ public class LegacyEnvironment {
 	 *          {@code setup()} method of the plugin)
 	 */
 	public Object runPlugIn(final String className, final String arg) {
+		initialize();
 		final Thread thread = Thread.currentThread();
 		final String savedName = thread.getName();
 		thread.setName("Run$_" + savedName);
@@ -299,6 +343,7 @@ public class LegacyEnvironment {
 	 * @param args the arguments to pass to the main() method
 	 */
 	public void main(final String... args) {
+		initialize();
 		Thread.currentThread().setContextClassLoader(loader);
 		try {
 			main.invoke(null, (Object) args);
@@ -315,6 +360,7 @@ public class LegacyEnvironment {
 	 * @return the class loader
 	 */
 	public ClassLoader getClassLoader() {
+		initialize();
 		return loader;
 	}
 
@@ -322,6 +368,7 @@ public class LegacyEnvironment {
 	 * Gets the ImageJ 1.x menu structure as a map
 	 */
 	public Map<String, String> getMenuStructure() {
+		initialize();
 		try {
 			final LegacyHooks hooks = (LegacyHooks) _hooks.get(null);
 			return hooks.getMenuStructure();

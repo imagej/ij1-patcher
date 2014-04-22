@@ -97,7 +97,7 @@ public class ExtraPluginDirsTest {
 
 		final String key = "random-" + Math.random();
 		System.setProperty(key, "321");
-		final LegacyEnvironment ij1 = new LegacyEnvironment(null, true);
+		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment(true, true);
 		ij1.run("Set Property", "key=" + key + " value=123");
 		assertEquals("123", System.getProperty(key));
 	}
@@ -108,7 +108,7 @@ public class ExtraPluginDirsTest {
 		assertTrue(pluginsDir.mkdirs());
 		final File jarsDir = new File(tmpDir, "jars");
 		assertTrue(jarsDir.mkdirs());
-		LegacyEnvironment ij1 = new LegacyEnvironment(null, true);
+		LegacyEnvironment ij1 = TestUtils.getTestEnvironment();
 		final String helperClassName = TestUtils.class.getName();
 		try {
 			assertNull(ij1.runPlugIn(helperClassName, null));
@@ -118,7 +118,7 @@ public class ExtraPluginDirsTest {
 		final File jarFile = new File(jarsDir, "helper.jar");
 		TestUtils.makeJar(jarFile, helperClassName);
 		System.setProperty("plugins.dir", pluginsDir.getAbsolutePath());
-		ij1 = new LegacyEnvironment(null, true);
+		ij1 = TestUtils.getTestEnvironment();
 		try {
 			assertNotNull(ij1.runPlugIn(helperClassName, null));
 		} catch (Throwable t) {
@@ -158,7 +158,7 @@ public class ExtraPluginDirsTest {
 		final String property = "ij.patcher.test." + Math.random();
 		System.clearProperty(property);
 		assertNull(System.getProperty(property));
-		final LegacyEnvironment ij1 = new LegacyEnvironment(null, true);
+		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment();
 		ij1.addPluginClasspath(tmpDir);
 		ij1.run(menuLabel, "property=" + property);
 		assertEquals(tmpDir.toURI().toURL().toString() + path, System.getProperty(property));
@@ -174,7 +174,7 @@ public class ExtraPluginDirsTest {
 			assertTrue(jarFile.getAbsolutePath() + " exists", jarFile.exists());
 			System.setProperty("ij1.plugin.dirs", tmpDir.getAbsolutePath());
 
-			final LegacyEnvironment ij1 = new LegacyEnvironment(null, false);
+			final LegacyEnvironment ij1 = TestUtils.getTestEnvironment(false, true);
 			final Class<?> imagej = ij1.getClassLoader().loadClass(ImageJ.class.getName());
 			imagej.getConstructor(Applet.class, Integer.TYPE).newInstance(null, ImageJ.NO_SHOW);
 			ij1.run("Submenu Test", "menupath=[Plugins>Submenu Test] class=Submenu_Test");

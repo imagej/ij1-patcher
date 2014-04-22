@@ -329,4 +329,38 @@ public class TestUtils {
 		return true;
 	}
 
+	/**
+	 * Instantiates a new {@link LegacyEnvironment} for use in unit tests.
+	 * <p>
+	 * In general, unit tests should not rely on, or be affected by, side
+	 * effects such as the presence of plugins in a subdirectory called
+	 * <code>.plugins/</code> of the user's home directory. This method
+	 * instantiates a legacy environment switching off all such side effects,
+	 * insofar supported by the {@link LegacyEnvironment}.
+	 * </p>
+	 * 
+	 * @return the legacy environment
+	 * @throws ClassNotFoundException
+	 */
+	public static LegacyEnvironment getTestEnvironment() throws ClassNotFoundException {
+		return getTestEnvironment(true, false);
+	}
+
+	/**
+	 * Instantiates a new {@link LegacyEnvironment} for use in unit tests.
+	 * 
+	 * @param headless whether to apply headless support patches
+	 * @param enableIJ1PluginDirs whether to allow parsing ${ij1.plugin.dirs} for plugins 
+	 * @return the legacy environment
+	 * @throws ClassNotFoundException
+	 */
+	public static LegacyEnvironment getTestEnvironment(final boolean headless,
+			final boolean enableIJ1PluginDirs) throws ClassNotFoundException {
+		final boolean debugMenus = false;
+		final LegacyInjector injector = debugMenus ? new InjectorForDebugging() : new LegacyInjector();
+		final LegacyEnvironment result = new LegacyEnvironment(null, headless, injector);
+		if (!enableIJ1PluginDirs) result.disableIJ1PluginDirs();
+		return result;
+	}
+
 }

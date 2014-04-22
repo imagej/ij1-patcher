@@ -156,8 +156,7 @@ public class HeadlessCompletenessTest {
 		final File jarFile = new File(tmpDir, "Set_Property.jar");
 		TestUtils.makeJar(jarFile, Set_Property.class.getName());
 
-		System.setProperty("ij1.plugin.dirs", "/no-no-no/");
-		final LegacyEnvironment headlessIJ1 = new LegacyEnvironment(null, true);
+		final LegacyEnvironment headlessIJ1 = TestUtils.getTestEnvironment();
 		headlessIJ1.addPluginClasspath(jarFile);
 		headlessIJ1.runMacro("", "");
 		final Map<String, String> menuItems =
@@ -165,7 +164,7 @@ public class HeadlessCompletenessTest {
 
 		assertTrue("does not have 'Set Property'", menuItems.containsKey("Plugins>Set Property"));
 
-		final LegacyEnvironment ij1 = new LegacyEnvironment(null, false);
+		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment(false, false);
 		ij1.addPluginClasspath(jarFile);
 		final Frame ij1Frame = construct(ij1.getClassLoader(), "ij.ImageJ", ImageJ.NO_SHOW);
 		final MenuBar menuBar = ij1Frame.getMenuBar();
