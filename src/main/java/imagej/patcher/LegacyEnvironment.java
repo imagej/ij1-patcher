@@ -59,7 +59,7 @@ import java.util.jar.Manifest;
 public class LegacyEnvironment {
 
 	final private boolean headless;
-	final private LegacyInjector injector = new LegacyInjector();
+	final private LegacyInjector injector;
 	private Throwable initializationStackTrace;
 	private ClassLoader loader;
 	private Method setOptions, run, runMacro, runPlugIn, main;
@@ -79,8 +79,15 @@ public class LegacyEnvironment {
 	public LegacyEnvironment(final ClassLoader loader, boolean headless)
 		throws ClassNotFoundException
 	{
+		this(loader, headless, new LegacyInjector());
+	}
+
+	LegacyEnvironment(final ClassLoader loader, boolean headless,
+			final LegacyInjector injector) throws ClassNotFoundException
+		{
 		this.headless = headless;
 		this.loader = loader;
+		this.injector = injector;
 	}
 
 	private boolean isInitialized() {
