@@ -356,7 +356,9 @@ public class TestUtils {
 	 */
 	public static LegacyEnvironment getTestEnvironment(final boolean headless,
 			final boolean enableIJ1PluginDirs) throws ClassNotFoundException {
-		final LegacyEnvironment result = new LegacyEnvironment(null, headless);
+		final boolean debugMenus = false;
+		final LegacyInjector injector = debugMenus ? new InjectorForDebugging() : new LegacyInjector();
+		final LegacyEnvironment result = new LegacyEnvironment(null, headless, injector);
 		if (!enableIJ1PluginDirs) result.disableIJ1PluginDirs();
 		return result;
 	}
