@@ -291,6 +291,7 @@ class LegacyExtensions {
 		overrideStartupMacrosForFiji(hacker);
 		handleMacAdapter(hacker);
 		handleMenuCallbacks(hacker, headless);
+		installOpenImageInterceptor(hacker);
 	}
 
 	/**
@@ -662,6 +663,17 @@ class LegacyExtensions {
 					"$_ = $proceed($$);" +
 					"if (_currentMenuPath != null) addPluginItem((java.awt.Menu) null, $_);", 2);
 		}
+	}
+
+	private static void installOpenImageInterceptor(CodeHacker hacker) {
+		hacker.insertAtTopOfMethod("ij.IJ",
+				"public static ij.ImagePlus openImage(java.lang.String path)",
+				"Object result = ij.IJ._hooks.interceptOpenImage($1, -1);" +
+				"if (result != null) return (ij.ImagePlus) result;");
+		hacker.insertAtTopOfMethod("ij.IJ",
+				"public static ij.ImagePlus openImage(java.lang.String path, int sliceIndex)",
+				"Object result = ij.IJ._hooks.interceptOpenImage($1, $2);" +
+				"if (result != null) return (ij.ImagePlus) result;");
 	}
 
 }

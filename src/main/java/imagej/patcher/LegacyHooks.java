@@ -422,4 +422,21 @@ public abstract class LegacyHooks {
 	public Map<String, String> getMenuStructure() {
 		return Collections.unmodifiableMap(menuStructure);
 	}
+
+	/**
+	 * Optionally override opening images via legacy hooks.
+	 * <p>
+	 * This is intended as a "HandleExtraFileTypesPlus".
+	 * </p>
+	 * 
+	 * @param path
+	 *            the path to the image, or {@code null} if a dialog needs to be
+	 *            shown
+	 * @param sliceIndex
+	 *            the index of the single slice to open, or -1 for all slices
+	 * @return an image, or {@code null} to let ImageJ 1.x open the image
+	 */
+	public Object interceptOpenImage(final String path, final int sliceIndex) {
+		return null;
+	}
 }
