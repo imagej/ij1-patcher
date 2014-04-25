@@ -122,8 +122,17 @@ public class EssentialLegacyHooks extends LegacyHooks {
 		try {
 			final ClassLoader loader = IJ.getClassLoader();
 			Thread.currentThread().setContextClassLoader(loader);
-			final Class<?> runClass = loader.loadClass(property != null ? property
-					: "imagej.legacy.plugin.LegacyInitializer");
+			Class<?> runClass;
+			if (property != null) {
+				runClass = loader.loadClass(property);
+			}
+			else {
+				try {
+					runClass = loader.loadClass("net.imagej.legacy.plugin.LegacyInitializer");
+				} catch (ClassNotFoundException e) {
+					runClass = loader.loadClass("imagej.legacy.plugin.LegacyInitializer");
+				}
+			}
 			final Runnable run = (Runnable)runClass.newInstance();
 			run.run();
 		} catch (ClassNotFoundException e) {
