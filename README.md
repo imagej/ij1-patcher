@@ -61,15 +61,45 @@ to a variable of the other.
 
 ## How does it work?
 
-The runtime patching works by calling [Javassist](http://www.javassist.org), a
+The runtime patches are applied through [Javassist](http://www.javassist.org), a
 library offering tools to manipulate Java bytecode. This is needed to get the
-changes into ImageJ 1.x code.
+changes into ImageJ 1.x code. The runtime patches live in `LegacyInjector`,
+`LegacyExtensions` and `LegacyHeadless` (the latter being applied only when the
+headless hacks are asked for).
 
-To offer encapsulated ImageJ 1.x, a new special-purpose class loader is created
-that contains only the patched ImageJ 1.x classes, plus a select few classes
-required for callbacks. The central class here is `LegacyHooks`, an abstract
-base class which gets called by the patched ImageJ 1.x classes at appropriate
-times, e.g. when an exception needs to be displayed.
+To offer an encapsulated ImageJ 1.x instance, a new special-purpose class loader
+(to be precise, a LegacyClassLoader) is created that contains only the patched
+ImageJ 1.x classes, plus a select few classes required for callbacks. In
+addition, it will share the very special `LegacyHooks` class with the calling
+class loader (i.e. this class will not be defined in the legacy class loader,
+but its class definition as per the calling class loader will be reused).
+
+The patched ImageJ 1.x classes interact with the "outside" world via the
+`LegacyHooks` class, an abstract base class which gets called by the patched
+ImageJ 1.x classes at appropriate times, e.g. when an exception needs to be
+displayed.
+
+By default, the patched ImageJ 1.x will instantiate the `EssentialLegacyHooks`
+specialization of the `LegacyHooks` and install these hooks into the `_hooks`
+field that gets patched into the `ij.IJ` class. That way, there is always an
+instance, and the patched code does not check for `null` first. The
+`EssentialLegacyHooks` will also look for an initializer class -- to be loaded
+in ImageJ 1.x' `PluginClassLoader` -- and if one is found, instantiate and run
+it as a `Runnable`. By default, the initializer class is
+`net.imagej.legacy.plugin.LegacyInitializer` -- to support ImageJ2 -- but it can
+be overridden by setting the system property `ij1.patcher.initializer` to the
+class name to use instead.
+
+To add new extensions, the `LegacyExtensions` class should be extended by
+* adding the necessary extension points at the end of the `LegacyHooks` class
+  (with default implementations, for forward compatibility, so that users of
+  `ij1-patcher` are able to use subclasses of `LegacyHooks` without requiring
+  changes after upgrading to a new `ij1-patcher` version),
+* adding a new method to the end that applies the necessary runtime patches,
+* and calling that method in `LegacyExtensions`' `injectHooks` method.
+
+As the `LegacyHooks` class definition needs to be shared with the calling class
+loader, it **must not** use any ImageJ 1.x classes!
 
 For details about the headless mode, see the section below.
 
