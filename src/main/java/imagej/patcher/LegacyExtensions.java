@@ -670,16 +670,16 @@ class LegacyExtensions {
 		// to perform any necessary display operations
 		hacker.insertAtTopOfMethod("ij.IJ",
 			"public static void open(java.lang.String path)",
-			"boolean result = ij.IJ._hooks.interceptOpen($1);" +
-			"if (result) return;");
-		// If openImage is intercepted, we return the opened ImagePlus
+			"Object result = ij.IJ._hooks.interceptOpen($1, -1, true);" +
+			"if (result != null) return;");
+		// If openImage is intercepted, we return the opened ImagePlus without displaying it
 		hacker.insertAtTopOfMethod("ij.IJ",
 				"public static ij.ImagePlus openImage(java.lang.String path)",
-				"Object result = ij.IJ._hooks.interceptOpenImage($1, -1);" +
+				"Object result = ij.IJ._hooks.interceptOpenImage($1, -1, false);" +
 				"if (result != null) return (ij.ImagePlus) result;");
 		hacker.insertAtTopOfMethod("ij.IJ",
 				"public static ij.ImagePlus openImage(java.lang.String path, int sliceIndex)",
-				"Object result = ij.IJ._hooks.interceptOpenImage($1, $2);" +
+				"Object result = ij.IJ._hooks.interceptOpenImage($1, $2, false);" +
 				"if (result != null) return (ij.ImagePlus) result;");
 	}
 
