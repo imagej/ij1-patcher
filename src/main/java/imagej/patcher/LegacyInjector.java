@@ -109,10 +109,22 @@ public class LegacyInjector {
 		hacker.commitClass(LegacyHooks.FatJarNameComparator.class);
 		hacker.commitClass(EssentialLegacyHooks.class);
 		final String legacyHooksClass = LegacyHooks.class.getName();
+
+		final StringBuilder builder = new StringBuilder();
+		for (final Field field : LegacyHooks.class.getDeclaredFields()) {
+			builder.append("try {").append("java.lang.reflect.Field field = ")
+				.append(legacyHooksClass).append(".class.getDeclaredField(\")").append(
+					field.getName()).append("\"); ").append("field.setAccessible(true);")
+				.append("field.set(hooks, field.get(_hooks));").append(
+					"} catch (Throwable t) {").append(
+					"if (ij.IJ.debugMode) t.printStackTrace();").append("}");
+		}
+
 		final String essentialHooksClass = EssentialLegacyHooks.class.getName();
 		hacker.insertNewMethod("ij.IJ",
 				"public static " + legacyHooksClass + " _hooks(" + legacyHooksClass + " hooks)",
 				legacyHooksClass + " previous = _hooks;"
+				+ "if (previous != null && hooks != null) {" + builder + "}"
 				+ "if (previous != null) previous.dispose();"
 				+ "_hooks = $1 == null ? new " + essentialHooksClass + "() : $1;"
 				+ "_hooks.installed();"
