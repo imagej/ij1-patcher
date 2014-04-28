@@ -666,6 +666,13 @@ class LegacyExtensions {
 	}
 
 	private static void installOpenImageInterceptor(CodeHacker hacker) {
+		// If the open method is intercepted, the hooks.interceptOpen method needs
+		// to perform any necessary display operations
+		hacker.insertAtTopOfMethod("ij.IJ",
+			"public static void open(java.lang.String path)",
+			"boolean result = ij.IJ._hooks.interceptOpen($1);" +
+			"if (result) return;");
+		// If openImage is intercepted, we return the opened ImagePlus
 		hacker.insertAtTopOfMethod("ij.IJ",
 				"public static ij.ImagePlus openImage(java.lang.String path)",
 				"Object result = ij.IJ._hooks.interceptOpenImage($1, -1);" +

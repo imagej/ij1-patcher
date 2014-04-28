@@ -424,6 +424,22 @@ public abstract class LegacyHooks {
 	}
 
 	/**
+	 * Optionally override opening resources via legacy hooks.
+	 * <p>
+	 * This is intended as a "HandleExtraFileTypesPlus".
+	 * </p>
+	 * 
+	 * @param path
+	 *            the path to the resource to open, or {@code null} if a dialog
+	 *            needs to be shown
+	 * @return true if the provided path was opened successfully, or {@code false}
+	 * 						to let ImageJ 1.x open the path.
+	 */
+	public boolean interceptOpen(final String path) {
+		return false;
+	}
+
+	/**
 	 * Optionally override opening images via legacy hooks.
 	 * <p>
 	 * This is intended as a "HandleExtraFileTypesPlus".
