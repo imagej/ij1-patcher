@@ -210,7 +210,7 @@ public class LegacyInjector {
 			+ "  java.io.File root = plugins.getParentFile();"
 			+ "  if (root != null) addRecursively(new java.io.File(root, \"jars\"));"
 			+ "}"
-			+ "final java.util.Iterator iter = ij.IJ._hooks._pluginClasspath.iterator();"
+			+ "final java.util.Iterator iter = ij.IJ._hooks.handleExtraPluginJars().iterator();"
 			+ "while (iter.hasNext()) {"
 			+ "  addURL(((java.io.File) iter.next()).toURL());"
 			+ "}");
