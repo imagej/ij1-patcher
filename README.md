@@ -101,6 +101,14 @@ To add new extensions, the `LegacyExtensions` class should be extended by
 As the `LegacyHooks` class definition needs to be shared with the calling class
 loader, it **must not** use any ImageJ 1.x classes!
 
+When configuring the `LegacyEnvironment` -- e.g. disabling handling for the
+ij1.plugin.dirs system property -- what really happens is that a `Callback`
+is added to the `LegacyInjector` instance of the environment. This callback
+will patch the constructor of the `EssentialLegacyHooks` accordingly. As that
+`EssentialLegacyHooks` class definition will be written out when using the
+`writeJar` method, the configuration will be hard-coded into the written-out
+`.jar` file, too.
+
 For details about the headless mode, see the section below.
 
 ## Where does it come from?

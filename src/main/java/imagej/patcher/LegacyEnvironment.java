@@ -31,6 +31,8 @@
 
 package imagej.patcher;
 
+import imagej.patcher.LegacyInjector.Callback;
+
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
@@ -76,15 +78,15 @@ public class LegacyEnvironment {
 	 *          not use graphical components directly)
 	 * @throws ClassNotFoundException
 	 */
-	public LegacyEnvironment(final ClassLoader loader, boolean headless)
+	public LegacyEnvironment(final ClassLoader loader, final boolean headless)
 		throws ClassNotFoundException
 	{
 		this(loader, headless, new LegacyInjector());
 	}
 
-	LegacyEnvironment(final ClassLoader loader, boolean headless,
-			final LegacyInjector injector) throws ClassNotFoundException
-		{
+	LegacyEnvironment(final ClassLoader loader, final boolean headless,
+		final LegacyInjector injector) throws ClassNotFoundException
+	{
 		this.headless = headless;
 		this.loader = loader;
 		this.injector = injector;
@@ -101,7 +103,8 @@ public class LegacyEnvironment {
 			injector.injectHooks(loader, headless);
 		}
 		try {
-			this.loader = loader != null ? loader : new LegacyClassLoader(headless, injector);
+			this.loader =
+				loader != null ? loader : new LegacyClassLoader(headless, injector);
 			final Class<?> ij = this.loader.loadClass("ij.IJ");
 			final Class<?> imagej = this.loader.loadClass("ij.ImageJ");
 			final Class<?> macro = this.loader.loadClass("ij.Macro");
@@ -112,7 +115,7 @@ public class LegacyEnvironment {
 			runPlugIn = ij.getMethod("runPlugIn", String.class, String.class);
 			main = imagej.getMethod("main", String[].class);
 		}
-		catch (Exception e) {
+		catch (final Exception e) {
 			throw new RuntimeException("Found incompatible ij.IJ class", e);
 		}
 		// TODO: if we want to allow calling IJ#run(ImagePlus, String, String), we
@@ -125,14 +128,22 @@ public class LegacyEnvironment {
 			final PrintWriter writer = new PrintWriter(string);
 			initializationStackTrace.printStackTrace(writer);
 			writer.close();
-			throw new RuntimeException("LegacyEnvironment was already initialized:\n\n" +
+			throw new RuntimeException(
+				"LegacyEnvironment was already initialized:\n\n" +
 					string.toString().replaceAll("(?m)^", "\t"));
 		}
 	}
 
 	public void disableIJ1PluginDirs() {
 		ensureUninitialized();
-		injector.disableIJ1PluginDirsHandling();
+		injector.after.add(new Callback() {
+			@Override
+			public void call(final CodeHacker hacker) {
+				hacker.insertAtBottomOfMethod(EssentialLegacyHooks.class.getName(),
+					"public <init>()",
+					"enableIJ1PluginDirs(false);");
+			}
+		});
 	}
 
 	/**
@@ -151,11 +162,19 @@ public class LegacyEnvironment {
 	 */
 	public void addPluginClasspath(final ClassLoader fromClassLoader) {
 		if (fromClassLoader == null) return;
-		initialize();
+		ensureUninitialized();
 		for (ClassLoader loader = fromClassLoader; loader != null; loader =
 			loader.getParent())
 		{
-			if (loader == this.loader || loader == this.loader.getParent()) {
+			if (loader == this.loader) {
+				break;
+			}
+			if (this.loader != null && loader == this.loader.getParent()) {
+				break;
+			}
+			if (this.loader == null &&
+				loader == getClass().getClassLoader().getParent())
+			{
 				break;
 			}
 			if (!(loader instanceof URLClassLoader)) {
@@ -173,7 +192,7 @@ public class LegacyEnvironment {
 				final String path = url.getPath();
 				if (path.matches(".*/target/surefire/surefirebooter[0-9]*\\.jar")) try {
 					final JarFile jar = new JarFile(path);
-					Manifest manifest = jar.getManifest();
+					final Manifest manifest = jar.getManifest();
 					if (manifest != null) {
 						final String classPath =
 							manifest.getMainAttributes().getValue(Name.CLASS_PATH);
@@ -184,7 +203,7 @@ public class LegacyEnvironment {
 									if (!"file".equals(url2.getProtocol())) continue;
 									addPluginClasspath(new File(url2.getPath()));
 								}
-								catch (MalformedURLException e) {
+								catch (final MalformedURLException e) {
 									e.printStackTrace();
 								}
 						}
@@ -226,17 +245,22 @@ public class LegacyEnvironment {
 	 *          plugins
 	 */
 	public void addPluginClasspath(final File... classpathEntries) {
-		initialize();
-		try {
-			final LegacyHooks hooks =
-				(LegacyHooks) loader.loadClass("ij.IJ").getField("_hooks").get(null);
-			for (final File file : classpathEntries) {
-				hooks._pluginClasspath.add(file);
+		if (classpathEntries.length == 0) return;
+		ensureUninitialized();
+
+		final StringBuilder builder = new StringBuilder();
+		for (final File file : classpathEntries) {
+			builder.append("addPluginClasspath(new java.io.File(\"").append(file.getPath()).append("\"));");
+		}
+
+		injector.after.add(new Callback() {
+			@Override
+			public void call(final CodeHacker hacker) {
+				hacker.insertAtBottomOfMethod(EssentialLegacyHooks.class.getName(),
+					"public <init>()",
+					builder.toString());
 			}
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		});
 	}
 
 	/**
@@ -255,10 +279,11 @@ public class LegacyEnvironment {
 	 *          {@link #runPlugIn(String, String)}
 	 */
 	public void setMacroOptions(final String options) {
+		initialize();
 		try {
 			setOptions.invoke(null, options);
 		}
-		catch (Exception e) {
+		catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -277,7 +302,7 @@ public class LegacyEnvironment {
 		try {
 			run.invoke(null, command, options);
 		}
-		catch (Exception e) {
+		catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 		finally {
@@ -302,7 +327,7 @@ public class LegacyEnvironment {
 		try {
 			runMacro.invoke(null, macro, arg);
 		}
-		catch (Exception e) {
+		catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 		finally {
@@ -328,7 +353,7 @@ public class LegacyEnvironment {
 		try {
 			return runPlugIn.invoke(null, className, arg);
 		}
-		catch (Exception e) {
+		catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 		finally {
@@ -348,7 +373,7 @@ public class LegacyEnvironment {
 		try {
 			main.invoke(null, (Object) args);
 		}
-		catch (Exception e) {
+		catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -372,9 +397,11 @@ public class LegacyEnvironment {
 		try {
 			final LegacyHooks hooks = (LegacyHooks) _hooks.get(null);
 			return hooks.getMenuStructure();
-		} catch (RuntimeException e) {
+		}
+		catch (final RuntimeException e) {
 			throw e;
-		} catch (Exception e) {
+		}
+		catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -387,7 +414,7 @@ public class LegacyEnvironment {
 	public static LegacyEnvironment getPatchedImageJ1()
 		throws ClassNotFoundException
 	{
-		boolean headless = GraphicsEnvironment.isHeadless();
+		final boolean headless = GraphicsEnvironment.isHeadless();
 		return new LegacyEnvironment(new LegacyClassLoader(headless), headless);
 	}
 }

@@ -37,6 +37,8 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javassist.ClassPool;
 import javassist.NotFoundException;
@@ -50,12 +52,6 @@ import javassist.NotFoundException;
  */
 public class LegacyInjector {
 
-	private boolean enableIJ1PluginDirs = true;
-
-	public void disableIJ1PluginDirsHandling() {
-		enableIJ1PluginDirs = false;
-	}
-
 	/**
 	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
 	 * 
@@ -65,6 +61,13 @@ public class LegacyInjector {
 		injectHooks(classLoader, GraphicsEnvironment.isHeadless());
 	}
 
+	interface Callback {
+		void call(CodeHacker hacker);
+	}
+
+	List<Callback> before = new ArrayList<Callback>();
+	List<Callback> after = new ArrayList<Callback>();
+
 	/**
 	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
 	 * 
@@ -72,20 +75,13 @@ public class LegacyInjector {
 	 * @param headless whether to include headless patches
 	 */
 	public void injectHooks(final ClassLoader classLoader, boolean headless) {
-		injectHooks(classLoader, headless, null);
-	}
-
-	interface Callback {
-		void before(CodeHacker hacker);
-		void after(CodeHacker hacker);
-	}
-
-	void injectHooks(final ClassLoader classLoader, boolean headless, final Callback callback) {
 		if (alreadyPatched(classLoader)) return;
 
-		final CodeHacker hacker = inject(classLoader, headless, callback);
+		final CodeHacker hacker = inject(classLoader, headless);
 
-		if (callback != null) callback.after(hacker);
+		for (final Callback callback : after) {
+			callback.call(hacker);
+		}
 
 		// commit patches
 		hacker.loadClasses();
@@ -99,11 +95,13 @@ public class LegacyInjector {
 	 * @return the CodeHacker instance for further patching or .jar writing
 	 */
 	private CodeHacker inject(final ClassLoader classLoader,
-			final boolean headless, final Callback callback) {
+			final boolean headless) {
 		final CodeHacker hacker = new CodeHacker(classLoader, new ClassPool(false));
 		if (hacker.hasField("ij.IJ", "_hooks")) return hacker; // pre-patched
 
-		if (callback != null) callback.before(hacker);
+		for (final Callback callback : before) {
+			callback.call(hacker);
+		}
 
 		// NB: Override class behavior before class loading gets too far along.
 		hacker.insertPublicStaticField("ij.IJ", LegacyHooks.class, "_hooks", null);
@@ -111,17 +109,27 @@ public class LegacyInjector {
 		hacker.commitClass(LegacyHooks.FatJarNameComparator.class);
 		hacker.commitClass(EssentialLegacyHooks.class);
 		final String legacyHooksClass = LegacyHooks.class.getName();
+
+		final StringBuilder builder = new StringBuilder();
+		for (final Field field : LegacyHooks.class.getDeclaredFields()) {
+			builder.append("try {").append("java.lang.reflect.Field field = ")
+				.append(legacyHooksClass).append(".class.getDeclaredField(\")").append(
+					field.getName()).append("\"); ").append("field.setAccessible(true);")
+				.append("field.set(hooks, field.get(_hooks));").append(
+					"} catch (Throwable t) {").append(
+					"if (ij.IJ.debugMode) t.printStackTrace();").append("}");
+		}
+
 		final String essentialHooksClass = EssentialLegacyHooks.class.getName();
 		hacker.insertNewMethod("ij.IJ",
 				"public static " + legacyHooksClass + " _hooks(" + legacyHooksClass + " hooks)",
 				legacyHooksClass + " previous = _hooks;"
+				+ "if (previous != null && hooks != null) {" + builder + "}"
 				+ "if (previous != null) previous.dispose();"
 				+ "_hooks = $1 == null ? new " + essentialHooksClass + "() : $1;"
 				+ "_hooks.installed();"
 				+ "return previous;");
-		hacker.addToClassInitializer("ij.IJ",
-				"_hooks(null);" +
-				(enableIJ1PluginDirs ? "" : "_hooks.enableIJ1PluginDirs = false;"));
+		hacker.addToClassInitializer("ij.IJ", "_hooks(null);");
 
 		if (headless) {
 			new LegacyHeadless(hacker).patch();
@@ -210,7 +218,7 @@ public class LegacyInjector {
 			+ "  java.io.File root = plugins.getParentFile();"
 			+ "  if (root != null) addRecursively(new java.io.File(root, \"jars\"));"
 			+ "}"
-			+ "final java.util.Iterator iter = ij.IJ._hooks._pluginClasspath.iterator();"
+			+ "final java.util.Iterator iter = ij.IJ._hooks.handleExtraPluginJars().iterator();"
 			+ "while (iter.hasNext()) {"
 			+ "  addURL(((java.io.File) iter.next()).toURL());"
 			+ "}");
@@ -274,7 +282,7 @@ public class LegacyInjector {
 		}
 		final LegacyInjector injector = new LegacyInjector();
 		final ClassLoader loader = new LegacyClassLoader(headless);
-		final CodeHacker hacker = injector.inject(loader, headless, null);
+		final CodeHacker hacker = injector.inject(loader, headless);
 		if (!fullIJJar) {
 			hacker.writeJar(outputJar);
 		}

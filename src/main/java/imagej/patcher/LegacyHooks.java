@@ -225,8 +225,15 @@ public abstract class LegacyHooks {
 		return false;
 	}
 
-	public boolean enableIJ1PluginDirs = true;
-	final public Collection<File> _pluginClasspath = new LinkedHashSet<File>();
+	private boolean enableIJ1PluginDirs = true;
+	protected void enableIJ1PluginDirs(final boolean enable) {
+		enableIJ1PluginDirs = enable;
+	}
+
+	final private Collection<File> pluginClasspath = new LinkedHashSet<File>();
+	protected void addPluginClasspath(final File file) {
+		pluginClasspath.add(file);
+	}
 
 	/**
 	 * Extension point to add to ImageJ 1.x' PluginClassLoader's class path.
@@ -235,7 +242,7 @@ public abstract class LegacyHooks {
 	 */
 	public List<File> handleExtraPluginJars() {
 		final List<File> result = new ArrayList<File>();
-		result.addAll(_pluginClasspath);
+		result.addAll(pluginClasspath);
 		if (!enableIJ1PluginDirs) return result;
 		final String extraPluginDirs = System.getProperty("ij1.plugin.dirs");
 		if (extraPluginDirs != null) {
