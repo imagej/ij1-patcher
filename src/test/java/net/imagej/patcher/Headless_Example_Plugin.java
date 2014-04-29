@@ -29,7 +29,7 @@
  * #L%
  */
 
-package imagej.patcher;
+package net.imagej.patcher;
 
 import ij.gui.GenericDialog;
 import ij.io.SaveDialog;

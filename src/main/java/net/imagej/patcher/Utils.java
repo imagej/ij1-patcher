@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package imagej.patcher;
+package net.imagej.patcher;
 
 import java.io.File;
 import java.io.FileInputStream;

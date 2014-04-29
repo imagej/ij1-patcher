@@ -29,7 +29,7 @@
  * #L%
  */
 
-package imagej.patcher;
+package net.imagej.patcher;
 
 import java.awt.GraphicsEnvironment;
 import java.io.File;
@@ -46,7 +46,7 @@ import javassist.NotFoundException;
 /**
  * Overrides class behavior of ImageJ1 classes using bytecode manipulation. This
  * class uses the {@link CodeHacker} (which uses Javassist) to inject method
- * hooks, which are implemented in the {@link imagej.patcher} package.
+ * hooks, which are implemented in the {@link net.imagej.patcher} package.
  * 
  * @author Curtis Rueden
  */

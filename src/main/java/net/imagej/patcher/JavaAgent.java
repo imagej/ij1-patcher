@@ -29,7 +29,7 @@
  * #L%
  */
 
-package imagej.patcher;
+package net.imagej.patcher;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

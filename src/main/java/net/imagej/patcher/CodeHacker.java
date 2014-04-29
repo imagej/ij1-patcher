@@ -29,7 +29,7 @@
  * #L%
  */
 
-package imagej.patcher;
+package net.imagej.patcher;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -1285,7 +1285,7 @@ class CodeHacker {
 		final JarOutputStream jar = new JarOutputStream(new FileOutputStream(path));
 		final DataOutputStream dataOut = new DataOutputStream(jar);
 		for (final CtClass clazz : handledClasses) {
-			if (!clazz.isModified() && !clazz.getName().startsWith("imagej.patcher.")) continue;
+			if (!clazz.isModified() && !clazz.getName().startsWith("net.imagej.patcher.")) continue;
 			final ZipEntry entry =
 				new ZipEntry(clazz.getName().replace('.', '/') + ".class");
 			jar.putNextEntry(entry);
@@ -1329,7 +1329,7 @@ class CodeHacker {
 			dataOut.flush();
 		}
 		for (final CtClass clazz : handledClasses) {
-			if (!clazz.isModified() && !clazz.getName().startsWith("imagej.patcher.")) continue;
+			if (!clazz.isModified() && !clazz.getName().startsWith("net.imagej.patcher.")) continue;
 			final ZipEntry entry =
 				new ZipEntry(clazz.getName().replace('.', '/') + ".class");
 			jar.putNextEntry(entry);

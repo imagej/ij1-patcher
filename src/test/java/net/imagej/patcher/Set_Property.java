@@ -29,41 +29,35 @@
  * #L%
  */
 
-package imagej.patcher.debug;
+package net.imagej.patcher;
 
-import imagej.patcher.HeadlessCompletenessTest;
-
-import java.awt.Menu;
-import java.awt.MenuItem;
+import ij.gui.GenericDialog;
+import ij.plugin.PlugIn;
 
 /**
- * A helper class to catch problems with the {@link HeadlessCompletenessTest}.
+ * A simple plugin to test the legacy service.
+ * 
+ * <p>
+ * Since regular plugins do not return anything, the quickest way to test that a
+ * plugin ran alright found by this developer is to set a system property,
+ * specified via a {@link GenericDialog}.
+ * </p>
  * 
  * @author Johannes Schindelin
  */
-public class MenuForDebugging extends Menu {
-	private static final long serialVersionUID = 1L;
-	final String lookingFor = "*32-bit";
-
-	public MenuForDebugging(final String label) {
-		super(label);
-	}
+public class Set_Property implements PlugIn {
 
 	@Override
-	public MenuItem add(final MenuItem item) {
-		adding(item.getLabel());
-		return super.add(item);
+	public void run(final String arg) {
+		final GenericDialog gd = new GenericDialog("Set Property");
+		gd.addStringField("key", "hello");
+		gd.addStringField("value", "world");
+		gd.showDialog();
+		if (gd.wasCanceled()) return;
+
+		final String key = gd.getNextString();
+		final String value = gd.getNextString();
+		System.setProperty(key, value);
 	}
 
-	@Override
-	public void add(String label) {
-		adding(label);
-		super.add(label);
-	}
-
-	private void adding(final String label) {
-		if (label != null && label.contains(lookingFor)) {
-			System.err.println("Adding " + label);
-		}
-	}
 }

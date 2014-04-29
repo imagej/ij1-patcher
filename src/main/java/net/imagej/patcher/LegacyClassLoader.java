@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package imagej.patcher;
+package net.imagej.patcher;
 
 import ij.ImagePlus;
 
