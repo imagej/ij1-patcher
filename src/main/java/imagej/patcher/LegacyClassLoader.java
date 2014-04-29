@@ -59,18 +59,7 @@ public class LegacyClassLoader extends URLClassLoader {
 	LegacyClassLoader(final boolean headless, final LegacyInjector injector) throws ClassNotFoundException {
 		super(getImageJ1Jar(), determineParent());
 		final ClassLoader loader = this;
-		final Thread thread = new Thread() {
-			public void run() {
-				setContextClassLoader(loader);
-				injector.injectHooks(loader, headless);
-			}
-		};
-		thread.start();
-		try {
-			thread.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		injector.injectHooks(loader, headless);
 	}
 
 	@Override
