@@ -65,4 +65,33 @@ public class HelpfulExceptionTracesTest {
 			assertTrue(writer.toString().contains("this does not compile"));
 		}
 	}
+
+	@Test
+	public void testInvocationTargetException() throws Exception {
+		final LegacyInjector injector = new LegacyInjector();
+		injector.after.add(new Callback() {
+
+			@Override
+			public void call(final CodeHacker hacker) {
+				hacker
+					.insertAtTopOfMethod(
+						"ij.IJ",
+						"public static void run(java.lang.String command, java.lang.String options)",
+						"throw new NullPointerException(\"must fail!\");");
+			}
+		});
+
+		final LegacyEnvironment ij1 = new LegacyEnvironment(null, true, injector);
+		try {
+			ij1.run("", "");
+			assertTrue(false);
+		}
+		catch (final RuntimeException e) {
+			final StringWriter writer = new StringWriter();
+			final PrintWriter out = new PrintWriter(writer);
+			e.printStackTrace(out);
+			out.close();
+			assertTrue(writer.toString().contains("must fail!"));
+		}
+	}
 }
