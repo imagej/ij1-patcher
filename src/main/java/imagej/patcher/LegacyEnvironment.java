@@ -162,7 +162,7 @@ public class LegacyEnvironment {
 	 */
 	public void addPluginClasspath(final ClassLoader fromClassLoader) {
 		if (fromClassLoader == null) return;
-		initialize();
+		ensureUninitialized();
 		for (ClassLoader loader = fromClassLoader; loader != null; loader =
 			loader.getParent())
 		{
@@ -245,17 +245,22 @@ public class LegacyEnvironment {
 	 *          plugins
 	 */
 	public void addPluginClasspath(final File... classpathEntries) {
-		initialize();
-		try {
-			final LegacyHooks hooks =
-				(LegacyHooks) loader.loadClass("ij.IJ").getField("_hooks").get(null);
-			for (final File file : classpathEntries) {
-				hooks._pluginClasspath.add(file);
+		if (classpathEntries.length == 0) return;
+		ensureUninitialized();
+
+		final StringBuilder builder = new StringBuilder();
+		for (final File file : classpathEntries) {
+			builder.append("addPluginClasspath(new java.io.File(\"").append(file.getPath()).append("\"));");
+		}
+
+		injector.after.add(new Callback() {
+			@Override
+			public void call(final CodeHacker hacker) {
+				hacker.insertAtBottomOfMethod(EssentialLegacyHooks.class.getName(),
+					"public <init>()",
+					builder.toString());
 			}
-		}
-		catch (final Exception e) {
-			throw new RuntimeException(e);
-		}
+		});
 	}
 
 	/**
