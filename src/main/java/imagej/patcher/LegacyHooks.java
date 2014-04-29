@@ -431,19 +431,21 @@ public abstract class LegacyHooks {
 	}
 
 	/**
-	 * Optionally override opening images via legacy hooks.
+	 * Optionally override opening resources via legacy hooks.
 	 * <p>
 	 * This is intended as a "HandleExtraFileTypesPlus".
 	 * </p>
 	 * 
-	 * @param path
-	 *            the path to the image, or {@code null} if a dialog needs to be
-	 *            shown
-	 * @param sliceIndex
-	 *            the index of the single slice to open, or -1 for all slices
-	 * @return an image, or {@code null} to let ImageJ 1.x open the image
+	 * @param path the path to the resource to open, or {@code null} if a dialog
+	 *          needs to be shown
+	 * @param planeIndex
+	 *            If applicable - the index of plane to open or -1 for all planes
+	 * @param display
+	 *            if true, the opened object should be displayed before returning
+	 * @return The opened object, or {@code null} to let ImageJ 1.x open the path.
 	 */
-	public Object interceptOpenImage(final String path, final int sliceIndex) {
+	public Object interceptOpen(final String path, final int planeIndex,
+		final boolean display) {
 		return null;
 	}
 }
