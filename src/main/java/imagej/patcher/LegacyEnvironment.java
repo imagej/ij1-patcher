@@ -157,7 +157,15 @@ public class LegacyEnvironment {
 		for (ClassLoader loader = fromClassLoader; loader != null; loader =
 			loader.getParent())
 		{
-			if (loader == this.loader || loader == this.loader.getParent()) {
+			if (loader == this.loader) {
+				break;
+			}
+			if (this.loader != null && loader == this.loader.getParent()) {
+				break;
+			}
+			if (this.loader == null &&
+				loader == getClass().getClassLoader().getParent())
+			{
 				break;
 			}
 			if (!(loader instanceof URLClassLoader)) {
