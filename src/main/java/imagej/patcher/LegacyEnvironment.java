@@ -265,6 +265,7 @@ public class LegacyEnvironment {
 	 *          {@link #runPlugIn(String, String)}
 	 */
 	public void setMacroOptions(final String options) {
+		initialize();
 		try {
 			setOptions.invoke(null, options);
 		}
