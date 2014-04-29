@@ -55,31 +55,28 @@ import javassist.CtClass;
  * @author Johannes Schindelin
  */
 class InjectorForDebugging extends LegacyInjector {
-	final static Callback callback = new Callback() {
-
-		@Override
-		public void before(final CodeHacker hacker) {
-			hacker.loadClass(hacker.getClass(MenuForDebugging.class.getName()));
-		}
-
-		@Override
-		public void after(final CodeHacker hacker) {
-			try {
-				final CodeConverter converter = new CodeConverter();
-				converter.replaceNew(hacker.getClass(Menu.class.getName()),
-						hacker.getClass(MenuForDebugging.class.getName()));
-				for (final CtClass clazz : hacker.getPatchedClasses()) {
-					clazz.instrument(converter);
-				}
-			} catch (CannotCompileException e) {
-				e.printStackTrace();
+	{
+		before.add(new Callback() {
+			@Override
+			public void call(final CodeHacker hacker) {
+				hacker.loadClass(hacker.getClass(MenuForDebugging.class.getName()));
 			}
-		}
-	};
+		});
 
-	@Override
-	public void injectHooks(final ClassLoader loader, final boolean headless) {
-		injectHooks(loader, headless, callback);
+		after.add(new Callback() {
+			@Override
+			public void call(final CodeHacker hacker) {
+				try {
+					final CodeConverter converter = new CodeConverter();
+					converter.replaceNew(hacker.getClass(Menu.class.getName()),
+							hacker.getClass(MenuForDebugging.class.getName()));
+					for (final CtClass clazz : hacker.getPatchedClasses()) {
+						clazz.instrument(converter);
+					}
+				} catch (CannotCompileException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
-
 }

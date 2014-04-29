@@ -37,6 +37,8 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javassist.ClassPool;
 import javassist.NotFoundException;
@@ -65,6 +67,13 @@ public class LegacyInjector {
 		injectHooks(classLoader, GraphicsEnvironment.isHeadless());
 	}
 
+	interface Callback {
+		void call(CodeHacker hacker);
+	}
+
+	List<Callback> before = new ArrayList<Callback>();
+	List<Callback> after = new ArrayList<Callback>();
+
 	/**
 	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
 	 * 
@@ -72,20 +81,13 @@ public class LegacyInjector {
 	 * @param headless whether to include headless patches
 	 */
 	public void injectHooks(final ClassLoader classLoader, boolean headless) {
-		injectHooks(classLoader, headless, null);
-	}
-
-	interface Callback {
-		void before(CodeHacker hacker);
-		void after(CodeHacker hacker);
-	}
-
-	void injectHooks(final ClassLoader classLoader, boolean headless, final Callback callback) {
 		if (alreadyPatched(classLoader)) return;
 
-		final CodeHacker hacker = inject(classLoader, headless, callback);
+		final CodeHacker hacker = inject(classLoader, headless);
 
-		if (callback != null) callback.after(hacker);
+		for (final Callback callback : after) {
+			callback.call(hacker);
+		}
 
 		// commit patches
 		hacker.loadClasses();
@@ -99,11 +101,13 @@ public class LegacyInjector {
 	 * @return the CodeHacker instance for further patching or .jar writing
 	 */
 	private CodeHacker inject(final ClassLoader classLoader,
-			final boolean headless, final Callback callback) {
+			final boolean headless) {
 		final CodeHacker hacker = new CodeHacker(classLoader, new ClassPool(false));
 		if (hacker.hasField("ij.IJ", "_hooks")) return hacker; // pre-patched
 
-		if (callback != null) callback.before(hacker);
+		for (final Callback callback : before) {
+			callback.call(hacker);
+		}
 
 		// NB: Override class behavior before class loading gets too far along.
 		hacker.insertPublicStaticField("ij.IJ", LegacyHooks.class, "_hooks", null);
@@ -274,7 +278,7 @@ public class LegacyInjector {
 		}
 		final LegacyInjector injector = new LegacyInjector();
 		final ClassLoader loader = new LegacyClassLoader(headless);
-		final CodeHacker hacker = injector.inject(loader, headless, null);
+		final CodeHacker hacker = injector.inject(loader, headless);
 		if (!fullIJJar) {
 			hacker.writeJar(outputJar);
 		}
