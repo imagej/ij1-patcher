@@ -250,7 +250,8 @@ public class LegacyEnvironment {
 
 		final StringBuilder builder = new StringBuilder();
 		for (final File file : classpathEntries) {
-			builder.append("addPluginClasspath(new java.io.File(\"").append(file.getPath()).append("\"));");
+			final String quoted = file.getPath().replaceAll("[\\\"\\\\]", "\\\\$0").replaceAll("\n", "\\n");
+			builder.append("addPluginClasspath(new java.io.File(\"").append(quoted).append("\"));");
 		}
 
 		injector.after.add(new Callback() {
