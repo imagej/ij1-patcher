@@ -433,7 +433,7 @@ public abstract class LegacyHooks {
 	 *          needs to be shown
 	 * @param planeIndex
 	 *            If applicable - the index of plane to open or -1 for all planes
-	 * @param displayResult
+	 * @param display
 	 *            if true, the opened object should be displayed before returning
 	 * @return The opened object, or {@code null} to let ImageJ 1.x open the path.
 	 */
