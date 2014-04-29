@@ -29,9 +29,7 @@
  * #L%
  */
 
-package imagej.patcher;
-
-import imagej.patcher.LegacyInjector.Callback;
+package net.imagej.patcher;
 
 import java.awt.GraphicsEnvironment;
 import java.io.File;
@@ -47,6 +45,8 @@ import java.util.Map;
 import java.util.jar.Attributes.Name;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+
+import net.imagej.patcher.LegacyInjector.Callback;
 
 /**
  * Encapsulates an ImageJ 1.x "instance".

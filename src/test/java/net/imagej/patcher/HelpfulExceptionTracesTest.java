@@ -28,55 +28,71 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package imagej.patcher;
 
-import imagej.patcher.debug.MenuForDebugging;
+package net.imagej.patcher;
 
-import java.awt.Menu;
+import static org.junit.Assert.assertTrue;
 
-import javassist.CannotCompileException;
-import javassist.CodeConverter;
-import javassist.CtClass;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
-/**
- * A {@link LegacyInjector} intended to debug problems with newer ImageJ 1.x versions 
- * <p>
- * Every once in a while, there are problems with new ImageJ 1.x releases, in
- * particular with the finicky menu structure (there are at least fifteen different
- * code paths adding menu items as of ImageJ 1.48v, most of which do not work at all
- * in headless mode).
- * </p>
- * <p>
- * This class is intended to help with debugging by overriding the AWT Menu instances
- * with instances of a custom subclass in which we can set a breakpoint when specific
- * menu items are added.
- * </p> 
- * 
- * @author Johannes Schindelin
- */
-class InjectorForDebugging extends LegacyInjector {
-	{
-		before.add(new Callback() {
+import net.imagej.patcher.LegacyInjector.Callback;
+
+import org.junit.Test;
+
+public class HelpfulExceptionTracesTest {
+
+	@Test
+	public void testHelpfulTrace() throws Exception {
+		final LegacyInjector injector = new LegacyInjector();
+		injector.after.add(new Callback() {
+
 			@Override
 			public void call(final CodeHacker hacker) {
-				hacker.loadClass(hacker.getClass(MenuForDebugging.class.getName()));
+				hacker.addToClassInitializer("ij.IJ", "this does not compile");
 			}
 		});
 
-		after.add(new Callback() {
+		final LegacyEnvironment ij1 = new LegacyEnvironment(null, true, injector);
+		try {
+			ij1.setMacroOptions("");
+			assertTrue(false);
+		}
+		catch (final RuntimeException e) {
+			final StringWriter writer = new StringWriter();
+			final PrintWriter out = new PrintWriter(writer);
+			e.printStackTrace(out);
+			out.close();
+			assertTrue(writer.toString().contains("this does not compile"));
+		}
+	}
+
+	@Test
+	public void testInvocationTargetException() throws Exception {
+		final LegacyInjector injector = new LegacyInjector();
+		injector.after.add(new Callback() {
+
 			@Override
 			public void call(final CodeHacker hacker) {
-				try {
-					final CodeConverter converter = new CodeConverter();
-					converter.replaceNew(hacker.getClass(Menu.class.getName()),
-							hacker.getClass(MenuForDebugging.class.getName()));
-					for (final CtClass clazz : hacker.getPatchedClasses()) {
-						clazz.instrument(converter);
-					}
-				} catch (CannotCompileException e) {
-					e.printStackTrace();
-				}
+				hacker
+					.insertAtTopOfMethod(
+						"ij.IJ",
+						"public static void run(java.lang.String command, java.lang.String options)",
+						"throw new NullPointerException(\"must fail!\");");
 			}
 		});
+
+		final LegacyEnvironment ij1 = new LegacyEnvironment(null, true, injector);
+		try {
+			ij1.run("", "");
+			assertTrue(false);
+		}
+		catch (final RuntimeException e) {
+			final StringWriter writer = new StringWriter();
+			final PrintWriter out = new PrintWriter(writer);
+			e.printStackTrace(out);
+			out.close();
+			assertTrue(writer.toString().contains("must fail!"));
+		}
 	}
 }

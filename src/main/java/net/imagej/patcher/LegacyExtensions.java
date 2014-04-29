@@ -29,7 +29,7 @@
  * #L%
  */
 
-package imagej.patcher;
+package net.imagej.patcher;
 
 import java.util.HashSet;
 import java.util.Set;

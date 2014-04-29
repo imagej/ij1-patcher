@@ -28,36 +28,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+package net.imagej.patcher;
 
-package imagej.patcher;
+import java.awt.Menu;
 
-import ij.gui.GenericDialog;
-import ij.plugin.PlugIn;
+import javassist.CannotCompileException;
+import javassist.CodeConverter;
+import javassist.CtClass;
+import net.imagej.patcher.debug.MenuForDebugging;
 
 /**
- * A simple plugin to test the legacy service.
- * 
+ * A {@link LegacyInjector} intended to debug problems with newer ImageJ 1.x versions 
  * <p>
- * Since regular plugins do not return anything, the quickest way to test that a
- * plugin ran alright found by this developer is to set a system property,
- * specified via a {@link GenericDialog}.
+ * Every once in a while, there are problems with new ImageJ 1.x releases, in
+ * particular with the finicky menu structure (there are at least fifteen different
+ * code paths adding menu items as of ImageJ 1.48v, most of which do not work at all
+ * in headless mode).
  * </p>
+ * <p>
+ * This class is intended to help with debugging by overriding the AWT Menu instances
+ * with instances of a custom subclass in which we can set a breakpoint when specific
+ * menu items are added.
+ * </p> 
  * 
  * @author Johannes Schindelin
  */
-public class Set_Property implements PlugIn {
+class InjectorForDebugging extends LegacyInjector {
+	{
+		before.add(new Callback() {
+			@Override
+			public void call(final CodeHacker hacker) {
+				hacker.loadClass(hacker.getClass(MenuForDebugging.class.getName()));
+			}
+		});
 
-	@Override
-	public void run(final String arg) {
-		final GenericDialog gd = new GenericDialog("Set Property");
-		gd.addStringField("key", "hello");
-		gd.addStringField("value", "world");
-		gd.showDialog();
-		if (gd.wasCanceled()) return;
-
-		final String key = gd.getNextString();
-		final String value = gd.getNextString();
-		System.setProperty(key, value);
+		after.add(new Callback() {
+			@Override
+			public void call(final CodeHacker hacker) {
+				try {
+					final CodeConverter converter = new CodeConverter();
+					converter.replaceNew(hacker.getClass(Menu.class.getName()),
+							hacker.getClass(MenuForDebugging.class.getName()));
+					for (final CtClass clazz : hacker.getPatchedClasses()) {
+						clazz.instrument(converter);
+					}
+				} catch (CannotCompileException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
-
 }
