@@ -291,7 +291,7 @@ class LegacyExtensions {
 		overrideStartupMacrosForFiji(hacker);
 		handleMacAdapter(hacker);
 		handleMenuCallbacks(hacker, headless);
-		installOpenImageInterceptor(hacker);
+		installOpenInterceptor(hacker);
 	}
 
 	/**
@@ -665,7 +665,8 @@ class LegacyExtensions {
 		}
 	}
 
-	private static void installOpenImageInterceptor(CodeHacker hacker) {
+	private static void installOpenInterceptor(CodeHacker hacker) {
+		// Intercept ij.IJ open methods
 		// If the open method is intercepted, the hooks.interceptOpen method needs
 		// to perform any necessary display operations
 		hacker.insertAtTopOfMethod("ij.IJ",
