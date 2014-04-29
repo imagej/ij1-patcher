@@ -33,6 +33,8 @@ package imagej.patcher;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -321,4 +323,21 @@ class Utils {
 		throw new IllegalArgumentException("Invalid URL: " + url);
 	}
 
+	/**
+	 * Determines whether the current stack trace contains the specified string.
+	 * 
+	 * @param needles the text(s) to find
+	 * @return whether the stack trace contains the text
+	 */
+	static boolean stackTraceContains(String... needles) {
+		final StringWriter writer = new StringWriter();
+		final PrintWriter out = new PrintWriter(writer);
+		new Exception().printStackTrace(out);
+		out.close();
+		final String haystack = writer.toString();
+		for (final String needle : needles) {
+			if (haystack.contains(needle)) return true;
+		}
+		return false;
+	}
 }
