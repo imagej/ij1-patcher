@@ -225,7 +225,11 @@ public abstract class LegacyHooks {
 		return false;
 	}
 
-	public boolean enableIJ1PluginDirs = true;
+	private boolean enableIJ1PluginDirs = true;
+	protected void enableIJ1PluginDirs(final boolean enable) {
+		enableIJ1PluginDirs = enable;
+	}
+
 	final public Collection<File> _pluginClasspath = new LinkedHashSet<File>();
 
 	/**

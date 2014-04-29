@@ -31,6 +31,8 @@
 
 package imagej.patcher;
 
+import imagej.patcher.LegacyInjector.Callback;
+
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
@@ -134,7 +136,14 @@ public class LegacyEnvironment {
 
 	public void disableIJ1PluginDirs() {
 		ensureUninitialized();
-		injector.disableIJ1PluginDirsHandling();
+		injector.after.add(new Callback() {
+			@Override
+			public void call(final CodeHacker hacker) {
+				hacker.insertAtBottomOfMethod(EssentialLegacyHooks.class.getName(),
+					"public <init>()",
+					"enableIJ1PluginDirs(false);");
+			}
+		});
 	}
 
 	/**
