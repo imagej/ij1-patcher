@@ -150,9 +150,9 @@ public class LegacyInjector {
 			"public static void showStatus(java.lang.String status)",
 			"ij.IJ._hooks.showStatus($1);");
 		hacker.insertAtTopOfMethod("ij.IJ",
-				"public static Object runPlugIn(java.lang.String className, java.lang.String arg)",
+				"public static Object runPlugIn(java.lang.String commandName, java.lang.String className, java.lang.String arg)",
 				" if (classLoader != null) Thread.currentThread().setContextClassLoader(classLoader);"
-				+ "Object o = _hooks.interceptRunPlugIn($1, $2);"
+				+ "Object o = _hooks.interceptRunPlugIn($2, $3);"
 				+ "if (o != null) return o;"
 				+ "if (\"ij.IJ.init\".equals($1)) {"
 				+ " ij.IJ.init();"
