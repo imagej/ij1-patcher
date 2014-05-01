@@ -78,6 +78,7 @@ import javassist.expr.FieldAccess;
 import javassist.expr.Handler;
 import javassist.expr.MethodCall;
 import javassist.expr.NewExpr;
+import net.imagej.patcher.JavaAgent;
 
 /**
  * The code hacker provides a mechanism for altering the behavior of classes
