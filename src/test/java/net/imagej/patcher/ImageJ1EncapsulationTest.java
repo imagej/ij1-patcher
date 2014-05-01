@@ -79,6 +79,8 @@ public class ImageJ1EncapsulationTest {
 		final Set<String> exceptions = new HashSet<String>();
 		exceptions.add(EssentialLegacyHooks.class.getName());
 		exceptions.add(HeadlessGenericDialog.class.getName());
+		exceptions.add(imagej.patcher.EssentialLegacyHooks.class.getName());
+		exceptions.add(imagej.patcher.HeadlessGenericDialog.class.getName());
 
 		final URL directory = Utils.getLocation(Utils.class);
 		final int prefixLength = directory.toString().length();
