@@ -29,7 +29,9 @@
  * #L%
  */
 
-package net.imagej.patcher;
+package imagej.patcher;
+
+import imagej.patcher.LegacyInjector.Callback;
 
 import java.awt.GraphicsEnvironment;
 import java.io.File;
@@ -46,8 +48,6 @@ import java.util.jar.Attributes.Name;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
-import net.imagej.patcher.LegacyInjector.Callback;
-
 /**
  * Encapsulates an ImageJ 1.x "instance".
  * <p>
@@ -58,6 +58,7 @@ import net.imagej.patcher.LegacyInjector.Callback;
  * 
  * @author "Johannes Schindelin"
  */
+@Deprecated
 public class LegacyEnvironment {
 
 	final private boolean headless;
@@ -99,10 +100,12 @@ public class LegacyEnvironment {
 	private synchronized void initialize() {
 		if (isInitialized()) return;
 		initializationStackTrace = new Throwable("Initialized here:");
+		if (loader != null) {
+			injector.injectHooks(loader, headless);
+		}
 		try {
 			this.loader =
-				loader != null ? loader : new LegacyClassLoader();
-			injector.injectHooks(loader, headless);
+				loader != null ? loader : new LegacyClassLoader(headless, injector);
 			final Class<?> ij = this.loader.loadClass("ij.IJ");
 			final Class<?> imagej = this.loader.loadClass("ij.ImageJ");
 			final Class<?> macro = this.loader.loadClass("ij.Macro");

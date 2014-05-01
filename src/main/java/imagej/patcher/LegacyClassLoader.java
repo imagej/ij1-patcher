@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package net.imagej.patcher;
+package imagej.patcher;
 
 import ij.ImagePlus;
 
@@ -46,6 +46,7 @@ import java.security.ProtectionDomain;
  * 
  * @author Johannes Schindelin
  */
+@Deprecated
 public class LegacyClassLoader extends URLClassLoader {
 	private final Class<?>[] knownClasses = new Class<?>[] {
 		LegacyHooks.class, LegacyHooks.FatJarNameComparator.class, EssentialLegacyHooks.class, HeadlessGenericDialog.class
@@ -53,12 +54,13 @@ public class LegacyClassLoader extends URLClassLoader {
 	private final int sharedClassCount = 2;
 
 	public LegacyClassLoader(final boolean headless) throws ClassNotFoundException {
-		this();
-		new LegacyInjector().injectHooks(this, headless);
+		this(headless, new LegacyInjector());
 	}
 
-	public LegacyClassLoader() throws ClassNotFoundException {
+	LegacyClassLoader(final boolean headless, final LegacyInjector injector) throws ClassNotFoundException {
 		super(getImageJ1Jar(), determineParent());
+		final ClassLoader loader = this;
+		injector.injectHooks(loader, headless);
 	}
 
 	@Override

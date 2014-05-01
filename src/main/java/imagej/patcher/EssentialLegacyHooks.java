@@ -29,7 +29,7 @@
  * #L%
  */
 
-package net.imagej.patcher;
+package imagej.patcher;
 
 import ij.IJ;
 
@@ -48,7 +48,7 @@ import java.util.Set;
  * installed by default after patching in the extension points into ImageJ 1.x.
  * On its own, it does not allow to override the extension points (such as the
  * editor) with different implementations; one needs to install different hooks using
- * the {@link net.imagej.patcher.CodeHacker#installHooks(LegacyHooks)} method.
+ * the {@link imagej.patcher.CodeHacker#installHooks(LegacyHooks)} method.
  * </p>
  * </p>
  * This class is also the perfect base class for all implementations of the
@@ -58,6 +58,7 @@ import java.util.Set;
  * 
  * @author Johannes Schindelin
  */
+@Deprecated
 public class EssentialLegacyHooks extends LegacyHooks {
 
 	/** @inherit */
@@ -180,16 +181,23 @@ public class EssentialLegacyHooks extends LegacyHooks {
 					// "Something" failed... Darn.
 					t.printStackTrace();
 
-					// Try again, with the bare minimum of services: DefaultLegacyService and friends
+					// Try again, with the bare minimum of services: DefaultLegacyService
+					// and friends
 					Class<?> legacyServiceClass;
 					try {
-						legacyServiceClass = IJ.getClassLoader().loadClass("net.imagej.legacy.DefaultLegacyService");
+						legacyServiceClass =
+							IJ.getClassLoader().loadClass(
+								"net.imagej.legacy.DefaultLegacyService");
 					}
 					catch (Throwable t2) {
-						legacyServiceClass = IJ.getClassLoader().loadClass("imagej.legacy.DefaultLegacyService");
+						legacyServiceClass =
+							IJ.getClassLoader().loadClass(
+								"imagej.legacy.DefaultLegacyService");
 					}
-					Constructor<?> ctor = contextClass.getConstructor((Class<?>) Class[].class);
-					return ctor.newInstance((Object) new Class<?>[] { legacyServiceClass });
+					Constructor<?> ctor =
+						contextClass.getConstructor((Class<?>) Class[].class);
+					return ctor
+						.newInstance((Object) new Class<?>[] { legacyServiceClass });
 				}
 			}
 			catch (Throwable t) {
