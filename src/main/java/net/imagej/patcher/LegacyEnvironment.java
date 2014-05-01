@@ -99,12 +99,10 @@ public class LegacyEnvironment {
 	private synchronized void initialize() {
 		if (isInitialized()) return;
 		initializationStackTrace = new Throwable("Initialized here:");
-		if (loader != null) {
-			injector.injectHooks(loader, headless);
-		}
 		try {
 			this.loader =
-				loader != null ? loader : new LegacyClassLoader(headless, injector);
+				loader != null ? loader : new LegacyClassLoader();
+			injector.injectHooks(loader, headless);
 			final Class<?> ij = this.loader.loadClass("ij.IJ");
 			final Class<?> imagej = this.loader.loadClass("ij.ImageJ");
 			final Class<?> macro = this.loader.loadClass("ij.Macro");
