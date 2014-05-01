@@ -35,6 +35,7 @@ import ij.IJ;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
@@ -142,4 +143,69 @@ public class EssentialLegacyHooks extends LegacyHooks {
 			t.printStackTrace();
 		}
 	}
+
+	/**
+	 * Intercepts LegacyInitializer's Context creation.
+	 * <p>
+	 * One of the most critical code paths in <a href="http://fiji.sc/">Fiji</a>
+	 * is how its runtime patches get installed. It calls the
+	 * {@link LegacyEnvironment}, of course, but the idea is for said environment
+	 * to install the essential {@link LegacyHooks} which then give ImageJ's
+	 * DefaultLegacyService a chance to spin up all of the legacy patches,
+	 * including Fiji's (which are add-ons on top of {@code imagej-legacy}).
+	 * </p>
+	 * <p>
+	 * If this critical code path fails, Fiji fails to start up properly. Ideally,
+	 * this should never happen, but this is not an ideal world: corrupt
+	 * {@code .jar} files and version skews caused by forgotten updates,
+	 * locally-modified files or simply by forward-incompatible downstream updates
+	 * can break any number of things in that path. So let's bend over another
+	 * inch (the existence of the {@code ij1-patcher} speaks volumes about our
+	 * learned ability to do so) and try extra hard to keep things working even
+	 * under very unfavorable circumstances.
+	 * </p>
+	 * 
+	 * @param className the class name
+	 * @param arg the argument passed to the {@code runPlugIn} method
+	 * @return the object to return, or null to let ImageJ 1.x handle the call
+	 */
+	@Override
+	public Object interceptRunPlugIn(final String className, final String arg) {
+		if ("org.scijava.Context".equals(className)) {
+			try {
+				final Class<?> contextClass = IJ.getClassLoader().loadClass(className);
+				try {
+					return contextClass.newInstance();
+				}
+				catch (Throwable t) {
+					// "Something" failed... Darn.
+					t.printStackTrace();
+
+					// Try again, with the bare minimum of services: DefaultLegacyService
+					// and friends
+					Class<?> legacyServiceClass;
+					try {
+						legacyServiceClass =
+							IJ.getClassLoader().loadClass(
+								"net.imagej.legacy.DefaultLegacyService");
+					}
+					catch (Throwable t2) {
+						legacyServiceClass =
+							IJ.getClassLoader().loadClass(
+								"imagej.legacy.DefaultLegacyService");
+					}
+					Constructor<?> ctor =
+						contextClass.getConstructor((Class<?>) Class[].class);
+					return ctor
+						.newInstance((Object) new Class<?>[] { legacyServiceClass });
+				}
+			}
+			catch (Throwable t) {
+				t.printStackTrace();
+				System.err.println("Giving up to create a SciJava Context!");
+			}
+		}
+		return null;
+	}
+
 }
