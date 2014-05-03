@@ -117,9 +117,12 @@ public class FatJarTest {
 		if (!jars.list()[0].equals("batik.jar")) {
 			System.err.println("first entry is " + jars.list()[0]);
 			// if not, make it so!
-			assertTrue(new File(jars, "batik.jar").renameTo(new File(jars, "xalaa.jar")));
+			assertTrue(new File(jars, "batik.jar").renameTo(new File(jars, "xalax.jar")));
 			assertTrue(new File(jars, "xalan.jar").renameTo(new File(jars, "batik.jar")));
 			System.err.println("Now, first entry is " + jars.list()[0]);
+			if (!jars.list()[0].equals("batik.jar")) {
+				assertTrue(new File(jars, "xalax.jar").renameTo(new File(jars, "xalaa.jar")));
+			}
 			assertTrue(jars.list()[0].equals("batik.jar"));
 			expect = "1";
 		}
