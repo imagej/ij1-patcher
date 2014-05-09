@@ -330,6 +330,10 @@ public abstract class LegacyHooks {
 		addPluginDirectory(final File directory, final String[] names)
 	{
 		if (names != null) {
+			/*
+			Note that this code is replicated in imagej-launcher's ClassLoaderPlus
+			class. Improvements to this Pattern string should also be mirrored there.
+			*/
 			final Pattern pattern =
 				Pattern.compile("(batik|jython|jruby)(-[0-9].*)?\\.jar");
 			Arrays.sort(names, new FatJarNameComparator(pattern));
@@ -337,6 +341,11 @@ public abstract class LegacyHooks {
 		return names;
 	}
 
+	/**
+	 * Comparator to ensure that problematic fat JARs are sorted <em>last</em>.
+	 * It is intended to be used with a {@link Pattern} that filters things this
+	 * way.
+	 */
 	public final static class FatJarNameComparator implements Comparator<String> {
 
 		private final Pattern pattern;
