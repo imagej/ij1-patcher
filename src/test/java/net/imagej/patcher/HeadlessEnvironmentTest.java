@@ -145,13 +145,16 @@ public class HeadlessEnvironmentTest {
 					Headless_Example_Plugin.class.getName(), arg).toString();
 			assertEquals(expectedValue, value);
 			return true;
-		} catch (final Throwable t) {
+		} catch (Throwable t) {
 			if (t instanceof Error) {
 				throw (Error) t;
 			}
-			if (!(t instanceof InvocationTargetException)
-					|| t.getCause() == null
-					|| !(t.getCause() instanceof HeadlessException)) {
+			while ((t instanceof InvocationTargetException || t instanceof RuntimeException) &&
+				t.getCause() != null)
+			{
+				t = t.getCause();
+			}
+			if (!(t instanceof HeadlessException)) {
 				t.printStackTrace();
 			}
 			return false;
