@@ -92,7 +92,8 @@ public class HeadlessCompletenessTest {
 	@After
 	public void after() {
 		if (threadName != null) Thread.currentThread().setName(threadName);
-		if (threadLoader != null) Thread.currentThread().setContextClassLoader(threadLoader);
+		if (threadLoader != null) Thread.currentThread().setContextClassLoader(
+			threadLoader);
 		if (tmpDir != null && tmpDir.isDirectory()) {
 			TestUtils.deleteRecursively(tmpDir);
 		}
@@ -118,27 +119,24 @@ public class HeadlessCompletenessTest {
 
 		// these do not need to be overridden
 		for (final String name : new String[] {
-				"actionPerformed(java.awt.event.ActionEvent)",
-				"adjustmentValueChanged(java.awt.event.AdjustmentEvent)",
-				"getInsets(int,int,int,int)",
-				"getValue(java.lang.String)",
-				"isMatch(java.lang.String,java.lang.String)",
-				"itemStateChanged(java.awt.event.ItemEvent)",
-				"keyPressed(java.awt.event.KeyEvent)",
-				"keyReleased(java.awt.event.KeyEvent)",
-				"keyTyped(java.awt.event.KeyEvent)",
-				"paint(java.awt.Graphics)",
-				"parseDouble(java.lang.String)",
-				"setCancelLabel(java.lang.String)",
-				"textValueChanged(java.awt.event.TextEvent)",
-				"windowActivated(java.awt.event.WindowEvent)",
-				"windowClosed(java.awt.event.WindowEvent)",
-				"windowClosing(java.awt.event.WindowEvent)",
-				"windowDeactivated(java.awt.event.WindowEvent)",
-				"windowDeiconified(java.awt.event.WindowEvent)",
-				"windowIconified(java.awt.event.WindowEvent)",
-				"windowOpened(java.awt.event.WindowEvent)"
-		}) {
+			"actionPerformed(java.awt.event.ActionEvent)",
+			"adjustmentValueChanged(java.awt.event.AdjustmentEvent)",
+			"getInsets(int,int,int,int)", "getValue(java.lang.String)",
+			"isMatch(java.lang.String,java.lang.String)",
+			"itemStateChanged(java.awt.event.ItemEvent)",
+			"keyPressed(java.awt.event.KeyEvent)",
+			"keyReleased(java.awt.event.KeyEvent)",
+			"keyTyped(java.awt.event.KeyEvent)", "paint(java.awt.Graphics)",
+			"parseDouble(java.lang.String)", "setCancelLabel(java.lang.String)",
+			"textValueChanged(java.awt.event.TextEvent)",
+			"windowActivated(java.awt.event.WindowEvent)",
+			"windowClosed(java.awt.event.WindowEvent)",
+			"windowClosing(java.awt.event.WindowEvent)",
+			"windowDeactivated(java.awt.event.WindowEvent)",
+			"windowDeiconified(java.awt.event.WindowEvent)",
+			"windowIconified(java.awt.event.WindowEvent)",
+			"windowOpened(java.awt.event.WindowEvent)" })
+		{
 			methods.put(name, null);
 		}
 
@@ -207,11 +205,13 @@ public class HeadlessCompletenessTest {
 		final Map<String, String> menuItems =
 			new LinkedHashMap<String, String>(headlessIJ1.getMenuStructure());
 
-		assertTrue("does not have 'Set Property'", menuItems.containsKey("Plugins>Set Property"));
+		assertTrue("does not have 'Set Property'", menuItems
+			.containsKey("Plugins>Set Property"));
 
 		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment(false, false);
 		ij1.addPluginClasspath(jarFile);
-		final Frame ij1Frame = construct(ij1.getClassLoader(), "ij.ImageJ", ImageJ.NO_SHOW);
+		final Frame ij1Frame =
+			construct(ij1.getClassLoader(), "ij.ImageJ", ImageJ.NO_SHOW);
 		final MenuBar menuBar = ij1Frame.getMenuBar();
 
 		final Hashtable<String, String> commands =
@@ -241,7 +241,7 @@ public class HeadlessCompletenessTest {
 				assertTrue("Not found: " + menuPath2, menuItems.containsKey(menuPath2));
 				menuItems.remove(menuPath2);
 			}
-			else if (!menuPath.startsWith("File>Open Recent>")){
+			else if (!menuPath.startsWith("File>Open Recent>")) {
 				assertTrue("Not found: " + menuPath, menuItems.containsKey(menuPath));
 				assertEquals("Command for menu path: " + menuPath, commands.get(label),
 					menuItems.get(menuPath));
