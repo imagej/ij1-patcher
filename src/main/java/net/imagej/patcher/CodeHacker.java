@@ -545,6 +545,17 @@ class CodeHacker {
 					}
 				});
 			letSuperclassMethodsOverride(clazz);
+
+			// stub'ify remaining methods
+			for (CtMethod method : clazz.getMethods()) {
+				if (method.getDeclaringClass() == clazz &&
+					!method.getName().startsWith("narf"))
+				{
+					final CtMethod stub = makeStubMethod(clazz, method);
+					method.setBody(stub, null);
+				}
+			}
+
 			addMissingMethods(clazz, originalSuperclass);
 		}
 		catch (final Throwable e) {
