@@ -33,6 +33,7 @@ package net.imagej.patcher;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import ij.Macro;
@@ -130,6 +131,16 @@ public class HeadlessEnvironmentTest {
 		runExamplePlugin(true, "BooleanParameter", "key=[This is the key!] key=1", "This is the key! false");
 		runExamplePlugin(true, "BooleanParameter", "key=[This is the key!] key1", "This is the key! false");
 		runExamplePlugin(true, "BooleanParameter", "key=[This is the next key!]", "This is the next key! false");
+	}
+
+	@Test
+	public void testIJInit() throws Exception {
+		final LegacyEnvironment ij1 = new LegacyEnvironment(null, true);
+		final ClassLoader loader = ij1.getClassLoader();
+		final Method runPlugIn = loader.loadClass("ij.IJ").getMethod("runPlugIn", String.class, String.class);
+		runPlugIn.invoke(null, "ij.IJ.init", "");
+		final Method getCommands = loader.loadClass("ij.Menus").getMethod("getCommands");
+		assertNotNull(getCommands.invoke(null));
 	}
 
 	private static boolean runExampleDialogPlugin(final boolean patchHeadless) throws Exception {
