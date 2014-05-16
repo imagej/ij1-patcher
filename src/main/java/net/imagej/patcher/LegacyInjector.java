@@ -154,7 +154,7 @@ public class LegacyInjector {
 				" if (classLoader != null) Thread.currentThread().setContextClassLoader(classLoader);"
 				+ "Object o = _hooks.interceptRunPlugIn($2, $3);"
 				+ "if (o != null) return o;"
-				+ "if (\"ij.IJ.init\".equals($1)) {"
+				+ "if (\"ij.IJ.init\".equals($2)) {"
 				+ " ij.IJ.init();"
 				+ " return null;"
 				+ "}");
