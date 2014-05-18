@@ -433,6 +433,12 @@ class LegacyExtensions {
 		hacker.insertAtTopOfMethod("ij.Menus",
 			"java.lang.String getSubmenuName(java.lang.String jarPath)",
 			"if (_extraJars.contains($1)) return null;");
+		// make sure that .jar files are iterated in alphabetical order
+		hacker.replaceCallInMethod("ij.Menus",
+				"public static synchronized java.lang.String[] getPlugins()",
+				"java.io.File", "list",
+				"$_ = $proceed($$);"
+				+ "if ($_ != null) java.util.Arrays.sort($_);");
 		// add the extra .jar files to the list of plugin .jar files to be processed.
 		hacker.insertAtBottomOfMethod("ij.Menus",
 				"public static synchronized java.lang.String[] getPlugins()",
