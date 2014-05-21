@@ -683,11 +683,17 @@ class LegacyExtensions {
 		hacker.insertAtTopOfMethod("ij.IJ",
 				"public static ij.ImagePlus openImage(java.lang.String path)",
 				"Object result = ij.IJ._hooks.interceptOpen($1, -1, false);" +
-				"if (result != null) return (ij.ImagePlus) result;");
+				"if (result != null) {" +
+						"if (result instanceof ij.ImagePlus) return (ij.ImagePlus)result;" +
+						"return null; " +
+				"}");
 		hacker.insertAtTopOfMethod("ij.IJ",
 				"public static ij.ImagePlus openImage(java.lang.String path, int sliceIndex)",
 				"Object result = ij.IJ._hooks.interceptOpen($1, $2, false);" +
-				"if (result != null) return (ij.ImagePlus) result;");
+				"if (result != null) {" +
+						"if (result instanceof ij.ImagePlus) return (ij.ImagePlus)result;" +
+						"return null; " +
+				"}");
 	}
 
 }
