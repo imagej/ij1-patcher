@@ -131,6 +131,23 @@ public class LegacyEnvironment {
 		}
 	}
 
+	/**
+	 * Disallows the encapsulated ImageJ 1.x from parsing the directories listed
+	 * in {@code ij1.plugin.dirs}.
+	 * <p>
+	 * The patched ImageJ 1.x has a feature where it interprets the value of the
+	 * {@code ij1.plugin.dirs} system property as a list of directories in which
+	 * to discover plugins in addition to {@code <imagej.dir>/plugins}. In the
+	 * case that the {@code ij1.plugin.dirs} property is not set, the directory
+	 * {@code $HOME/.plugins/} -- if it exists -- is inspected instead.
+	 * </p>
+	 * <p>
+	 * This is a convenient behavior when the user starts up ImageJ 1.x as an
+	 * application, but it is less than desirable when running in a cluster or
+	 * from unit tests. For such use cases, this method needs to be called in
+	 * order to disable additional plugin directories.
+	 * </p>
+	 */
 	public void disableIJ1PluginDirs() {
 		ensureUninitialized();
 		injector.after.add(new Callback() {
