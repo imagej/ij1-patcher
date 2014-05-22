@@ -100,8 +100,7 @@ public class LegacyEnvironment {
 		if (isInitialized()) return;
 		initializationStackTrace = new Throwable("Initialized here:");
 		try {
-			this.loader =
-				loader != null ? loader : new LegacyClassLoader();
+			this.loader = loader != null ? loader : new LegacyClassLoader();
 			injector.injectHooks(loader, headless);
 			final Class<?> ij = this.loader.loadClass("ij.IJ");
 			final Class<?> imagej = this.loader.loadClass("ij.ImageJ");
@@ -116,8 +115,8 @@ public class LegacyEnvironment {
 		catch (final Exception e) {
 			throw new RuntimeException("Found incompatible ij.IJ class", e);
 		}
-		// TODO: if we want to allow calling IJ#run(ImagePlus, String, String), we
-		// will need a data translator
+		// TODO: if we want to allow calling IJ#run(ImagePlus, String, String),
+		// we will need a data translator
 	}
 
 	private void ensureUninitialized() {
@@ -135,11 +134,11 @@ public class LegacyEnvironment {
 	public void disableIJ1PluginDirs() {
 		ensureUninitialized();
 		injector.after.add(new Callback() {
+
 			@Override
 			public void call(final CodeHacker hacker) {
 				hacker.insertAtBottomOfMethod(EssentialLegacyHooks.class.getName(),
-					"public <init>()",
-					"enableIJ1PluginDirs(false);");
+					"public <init>()", "enableIJ1PluginDirs(false);");
 			}
 		});
 	}
@@ -248,16 +247,18 @@ public class LegacyEnvironment {
 
 		final StringBuilder builder = new StringBuilder();
 		for (final File file : classpathEntries) {
-			final String quoted = file.getPath().replaceAll("[\\\"\\\\]", "\\\\$0").replaceAll("\n", "\\n");
-			builder.append("addPluginClasspath(new java.io.File(\"").append(quoted).append("\"));");
+			String quoted = file.getPath().replaceAll("[\\\"\\\\]", "\\\\$0");
+			quoted = quoted.replaceAll("\n", "\\n");
+			builder.append("addPluginClasspath(new java.io.File(\"").append(quoted)
+				.append("\"));");
 		}
 
 		injector.after.add(new Callback() {
+
 			@Override
 			public void call(final CodeHacker hacker) {
 				hacker.insertAtBottomOfMethod(EssentialLegacyHooks.class.getName(),
-					"public <init>()",
-					builder.toString());
+					"public <init>()", builder.toString());
 			}
 		});
 	}
