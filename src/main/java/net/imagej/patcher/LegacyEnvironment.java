@@ -31,6 +31,8 @@
 
 package net.imagej.patcher;
 
+import static net.imagej.patcher.LegacyInjector.ESSENTIAL_LEGACY_HOOKS_CLASS;
+
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
@@ -154,7 +156,7 @@ public class LegacyEnvironment {
 
 			@Override
 			public void call(final CodeHacker hacker) {
-				hacker.insertAtBottomOfMethod(EssentialLegacyHooks.class.getName(),
+				hacker.insertAtBottomOfMethod(ESSENTIAL_LEGACY_HOOKS_CLASS,
 					"public <init>()", "enableIJ1PluginDirs(false);");
 			}
 		});
@@ -274,7 +276,7 @@ public class LegacyEnvironment {
 
 			@Override
 			public void call(final CodeHacker hacker) {
-				hacker.insertAtBottomOfMethod(EssentialLegacyHooks.class.getName(),
+				hacker.insertAtBottomOfMethod(ESSENTIAL_LEGACY_HOOKS_CLASS,
 					"public <init>()", builder.toString());
 			}
 		});

@@ -53,6 +53,13 @@ import javassist.NotFoundException;
 public class LegacyInjector {
 
 	/**
+	 * This constant is used in place of EssentialLegacyHooks.class.getName() to
+	 * make sure that the class is <b>not</b> yet loaded.
+	 */
+	final static String ESSENTIAL_LEGACY_HOOKS_CLASS =
+		"net.imagej.patcher.EssentialLegacyHooks";
+
+	/**
 	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
 	 * 
 	 * @param classLoader the class loader into which to load the patched classes
@@ -107,7 +114,7 @@ public class LegacyInjector {
 		hacker.insertPublicStaticField("ij.IJ", LegacyHooks.class, "_hooks", null);
 		hacker.commitClass(LegacyHooks.class);
 		hacker.commitClass(LegacyHooks.FatJarNameComparator.class);
-		hacker.commitClass(EssentialLegacyHooks.class);
+		hacker.commitClass(ESSENTIAL_LEGACY_HOOKS_CLASS);
 		final String legacyHooksClass = LegacyHooks.class.getName();
 
 		final StringBuilder builder = new StringBuilder();
@@ -120,7 +127,7 @@ public class LegacyInjector {
 					"if (ij.IJ.debugMode) t.printStackTrace();").append("}");
 		}
 
-		final String essentialHooksClass = EssentialLegacyHooks.class.getName();
+		final String essentialHooksClass = ESSENTIAL_LEGACY_HOOKS_CLASS;
 		hacker.insertNewMethod("ij.IJ",
 				"public static " + legacyHooksClass + " _hooks(" + legacyHooksClass + " hooks)",
 				legacyHooksClass + " previous = _hooks;"
