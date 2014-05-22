@@ -33,6 +33,7 @@ package net.imagej.patcher;
 
 import ij.IJ;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
@@ -144,6 +145,22 @@ public class EssentialLegacyHooks extends LegacyHooks {
 			// ignore
 		} catch (Throwable t) {
 			t.printStackTrace();
+		}
+	}
+
+	/**
+	 * Intended for sole use with {@link LegacyExtensions#noPluginClassLoader(CodeHacker)}.
+	 */
+	void addThisLoadersClasspath() {
+		final StringBuilder errors = new java.lang.StringBuilder();
+		final ClassLoader loader = getClass().getClassLoader();
+		final ClassLoader extLoader =
+			ClassLoader.getSystemClassLoader().getParent();
+		for (final File file : getClassPathElements(loader, errors, extLoader)) {
+			addPluginClasspath(file);
+		}
+		if (errors.length() > 0) {
+			System.err.println(errors.toString());
 		}
 	}
 

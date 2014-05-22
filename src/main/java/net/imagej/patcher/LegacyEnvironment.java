@@ -185,6 +185,53 @@ public class LegacyEnvironment {
 	}
 
 	/**
+	 * Forces ImageJ 1.x to use the same {@link ClassLoader} for plugins as for
+	 * ImageJ 1.x itself.
+	 * <p>
+	 * ImageJ 1.x has a command <i>Help&gt;Refresh Menus</i> that allows users to
+	 * ask ImageJ 1.x to parse the {@code plugins/} directory for new, or
+	 * modified, plugins, and to remove menu labels corresponding to plugins whose
+	 * files were deleted while ImageJ 1.x is running. The intended use case is to
+	 * support developing ImageJ 1.x plugins without having to restart ImageJ 1.x
+	 * all the time, just to test new iterations of the same plugin.
+	 * </p>
+	 * <p>
+	 * To support this, a {@link ij.io.PluginClassLoader} that loads the plugin
+	 * classes is instantiated at initialization, and whenever the user calls
+	 * <i>Refresh Menus</i>, essentially releasing the old {@link ClassLoader}.
+	 * This is a fragile solution, as no measures are taken to ensure that the
+	 * classes loaded by the previous {@link ij.io.PluginClassLoader} are no
+	 * longer used, but it works most of the time.
+	 * </p>
+	 * <p>
+	 * With ImageJ2 being developed in a modular manner, it is no longer easy to
+	 * have one class loader containing only the ImageJ classes and another class
+	 * loader containing all the plugins. Therefore, this method is required to be
+	 * able to force ImageJ 1.x to reuse the same class loader for plugins as for
+	 * ImageJ classes, implying that the <i>Refresh Menus</i> command needs to be
+	 * disabled.
+	 * </p>
+	 * <p>
+	 * Since the advent of powerful Integrated Development Environments such as
+	 * Netbeans and Eclipse, it is preferable to develop even ImageJ 1.x plugins
+	 * in such environments instead of using a text editor to edit the
+	 * {@code .java} source, then running {@code javac} from the command-line,
+	 * calling <i>Refresh Menus</i> and finally repeating the manual test
+	 * procedure, anyway.
+	 * </p>
+	 */
+	public void noPluginClassLoader() {
+		ensureUninitialized();
+		injector.after.add(new Callback() {
+
+			@Override
+			public void call(final CodeHacker hacker) {
+				LegacyExtensions.noPluginClassLoader(hacker);
+			}
+		});
+	}
+
+	/**
 	 * Adds the class path of a given {@link ClassLoader} to the plugin class
 	 * loader.
 	 * <p>
