@@ -40,8 +40,11 @@ import ij.Macro;
 
 import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 import org.junit.After;
 import org.junit.Before;
@@ -65,6 +68,7 @@ public class HeadlessEnvironmentTest {
 
 	private String threadName;
 	private ClassLoader threadLoader;
+	private File tmpDir;
 
 	@Before
 	public void saveThreadName() {
@@ -76,6 +80,9 @@ public class HeadlessEnvironmentTest {
 	public void restoreThreadName() {
 		if (threadName != null) Thread.currentThread().setName(threadName);
 		if (threadLoader != null) Thread.currentThread().setContextClassLoader(threadLoader);
+		if (tmpDir != null && tmpDir.isDirectory()) {
+			TestUtils.deleteRecursively(tmpDir);
+		}
 	}
 
 	@Test
@@ -141,6 +148,39 @@ public class HeadlessEnvironmentTest {
 		runPlugIn.invoke(null, "ij.IJ.init", "");
 		final Method getCommands = loader.loadClass("ij.Menus").getMethod("getCommands");
 		assertNotNull(getCommands.invoke(null));
+	}
+
+	@Test
+	public void testWithoutPluginClassLoader() throws Exception {
+		tmpDir = TestUtils.createTemporaryDirectory("class-loader-");
+		final File jarFile = new File(tmpDir, "Set_Property.jar");
+		TestUtils.makeJar(jarFile, Set_Property.class.getName());
+
+		// make a new class loader with the plugin and the classes
+		// required to make a new LegacyEnvironment in it
+		final URL jarURL = jarFile.toURI().toURL();
+		final URL ij1URL = Utils.getLocation(Class.forName("ij.IJ"));
+		final URL ij1PatcherURL = Utils.getLocation(LegacyEnvironment.class);
+		final URL javassistURL = Utils.getLocation(javassist.CtClass.class);
+		final URL[] urls = { ij1PatcherURL, javassistURL, ij1URL, jarURL };
+		final ClassLoader parent = getClass().getClassLoader().getParent();
+		final ClassLoader loader = new URLClassLoader(urls, parent);
+
+		// create a new legacy environment inside that new class loader
+		final Class<?> envClass =
+			loader.loadClass(LegacyEnvironment.class.getName());
+		final Object env = envClass.getConstructor(ClassLoader.class, Boolean.TYPE)
+				.newInstance(loader, true);
+		envClass.getMethod("disableIJ1PluginDirs").invoke(env);
+		envClass.getMethod("disableInitializer").invoke(env);
+		envClass.getMethod("noPluginClassLoader").invoke(env);
+		final Method ij1Run = envClass.getMethod("run", String.class, String.class);
+
+		// verify that the Set Property plugin can be called
+		final String key = "random-" + Math.random();
+		System.setProperty(key, "must be overridden");
+		ij1Run.invoke(env, "Set Property", "key=" + key + " value=overridden");
+		assertEquals("overridden", System.getProperty(key));
 	}
 
 	private static boolean runExampleDialogPlugin(final boolean patchHeadless) throws Exception {
