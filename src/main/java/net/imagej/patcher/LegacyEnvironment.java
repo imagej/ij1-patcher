@@ -163,6 +163,33 @@ public class LegacyEnvironment {
 	}
 
 	/**
+	 * Disables the execution of the {@code ij1.patcher.initializer}.
+	 * <p>
+	 * A fully patched ImageJ 1.x will allow an initializer class implementing the
+	 * {@link Runnable} interface (and discovered via ImageJ 1.x' own
+	 * {@link ij.io.PluginClassLoader}) to run just after ImageJ 1.x was
+	 * initialized. If the system property {@code ij1.patcher.initializer} is
+	 * unset, it defaults to ImageJ2's {@code LegacyInitializer} class.
+	 * </p>
+	 * <p>
+	 * Users of the LegacyEnvironment class can call this method to disable that
+	 * behavior.
+	 * </p>
+	 */
+	public void disableInitializer() {
+		ensureUninitialized();
+		injector.after.add(new Callback() {
+
+			@Override
+			public void call(final CodeHacker hacker) {
+				hacker.replaceCallInMethod(ESSENTIAL_LEGACY_HOOKS_CLASS,
+					"public void initialized()", ESSENTIAL_LEGACY_HOOKS_CLASS,
+					"runInitializer", "");
+			}
+		});
+	}
+
+	/**
 	 * Adds the class path of a given {@link ClassLoader} to the plugin class
 	 * loader.
 	 * <p>

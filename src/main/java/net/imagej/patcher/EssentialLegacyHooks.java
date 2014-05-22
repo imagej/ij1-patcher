@@ -119,6 +119,10 @@ public class EssentialLegacyHooks extends LegacyHooks {
 	/** @inherit */
 	@Override
 	public void initialized() {
+		runInitializer();
+	}
+
+	private void runInitializer() {
 		final String property = System.getProperty("ij1.patcher.initializer");
 		try {
 			final ClassLoader loader = IJ.getClassLoader();
