@@ -763,7 +763,7 @@ class CodeHacker {
 		final String path =
 			url != null && "file".equals(url.getProtocol()) &&
 				url.getPath().endsWith(".jar") ? url.getPath()
-				: "/path/to/ij-legacy.jar";
+				: "/path/to/ij1-patcher.jar";
 
 		return new RuntimeException(message + "\n" +
 				"It appears that this class was already defined in the class loader!\n" +

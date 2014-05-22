@@ -80,10 +80,10 @@ public class JavaAgent implements ClassFileTransformer {
 	 * 
 	 * When this class is specified as <i>Premain-Class</i> in the manifest and
 	 * the JVM is started with the option
-	 * <tt>-javaagent:/path/to/ij-legacy.jar</tt> then this method is called
+	 * <tt>-javaagent:/path/to/ij1-patcher.jar</tt> then this method is called
 	 * some time before the <i>main</i> method of the main class is called.
 	 * 
-	 * @param agentArgs the optional argument passed  via <tt>-javaagent:ij-legacy.jar=ARGUMENT</tt>
+	 * @param agentArgs the optional argument passed  via <tt>-javaagent:ij1-patcher.jar=ARGUMENT</tt>
 	 * @param instrumentation the {@link Instrumentation} instance passed by the JVM
 	 */
 	public static void premain(final String agentArgs, final Instrumentation instrumentation) {
@@ -121,7 +121,7 @@ public class JavaAgent implements ClassFileTransformer {
 	private static void usage() {
 		System.err.println("ImageJ Legacy Agent Usage:\n" +
 				"\n" +
-				"The ij-legacy agent's purpose is to help with issues arising from ImageJ 1.x\n" +
+				"The ij1-patcher agent's purpose is to help with issues arising from ImageJ 1.x\n" +
 				"classes being used before the ImageJ2 legacy service's pre-initialization stage\n" +
 				"had a chance to run.\n" +
 				"\n" +
@@ -130,7 +130,7 @@ public class JavaAgent implements ClassFileTransformer {
 				"legacy service to synchronize between the internal states of the legacy and\n" +
 				"modern mode, respectively.\n" +
 				"\n" +
-				"Use the agent via the JVM option -javaagent=/path/to/ij-legacy.jar[=<OPTION>].\n" +
+				"Use the agent via the JVM option -javaagent=/path/to/ij1-patcher.jar[=<OPTION>].\n" +
 				"The following optional options are available:\n\n" +
 				"help\n" +
 				"\tshow this description\n" +
@@ -240,8 +240,8 @@ public class JavaAgent implements ClassFileTransformer {
 	 * Writes out a minimal java agent .jar file.
 	 * 
 	 * <p>
-	 * When trying to debug class loading issues in ij-legacy itself, of course
-	 * we cannot load the complete ij-legacy.jar as a Java Agent (otherwise it
+	 * When trying to debug class loading issues in ij1-patcher itself, of course
+	 * we cannot load the complete ij1-patcher.jar as a Java Agent (otherwise it
 	 * would hide the classes that we want to test with possibly out-dated
 	 * ones).
 	 * </p>
@@ -265,7 +265,7 @@ public class JavaAgent implements ClassFileTransformer {
 			i++;
 		}
 		if (args == null || args.length <= i) {
-			file = File.createTempFile("ij-legacy-javaagent-", ".jar");
+			file = File.createTempFile("ij1-patcher-javaagent-", ".jar");
 		} else {
 			file = new File(args[i]);
 			if (!overwrite && file.exists()) {
