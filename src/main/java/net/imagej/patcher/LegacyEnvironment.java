@@ -35,18 +35,13 @@ import static net.imagej.patcher.LegacyInjector.ESSENTIAL_LEGACY_HOOKS_CLASS;
 
 import java.awt.GraphicsEnvironment;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Collection;
 import java.util.Map;
-import java.util.jar.Attributes.Name;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 
 import net.imagej.patcher.LegacyInjector.Callback;
 
@@ -206,59 +201,16 @@ public class LegacyEnvironment {
 	public void addPluginClasspath(final ClassLoader fromClassLoader) {
 		if (fromClassLoader == null) return;
 		ensureUninitialized();
-		for (ClassLoader loader = fromClassLoader; loader != null; loader =
-			loader.getParent())
+		final StringBuilder errors = new StringBuilder();
+		final Collection<File> files = LegacyHooks.getClassPathElements(fromClassLoader, errors,
+			loader, loader == null ? null : loader.getParent(), getClass()
+				.getClassLoader().getParent());
+		if (errors.length() > 0) {
+			throw new IllegalArgumentException(errors.toString());
+		}
+		for (final File file : files)
 		{
-			if (loader == this.loader) {
-				break;
-			}
-			if (this.loader != null && loader == this.loader.getParent()) {
-				break;
-			}
-			if (this.loader == null &&
-				loader == getClass().getClassLoader().getParent())
-			{
-				break;
-			}
-			if (!(loader instanceof URLClassLoader)) {
-				if (loader != fromClassLoader) continue;
-				throw new IllegalArgumentException(
-					"Cannot add class path from ClassLoader of type " +
-						fromClassLoader.getClass().getName());
-			}
-
-			for (final URL url : ((URLClassLoader) loader).getURLs()) {
-				if (!"file".equals(url.getProtocol())) {
-					throw new RuntimeException("Not a file URL! " + url);
-				}
-				addPluginClasspath(new File(url.getPath()));
-				final String path = url.getPath();
-				if (path.matches(".*/target/surefire/surefirebooter[0-9]*\\.jar")) try {
-					final JarFile jar = new JarFile(path);
-					final Manifest manifest = jar.getManifest();
-					if (manifest != null) {
-						final String classPath =
-							manifest.getMainAttributes().getValue(Name.CLASS_PATH);
-						if (classPath != null) {
-							for (final String element : classPath.split(" +"))
-								try {
-									final URL url2 = new URL(element);
-									if (!"file".equals(url2.getProtocol())) continue;
-									addPluginClasspath(new File(url2.getPath()));
-								}
-								catch (final MalformedURLException e) {
-									e.printStackTrace();
-								}
-						}
-					}
-				}
-				catch (final IOException e) {
-					System.err
-						.println("Warning: could not add plugin class path due to ");
-					e.printStackTrace();
-				}
-
-			}
+			addPluginClasspath(file);
 		}
 	}
 

@@ -33,17 +33,25 @@ package net.imagej.patcher;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.jar.Attributes.Name;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 
 /**
@@ -456,5 +464,63 @@ public abstract class LegacyHooks {
 	public Object interceptOpen(final String path, final int planeIndex,
 		final boolean display) {
 		return null;
+	}
+
+	// for internal use only
+	static Collection<File> getClassPathElements(final ClassLoader fromClassLoader,
+			final StringBuilder errors,
+			final ClassLoader... excludeClassLoaders) {
+		final Set<ClassLoader> exclude =
+				new HashSet<ClassLoader>(Arrays.asList(excludeClassLoaders));
+		final List<File> result = new ArrayList<File>();
+		for (ClassLoader loader = fromClassLoader; loader != null; loader =
+				loader.getParent()) {
+			if (loader == null || exclude.contains(loader)) {
+				break;
+			}
+			if (!(loader instanceof URLClassLoader)) {
+				errors.append("Cannot add class path from ClassLoader of type ")
+				.append(fromClassLoader.getClass().getName()).append("\n");
+				continue;
+			}
+
+			for (final URL url : ((URLClassLoader) loader).getURLs()) {
+				if (!"file".equals(url.getProtocol())) {
+					errors.append("Not a file URL! ").append(url).append("\n");
+					continue;
+				}
+				result.add(new File(url.getPath()));
+				final String path = url.getPath();
+				if (path.matches(".*/target/surefire/surefirebooter[0-9]*\\.jar")) try {
+					final JarFile jar = new JarFile(path);
+					final Manifest manifest = jar.getManifest();
+					if (manifest != null) {
+						final String classPath =
+							manifest.getMainAttributes().getValue(Name.CLASS_PATH);
+						if (classPath != null) {
+							for (final String element : classPath.split(" +"))
+								try {
+									final URL url2 = new URL(element);
+									if (!"file".equals(url2.getProtocol())) {
+										errors.append("Not a file URL! ").append(url2).append("\n");
+										continue;
+									}
+									result.add(new File(url2.getPath()));
+								}
+								catch (final MalformedURLException e) {
+									e.printStackTrace();
+								}
+						}
+					}
+				}
+				catch (final IOException e) {
+					System.err
+						.println("Warning: could not add plugin class path due to ");
+					e.printStackTrace();
+				}
+
+			}
+		}
+		return result;
 	}
 }
