@@ -72,6 +72,7 @@ public class ImageJ1EncapsulationTest {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void verifyEncapsulation() throws Exception {
 		final ClassPool pool = ClassPool.getDefault();
