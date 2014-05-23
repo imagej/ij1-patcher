@@ -694,6 +694,12 @@ class LegacyExtensions {
 						"if (result instanceof ij.ImagePlus) return (ij.ImagePlus)result;" +
 						"return null; " +
 				"}");
-	}
 
+		// Intercept File > Open Recent
+		hacker.replaceCallInMethod("ij.RecentOpener", "public void run()",
+				"ij.io.Opener", "open",
+				"Object result = ij.IJ._hooks.interceptOpen(path, -1, true);" +
+				"if (result == null) o.open(path);" +
+				"else if (! (result instanceof ij.ImagePlus)) return;");
+	}
 }
