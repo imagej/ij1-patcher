@@ -515,4 +515,28 @@ public class LegacyEnvironment {
 		final boolean headless = GraphicsEnvironment.isHeadless();
 		return new LegacyEnvironment(new LegacyClassLoader(headless), headless);
 	}
+
+	/**
+	 * Determines whether there is already an ImageJ 1.x instance.
+	 * <p>
+	 * In contrast to {@link ij.IJ#getInstance()}, this method avoids loading any
+	 * ImageJ 1.x class, and is therefore suitable for testing whether a
+	 * {@link LegacyEnvironment} needs to be created when the caller wants the
+	 * classes to be patched in its own {@link ClassLoader}.
+	 * </p>
+	 * 
+	 * @param loader the class loader in which to look for the ImageJ 1.x instance
+	 * @return true if there is an initialized instance
+	 */
+	public static boolean isImageJ1Initialized(final ClassLoader loader) {
+		if (!LegacyInjector.alreadyPatched(loader)) return false;
+		try {
+			return loader.loadClass("ij.IJ").getMethod("getInstance").invoke(null) != null;
+		}
+		catch (final Throwable t) {
+			throw new IllegalArgumentException(
+				"Problem accessing ImageJ 1.x in class loader " + loader, t);
+		}
+	}
+
 }
