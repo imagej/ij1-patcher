@@ -310,7 +310,7 @@ public class LegacyInjector {
 		new LegacyInjector().injectHooks(classLoader);
 	}
 
-	private static boolean alreadyPatched(final ClassLoader classLoader) {
+	static boolean alreadyPatched(final ClassLoader classLoader) {
 		Class<?> ij = null;
 		try {
 			final Method findLoadedClass = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);

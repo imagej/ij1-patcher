@@ -424,6 +424,59 @@ public class LegacyEnvironment {
 	}
 
 	/**
+	 * Initializes a new ImageJ 1.x instance.
+	 * <p>
+	 * This method starts up a fully-patched ImageJ 1.x, optionally hidden (in
+	 * {@code headless} mode, it <b>must</b> be hidden).
+	 * </p>
+	 * 
+	 * @param hidden whether to hide the ImageJ 1.x main window upon startup
+	 * @return the instance of the {@link ij.ImageJ} class, or {@code null} in
+	 *         headless mode
+	 */
+	public Object newImageJ1(final boolean hidden) {
+		initialize();
+		try {
+			if (headless) {
+				if (!hidden) {
+					throw new IllegalArgumentException(
+						"In headless mode, ImageJ 1.x must be hidden");
+				}
+				runPlugIn("ij.IJ.init", null);
+				return null;
+			} else {
+				final Class<?> clazz = getClassLoader().loadClass("ij.ImageJ");
+				final int mode = hidden ? 2 /* NO_SHOW */: 0 /* STANDALONE */;
+				return clazz.getConstructor(Integer.TYPE).newInstance(mode);
+			}
+		} catch (Throwable t) {
+			if (t instanceof RuntimeException) throw (RuntimeException) t;
+			if (t instanceof Error) throw (Error) t;
+			throw new RuntimeException(t);
+		}
+	}
+
+	/**
+	 * Applies the configuration patches.
+	 * <p>
+	 * After calling methods to configure the current {@link LegacyEnvironment}
+	 * (e.g. {@link #disableIJ1PluginDirs()}), the final step before using the
+	 * encapsulated ImageJ 1.x is to apply the configuring patches to the
+	 * {@link EssentialLegacyHooks} class. This method needs to be called if the
+	 * configuration has to be finalized, but ImageJ 1.x is not run right away,
+	 * e.g. to prepare for third-party libraries using ImageJ 1.x classes
+	 * directly.
+	 * </p>
+	 */
+	public synchronized void applyPatches() {
+		if (isInitialized()) {
+			throw new RuntimeException("Already initialized:",
+				initializationStackTrace);
+		}
+		initialize();
+	}
+
+	/**
 	 * Gets the class loader containing the ImageJ 1.x classes used in this legacy
 	 * environment.
 	 * 
@@ -462,4 +515,28 @@ public class LegacyEnvironment {
 		final boolean headless = GraphicsEnvironment.isHeadless();
 		return new LegacyEnvironment(new LegacyClassLoader(headless), headless);
 	}
+
+	/**
+	 * Determines whether there is already an ImageJ 1.x instance.
+	 * <p>
+	 * In contrast to {@link ij.IJ#getInstance()}, this method avoids loading any
+	 * ImageJ 1.x class, and is therefore suitable for testing whether a
+	 * {@link LegacyEnvironment} needs to be created when the caller wants the
+	 * classes to be patched in its own {@link ClassLoader}.
+	 * </p>
+	 * 
+	 * @param loader the class loader in which to look for the ImageJ 1.x instance
+	 * @return true if there is an initialized instance
+	 */
+	public static boolean isImageJ1Initialized(final ClassLoader loader) {
+		if (!LegacyInjector.alreadyPatched(loader)) return false;
+		try {
+			return loader.loadClass("ij.IJ").getMethod("getInstance").invoke(null) != null;
+		}
+		catch (final Throwable t) {
+			throw new IllegalArgumentException(
+				"Problem accessing ImageJ 1.x in class loader " + loader, t);
+		}
+	}
+
 }
