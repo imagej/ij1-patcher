@@ -424,6 +424,39 @@ public class LegacyEnvironment {
 	}
 
 	/**
+	 * Initializes a new ImageJ 1.x instance.
+	 * <p>
+	 * This method starts up a fully-patched ImageJ 1.x, optionally hidden (in
+	 * {@code headless} mode, it <b>must</b> be hidden).
+	 * </p>
+	 * 
+	 * @param hidden whether to hide the ImageJ 1.x main window upon startup
+	 * @return the instance of the {@link ij.ImageJ} class, or {@code null} in
+	 *         headless mode
+	 */
+	public Object newImageJ1(final boolean hidden) {
+		initialize();
+		try {
+			if (headless) {
+				if (!hidden) {
+					throw new IllegalArgumentException(
+						"In headless mode, ImageJ 1.x must be hidden");
+				}
+				runPlugIn("ij.IJ.init", null);
+				return null;
+			} else {
+				final Class<?> clazz = getClassLoader().loadClass("ij.ImageJ");
+				final int mode = hidden ? 2 /* NO_SHOW */: 0 /* STANDALONE */;
+				return clazz.getConstructor(Integer.TYPE).newInstance(mode);
+			}
+		} catch (Throwable t) {
+			if (t instanceof RuntimeException) throw (RuntimeException) t;
+			if (t instanceof Error) throw (Error) t;
+			throw new RuntimeException(t);
+		}
+	}
+
+	/**
 	 * Applies the configuration patches.
 	 * <p>
 	 * After calling methods to configure the current {@link LegacyEnvironment}
