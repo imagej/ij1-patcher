@@ -31,6 +31,7 @@
 
 package net.imagej.patcher;
 
+import static org.scijava.test.TestUtils.createTemporaryDirectory;
 import static net.imagej.patcher.TestUtils.construct;
 import static net.imagej.patcher.TestUtils.invokeStatic;
 import static org.junit.Assert.assertEquals;
@@ -86,7 +87,7 @@ public class HeadlessCompletenessTest {
 	public void before() throws IOException {
 		threadName = Thread.currentThread().getName();
 		threadLoader = Thread.currentThread().getContextClassLoader();
-		tmpDir = TestUtils.createTemporaryDirectory("legacy-");
+		tmpDir = createTemporaryDirectory("legacy-");
 	}
 
 	@After
@@ -94,9 +95,6 @@ public class HeadlessCompletenessTest {
 		if (threadName != null) Thread.currentThread().setName(threadName);
 		if (threadLoader != null) Thread.currentThread().setContextClassLoader(
 			threadLoader);
-		if (tmpDir != null && tmpDir.isDirectory()) {
-			TestUtils.deleteRecursively(tmpDir);
-		}
 	}
 
 	@Test

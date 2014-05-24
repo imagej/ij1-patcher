@@ -36,6 +36,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
+import static org.scijava.test.TestUtils.createTemporaryDirectory;
 import ij.Macro;
 
 import java.awt.GraphicsEnvironment;
@@ -80,9 +81,6 @@ public class HeadlessEnvironmentTest {
 	public void restoreThreadName() {
 		if (threadName != null) Thread.currentThread().setName(threadName);
 		if (threadLoader != null) Thread.currentThread().setContextClassLoader(threadLoader);
-		if (tmpDir != null && tmpDir.isDirectory()) {
-			TestUtils.deleteRecursively(tmpDir);
-		}
 	}
 
 	@Test
@@ -152,7 +150,7 @@ public class HeadlessEnvironmentTest {
 
 	@Test
 	public void testWithoutPluginClassLoader() throws Exception {
-		tmpDir = TestUtils.createTemporaryDirectory("class-loader-");
+		tmpDir = createTemporaryDirectory("class-loader-");
 		final File jarFile = new File(tmpDir, "Set_Property.jar");
 		TestUtils.makeJar(jarFile, Set_Property.class.getName());
 
