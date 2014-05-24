@@ -424,6 +424,26 @@ public class LegacyEnvironment {
 	}
 
 	/**
+	 * Applies the configuration patches.
+	 * <p>
+	 * After calling methods to configure the current {@link LegacyEnvironment}
+	 * (e.g. {@link #disableIJ1PluginDirs()}), the final step before using the
+	 * encapsulated ImageJ 1.x is to apply the configuring patches to the
+	 * {@link EssentialLegacyHooks} class. This method needs to be called if the
+	 * configuration has to be finalized, but ImageJ 1.x is not run right away,
+	 * e.g. to prepare for third-party libraries using ImageJ 1.x classes
+	 * directly.
+	 * </p>
+	 */
+	public synchronized void applyPatches() {
+		if (isInitialized()) {
+			throw new RuntimeException("Already initialized:",
+				initializationStackTrace);
+		}
+		initialize();
+	}
+
+	/**
 	 * Gets the class loader containing the ImageJ 1.x classes used in this legacy
 	 * environment.
 	 * 
