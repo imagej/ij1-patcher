@@ -702,4 +702,36 @@ class LegacyExtensions {
 				"if (result == null) o.open(path);" +
 				"else if (! (result instanceof ij.ImagePlus)) return;");
 	}
+
+	// methods to configure LegacyEnvironment instances
+
+	static void noPluginClassLoader(final CodeHacker hacker) {
+		hacker.insertAtTopOfMethod("ij.IJ",
+			"public static ClassLoader getClassLoader()",
+			"return ij.IJ.class.getClassLoader();");
+		hacker.insertAtTopOfMethod(LegacyInjector.ESSENTIAL_LEGACY_HOOKS_CLASS,
+			"public <init>()", "addThisLoadersClasspath();");
+		disableRefreshMenus(hacker);
+	}
+
+	static void disableRefreshMenus(final CodeHacker hacker) {
+		hacker.insertAtTopOfMethod("ij.IJ",
+			"static void setClassLoader(java.lang.ClassLoader loader)",
+			"ij.IJ.log(\"WARNING: The PluginClassLoader cannot be reset\");" +
+			"return;");
+		hacker.insertAtBottomOfMethod("ij.Menus", "java.lang.String addMenuBar()",
+			"if (mbar != null) {" +
+			"  final java.awt.Menu help = mbar.getHelpMenu();" +
+			"  if (help != null) {" +
+			"    for (int i = 0; i < help.getItemCount(); i++) {" +
+			"      final java.awt.MenuItem item = help.getItem(i);" +
+			"      if (\"Refresh Menus\".equals(item.getLabel())) {" +
+			"        item.setEnabled(false);" +
+			"        break;" +
+			"      }" +
+			"    }" +
+			"  }" +
+			"}");
+	}
+
 }

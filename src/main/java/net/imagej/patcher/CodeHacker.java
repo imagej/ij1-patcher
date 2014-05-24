@@ -1453,7 +1453,15 @@ class CodeHacker {
 	 * @param clazz the class to commit
 	 */
 	public void commitClass(Class<?> clazz) {
-		getClass(clazz.getName());
+		commitClass(clazz.getName());
 	}
 
+	/**
+	 * Makes sure that the given class is defined in the class loader.
+	 * 
+	 * @param clazz the name of the class to commit
+	 */
+	public void commitClass(String clazz) {
+		getClass(clazz);
+	}
 }

@@ -31,20 +31,17 @@
 
 package net.imagej.patcher;
 
+import static net.imagej.patcher.LegacyInjector.ESSENTIAL_LEGACY_HOOKS_CLASS;
+
 import java.awt.GraphicsEnvironment;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Collection;
 import java.util.Map;
-import java.util.jar.Attributes.Name;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 
 import net.imagej.patcher.LegacyInjector.Callback;
 
@@ -100,8 +97,7 @@ public class LegacyEnvironment {
 		if (isInitialized()) return;
 		initializationStackTrace = new Throwable("Initialized here:");
 		try {
-			this.loader =
-				loader != null ? loader : new LegacyClassLoader();
+			this.loader = loader != null ? loader : new LegacyClassLoader();
 			injector.injectHooks(loader, headless);
 			final Class<?> ij = this.loader.loadClass("ij.IJ");
 			final Class<?> imagej = this.loader.loadClass("ij.ImageJ");
@@ -116,8 +112,8 @@ public class LegacyEnvironment {
 		catch (final Exception e) {
 			throw new RuntimeException("Found incompatible ij.IJ class", e);
 		}
-		// TODO: if we want to allow calling IJ#run(ImagePlus, String, String), we
-		// will need a data translator
+		// TODO: if we want to allow calling IJ#run(ImagePlus, String, String),
+		// we will need a data translator
 	}
 
 	private void ensureUninitialized() {
@@ -132,14 +128,105 @@ public class LegacyEnvironment {
 		}
 	}
 
+	/**
+	 * Disallows the encapsulated ImageJ 1.x from parsing the directories listed
+	 * in {@code ij1.plugin.dirs}.
+	 * <p>
+	 * The patched ImageJ 1.x has a feature where it interprets the value of the
+	 * {@code ij1.plugin.dirs} system property as a list of directories in which
+	 * to discover plugins in addition to {@code <imagej.dir>/plugins}. In the
+	 * case that the {@code ij1.plugin.dirs} property is not set, the directory
+	 * {@code $HOME/.plugins/} -- if it exists -- is inspected instead.
+	 * </p>
+	 * <p>
+	 * This is a convenient behavior when the user starts up ImageJ 1.x as an
+	 * application, but it is less than desirable when running in a cluster or
+	 * from unit tests. For such use cases, this method needs to be called in
+	 * order to disable additional plugin directories.
+	 * </p>
+	 */
 	public void disableIJ1PluginDirs() {
 		ensureUninitialized();
 		injector.after.add(new Callback() {
+
 			@Override
 			public void call(final CodeHacker hacker) {
-				hacker.insertAtBottomOfMethod(EssentialLegacyHooks.class.getName(),
-					"public <init>()",
-					"enableIJ1PluginDirs(false);");
+				hacker.insertAtBottomOfMethod(ESSENTIAL_LEGACY_HOOKS_CLASS,
+					"public <init>()", "enableIJ1PluginDirs(false);");
+			}
+		});
+	}
+
+	/**
+	 * Disables the execution of the {@code ij1.patcher.initializer}.
+	 * <p>
+	 * A fully patched ImageJ 1.x will allow an initializer class implementing the
+	 * {@link Runnable} interface (and discovered via ImageJ 1.x' own
+	 * {@link ij.io.PluginClassLoader}) to run just after ImageJ 1.x was
+	 * initialized. If the system property {@code ij1.patcher.initializer} is
+	 * unset, it defaults to ImageJ2's {@code LegacyInitializer} class.
+	 * </p>
+	 * <p>
+	 * Users of the LegacyEnvironment class can call this method to disable that
+	 * behavior.
+	 * </p>
+	 */
+	public void disableInitializer() {
+		ensureUninitialized();
+		injector.after.add(new Callback() {
+
+			@Override
+			public void call(final CodeHacker hacker) {
+				hacker.replaceCallInMethod(ESSENTIAL_LEGACY_HOOKS_CLASS,
+					"public void initialized()", ESSENTIAL_LEGACY_HOOKS_CLASS,
+					"runInitializer", "");
+			}
+		});
+	}
+
+	/**
+	 * Forces ImageJ 1.x to use the same {@link ClassLoader} for plugins as for
+	 * ImageJ 1.x itself.
+	 * <p>
+	 * ImageJ 1.x has a command <i>Help&gt;Refresh Menus</i> that allows users to
+	 * ask ImageJ 1.x to parse the {@code plugins/} directory for new, or
+	 * modified, plugins, and to remove menu labels corresponding to plugins whose
+	 * files were deleted while ImageJ 1.x is running. The intended use case is to
+	 * support developing ImageJ 1.x plugins without having to restart ImageJ 1.x
+	 * all the time, just to test new iterations of the same plugin.
+	 * </p>
+	 * <p>
+	 * To support this, a {@link ij.io.PluginClassLoader} that loads the plugin
+	 * classes is instantiated at initialization, and whenever the user calls
+	 * <i>Refresh Menus</i>, essentially releasing the old {@link ClassLoader}.
+	 * This is a fragile solution, as no measures are taken to ensure that the
+	 * classes loaded by the previous {@link ij.io.PluginClassLoader} are no
+	 * longer used, but it works most of the time.
+	 * </p>
+	 * <p>
+	 * With ImageJ2 being developed in a modular manner, it is no longer easy to
+	 * have one class loader containing only the ImageJ classes and another class
+	 * loader containing all the plugins. Therefore, this method is required to be
+	 * able to force ImageJ 1.x to reuse the same class loader for plugins as for
+	 * ImageJ classes, implying that the <i>Refresh Menus</i> command needs to be
+	 * disabled.
+	 * </p>
+	 * <p>
+	 * Since the advent of powerful Integrated Development Environments such as
+	 * Netbeans and Eclipse, it is preferable to develop even ImageJ 1.x plugins
+	 * in such environments instead of using a text editor to edit the
+	 * {@code .java} source, then running {@code javac} from the command-line,
+	 * calling <i>Refresh Menus</i> and finally repeating the manual test
+	 * procedure, anyway.
+	 * </p>
+	 */
+	public void noPluginClassLoader() {
+		ensureUninitialized();
+		injector.after.add(new Callback() {
+
+			@Override
+			public void call(final CodeHacker hacker) {
+				LegacyExtensions.noPluginClassLoader(hacker);
 			}
 		});
 	}
@@ -161,59 +248,16 @@ public class LegacyEnvironment {
 	public void addPluginClasspath(final ClassLoader fromClassLoader) {
 		if (fromClassLoader == null) return;
 		ensureUninitialized();
-		for (ClassLoader loader = fromClassLoader; loader != null; loader =
-			loader.getParent())
+		final StringBuilder errors = new StringBuilder();
+		final Collection<File> files = LegacyHooks.getClassPathElements(fromClassLoader, errors,
+			loader, loader == null ? null : loader.getParent(), getClass()
+				.getClassLoader().getParent());
+		if (errors.length() > 0) {
+			throw new IllegalArgumentException(errors.toString());
+		}
+		for (final File file : files)
 		{
-			if (loader == this.loader) {
-				break;
-			}
-			if (this.loader != null && loader == this.loader.getParent()) {
-				break;
-			}
-			if (this.loader == null &&
-				loader == getClass().getClassLoader().getParent())
-			{
-				break;
-			}
-			if (!(loader instanceof URLClassLoader)) {
-				if (loader != fromClassLoader) continue;
-				throw new IllegalArgumentException(
-					"Cannot add class path from ClassLoader of type " +
-						fromClassLoader.getClass().getName());
-			}
-
-			for (final URL url : ((URLClassLoader) loader).getURLs()) {
-				if (!"file".equals(url.getProtocol())) {
-					throw new RuntimeException("Not a file URL! " + url);
-				}
-				addPluginClasspath(new File(url.getPath()));
-				final String path = url.getPath();
-				if (path.matches(".*/target/surefire/surefirebooter[0-9]*\\.jar")) try {
-					final JarFile jar = new JarFile(path);
-					final Manifest manifest = jar.getManifest();
-					if (manifest != null) {
-						final String classPath =
-							manifest.getMainAttributes().getValue(Name.CLASS_PATH);
-						if (classPath != null) {
-							for (final String element : classPath.split(" +"))
-								try {
-									final URL url2 = new URL(element);
-									if (!"file".equals(url2.getProtocol())) continue;
-									addPluginClasspath(new File(url2.getPath()));
-								}
-								catch (final MalformedURLException e) {
-									e.printStackTrace();
-								}
-						}
-					}
-				}
-				catch (final IOException e) {
-					System.err
-						.println("Warning: could not add plugin class path due to ");
-					e.printStackTrace();
-				}
-
-			}
+			addPluginClasspath(file);
 		}
 	}
 
@@ -248,16 +292,18 @@ public class LegacyEnvironment {
 
 		final StringBuilder builder = new StringBuilder();
 		for (final File file : classpathEntries) {
-			final String quoted = file.getPath().replaceAll("[\\\"\\\\]", "\\\\$0").replaceAll("\n", "\\n");
-			builder.append("addPluginClasspath(new java.io.File(\"").append(quoted).append("\"));");
+			String quoted = file.getPath().replaceAll("[\\\"\\\\]", "\\\\$0");
+			quoted = quoted.replaceAll("\n", "\\n");
+			builder.append("addPluginClasspath(new java.io.File(\"").append(quoted)
+				.append("\"));");
 		}
 
 		injector.after.add(new Callback() {
+
 			@Override
 			public void call(final CodeHacker hacker) {
-				hacker.insertAtBottomOfMethod(EssentialLegacyHooks.class.getName(),
-					"public <init>()",
-					builder.toString());
+				hacker.insertAtBottomOfMethod(ESSENTIAL_LEGACY_HOOKS_CLASS,
+					"public <init>()", builder.toString());
 			}
 		});
 	}
