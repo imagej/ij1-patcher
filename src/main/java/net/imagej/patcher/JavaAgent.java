@@ -112,7 +112,8 @@ public class JavaAgent implements ClassFileTransformer {
 	public byte[] transform(ClassLoader loader, String className,
 			Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
 			byte[] classfileBuffer) throws IllegalClassFormatException {
-		if (className.startsWith("ij.") || className.startsWith("ij/")) {
+		if (className.startsWith("ij.") || className.startsWith("ij/") ||
+				className.matches("net.imagej.patcher.EssentialLegacyHooks")) {
 			return reportCaller("Loading " + className + " into " + loader + "!", classfileBuffer);
 		}
 		return null;
