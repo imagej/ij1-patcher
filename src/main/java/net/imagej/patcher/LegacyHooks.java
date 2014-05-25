@@ -466,12 +466,15 @@ public abstract class LegacyHooks {
 		return null;
 	}
 
-	// for internal use only
-	static Collection<File> getClassPathElements(final ClassLoader fromClassLoader,
-			final StringBuilder errors,
-			final ClassLoader... excludeClassLoaders) {
+	/**
+	 * Do not use: for internal use only.
+	 */
+	public static Collection<File> getClasspathElements(
+		final ClassLoader fromClassLoader, final StringBuilder errors,
+		final ClassLoader... excludeClassLoaders)
+	{
 		final Set<ClassLoader> exclude =
-				new HashSet<ClassLoader>(Arrays.asList(excludeClassLoaders));
+			new HashSet<ClassLoader>(Arrays.asList(excludeClassLoaders));
 		final List<File> result = new ArrayList<File>();
 		for (ClassLoader loader = fromClassLoader; loader != null; loader =
 				loader.getParent()) {

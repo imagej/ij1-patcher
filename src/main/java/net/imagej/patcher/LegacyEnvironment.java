@@ -249,7 +249,7 @@ public class LegacyEnvironment {
 		if (fromClassLoader == null) return;
 		ensureUninitialized();
 		final StringBuilder errors = new StringBuilder();
-		final Collection<File> files = LegacyHooks.getClassPathElements(fromClassLoader, errors,
+		final Collection<File> files = LegacyHooks.getClasspathElements(fromClassLoader, errors,
 			loader, loader == null ? null : loader.getParent(), getClass()
 				.getClassLoader().getParent());
 		if (errors.length() > 0) {
