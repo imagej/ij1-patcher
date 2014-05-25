@@ -469,7 +469,7 @@ public abstract class LegacyHooks {
 	/**
 	 * Do not use: for internal use only.
 	 */
-	public static Collection<File> getClassPathElements(
+	public static Collection<File> getClasspathElements(
 		final ClassLoader fromClassLoader, final StringBuilder errors,
 		final ClassLoader... excludeClassLoaders)
 	{

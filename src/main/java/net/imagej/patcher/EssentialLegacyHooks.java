@@ -156,7 +156,7 @@ public class EssentialLegacyHooks extends LegacyHooks {
 		final ClassLoader loader = getClass().getClassLoader();
 		final ClassLoader extLoader =
 			ClassLoader.getSystemClassLoader().getParent();
-		for (final File file : getClassPathElements(loader, errors, extLoader)) {
+		for (final File file : getClasspathElements(loader, errors, extLoader)) {
 			addPluginClasspath(file);
 		}
 		if (errors.length() > 0) {
