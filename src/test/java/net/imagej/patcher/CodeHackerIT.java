@@ -51,8 +51,13 @@ public class CodeHackerIT {
 			LegacyInjector.preinit();
 			assertTrue("Should never reach here", false);
 		} catch (RuntimeException e) {
-			final Throwable e2 = e.getCause();
+			Throwable e2 = e.getCause();
 			assertTrue(e2 != null);
+			if (e2 instanceof RuntimeException) {
+				e = (RuntimeException) e2;
+				e2 = e2.getCause();
+				assertTrue(e2 != null);
+			}
 			assertTrue("Should be a NoSuchFieldException: " + e2, e2 instanceof NoSuchFieldException);
 			final String cause = e.getMessage();
 			assertTrue("Contains hint:\n\n" + cause, cause.indexOf("-javaagent:") > 0);
