@@ -31,6 +31,7 @@
 
 package net.imagej.patcher;
 
+import static org.scijava.test.TestUtils.createTemporaryDirectory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -44,6 +45,7 @@ import javassist.ClassPool;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.scijava.util.FileUtils;
 
 /**
  * Tests that fat .jar files are put at the end of the class path of the
@@ -93,12 +95,12 @@ public class FatJarTest {
 
 	@Test
 	public void testFatJars() throws Exception {
-		final File tmp = TestUtils.createTemporaryDirectory("fat-jars-");
+		final File tmp = createTemporaryDirectory("fat-jars-");
 		final File plugins = new File(tmp, "plugins");
 		assertTrue(plugins.exists() || plugins.mkdir());
 		final File jars = new File(tmp, "jars");
 		if (jars.exists()) {
-			TestUtils.deleteRecursively(jars);
+			FileUtils.deleteRecursively(jars);
 		}
 		assertTrue(jars.mkdir());
 

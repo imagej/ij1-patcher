@@ -36,6 +36,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
+import static org.scijava.test.TestUtils.createTemporaryDirectory;
 import ij.ImageJ;
 
 import java.applet.Applet;
@@ -50,6 +51,7 @@ import java.io.PrintStream;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.scijava.util.FileUtils;
 
 /**
  * Tests the support for <i>ij1.plugin.dirs</i> (falling back to the <i>.plugins/</i> subdirectory of <i>user.home</i>).
@@ -76,16 +78,13 @@ public class ExtraPluginDirsTest {
 	public void after() {
 		if (threadName != null) Thread.currentThread().setName(threadName);
 		if (threadLoader != null) Thread.currentThread().setContextClassLoader(threadLoader);
-		if (tmpDir != null && tmpDir.isDirectory()) {
-			TestUtils.deleteRecursively(tmpDir);
-		}
 	}
 
 	@Before
 	public void before() throws IOException {
 		threadName = Thread.currentThread().getName();
 		threadLoader = Thread.currentThread().getContextClassLoader();
-		tmpDir = TestUtils.createTemporaryDirectory("legacy-");
+		tmpDir = createTemporaryDirectory("legacy-");
 	}
 
 	@Test
@@ -131,7 +130,7 @@ public class ExtraPluginDirsTest {
 	public void extraDirectory() throws Exception {
 		// empty tmpDir
 		for (final File file : tmpDir.listFiles()) {
-			if (file.isDirectory()) TestUtils.deleteRecursively(file);
+			if (file.isDirectory()) FileUtils.deleteRecursively(file);
 			else file.delete();
 		}
 

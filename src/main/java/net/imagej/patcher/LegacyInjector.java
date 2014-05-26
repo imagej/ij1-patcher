@@ -307,7 +307,15 @@ public class LegacyInjector {
 	}
 
 	public static void preinit(final ClassLoader classLoader) {
-		new LegacyInjector().injectHooks(classLoader);
+		final boolean headless = GraphicsEnvironment.isHeadless();
+		try {
+			final LegacyEnvironment ij1 = new LegacyEnvironment(classLoader, headless);
+			ij1.disableInitializer();
+			ij1.noPluginClassLoader();
+			ij1.applyPatches();
+		} catch (final ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	static boolean alreadyPatched(final ClassLoader classLoader) {
