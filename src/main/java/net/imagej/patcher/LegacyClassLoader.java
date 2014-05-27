@@ -74,6 +74,8 @@ public class LegacyClassLoader extends URLClassLoader {
 			EssentialLegacyHooks.class);
 		knownClasses.put(HeadlessGenericDialog.class.getName(),
 			HeadlessGenericDialog.class);
+		knownClasses.put(IJ1Callbacks.class.getName(),
+			IJ1Callbacks.class);
 	}
 
 	public LegacyClassLoader(final boolean headless)

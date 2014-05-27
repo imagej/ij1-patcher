@@ -114,6 +114,7 @@ public class LegacyInjector {
 		hacker.insertPublicStaticField("ij.IJ", LegacyHooks.class, "_hooks", null);
 		hacker.commitClass(LegacyHooks.class);
 		hacker.commitClass(LegacyHooks.FatJarNameComparator.class);
+		hacker.commitClass(IJ1Callbacks.class);
 		hacker.commitClass(ESSENTIAL_LEGACY_HOOKS_CLASS);
 		final String legacyHooksClass = LegacyHooks.class.getName();
 
@@ -164,6 +165,9 @@ public class LegacyInjector {
 				+ "if (\"ij.IJ.init\".equals($2)) {"
 				+ " ij.IJ.init();"
 				+ " return null;"
+				+ "}"
+				+ "if (" + IJ1Callbacks.class.getName() + ".instanceOf($1)) {"
+				+ "  return " + IJ1Callbacks.class.getName() + ".get();"
 				+ "}");
 		hacker.insertAtTopOfMethod("ij.IJ",
 				"public static void log(java.lang.String message)",
