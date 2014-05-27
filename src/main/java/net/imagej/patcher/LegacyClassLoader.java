@@ -28,6 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package net.imagej.patcher;
 
 import ij.ImagePlus;
@@ -42,13 +43,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A special purpose class loader to encapsulate ImageJ 1.x "instances" from each other.
+ * A special purpose class loader to encapsulate ImageJ 1.x "instances" from
+ * each other.
  * 
  * @see LegacyEnvironment
- * 
  * @author Johannes Schindelin
  */
 public class LegacyClassLoader extends URLClassLoader {
+
 	/*
 	 * Shared classes are classes we share with the class loader in which the
 	 * LegacyClassLoader class itself is defined. That way, code inside
@@ -74,7 +76,9 @@ public class LegacyClassLoader extends URLClassLoader {
 			HeadlessGenericDialog.class);
 	}
 
-	public LegacyClassLoader(final boolean headless) throws ClassNotFoundException {
+	public LegacyClassLoader(final boolean headless)
+		throws ClassNotFoundException
+	{
 		this();
 		new LegacyInjector().injectHooks(this, headless);
 	}
@@ -94,7 +98,9 @@ public class LegacyClassLoader extends URLClassLoader {
 	}
 
 	@Override
-	public Class<?> findClass(final String className) throws ClassNotFoundException {
+	public Class<?> findClass(final String className)
+		throws ClassNotFoundException
+	{
 		final Class<?> knownClass = knownClasses.get(className);
 		if (knownClass != null) try {
 			final Class<?> sharedClass = sharedClasses.get(className);
