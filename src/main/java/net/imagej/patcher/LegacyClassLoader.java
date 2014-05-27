@@ -63,7 +63,7 @@ public class LegacyClassLoader extends URLClassLoader {
 
 	@Override
 	public URL getResource(final String name) {
-		if (name.startsWith("imagej/patcher/")) {
+		if (name.startsWith("net/imagej/patcher/")) {
 			for (final Class<?> clazz : knownClasses) {
 				if (name.equals(clazz.getName().replace('.', '/') + ".class")) {
 					return clazz.getResource("/" + name);
