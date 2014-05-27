@@ -526,4 +526,17 @@ public abstract class LegacyHooks {
 		}
 		return result;
 	}
+
+	/**
+	 * An interface to communicate with ImageJ 1.x' progress bar
+	 * <p>
+	 * The ImageJ 1.x adapter is expected <i>not</i> to trigger any legacy hooks.
+	 * </p>
+	 * 
+	 * @author Johannes Schindelin
+	 */
+	public interface SetProgress {
+		public void show(double progress);
+		public void show(int currentIndex, int finalIndex);
+	}
 }
