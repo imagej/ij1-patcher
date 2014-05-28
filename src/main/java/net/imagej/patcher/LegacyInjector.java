@@ -245,6 +245,19 @@ public class LegacyInjector {
 			"if ($1 == null) $_ = false;" +
 			"else $_ = $proceed($$);");
 
+		// avoid duplicate menu entries
+		hacker.insertAtTopOfMethod("ij.Menus",
+			"void installJarPlugins()",
+			"if (jarFiles != null) {" +
+			"  java.util.HashSet seen = new java.util.HashSet();" +
+			"  for (java.util.Iterator iter = jarFiles.iterator(); iter.hasNext(); ) {" +
+			"    Object jar = iter.next();" +
+			"    if (seen.contains(jar)) iter.remove();" +
+			"    else seen.add(jar);" +
+			"  }" +
+			"  seen = null;" +
+			"}");
+
 		// override behavior of MacAdapter, if needed
 		if (Utils.hasClass("com.apple.eawt.ApplicationListener")) {
 			// NB: If com.apple.eawt package is present, override IJ1's MacAdapter.
