@@ -31,6 +31,7 @@
 
 package net.imagej.patcher;
 
+import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -525,5 +526,15 @@ public abstract class LegacyHooks {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Intercepts keyboard events sent to ImageJ 1.x.
+	 * 
+	 * @param e the keyboard event
+	 * @return whether the event was intercepted
+	 */
+	public boolean interceptKeyPressed(final KeyEvent e) {
+		return false;
 	}
 }
