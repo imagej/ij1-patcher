@@ -78,6 +78,7 @@ public class ImageJ1EncapsulationTest {
 		final ClassPool pool = ClassPool.getDefault();
 
 		final Set<String> exceptions = new HashSet<String>();
+		exceptions.add(IJ1Callbacks.class.getName());
 		exceptions.add(EssentialLegacyHooks.class.getName());
 		exceptions.add(HeadlessGenericDialog.class.getName());
 		exceptions.add(imagej.patcher.EssentialLegacyHooks.class.getName());

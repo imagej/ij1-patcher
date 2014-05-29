@@ -28,6 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package net.imagej.patcher;
 
 import ij.ImagePlus;
@@ -38,21 +39,48 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.ProtectionDomain;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * A special purpose class loader to encapsulate ImageJ 1.x "instances" from each other.
+ * A special purpose class loader to encapsulate ImageJ 1.x "instances" from
+ * each other.
  * 
  * @see LegacyEnvironment
- * 
  * @author Johannes Schindelin
  */
 public class LegacyClassLoader extends URLClassLoader {
-	private final Class<?>[] knownClasses = new Class<?>[] {
-		LegacyHooks.class, LegacyHooks.FatJarNameComparator.class, EssentialLegacyHooks.class, HeadlessGenericDialog.class
-	};
-	private final int sharedClassCount = 2;
 
-	public LegacyClassLoader(final boolean headless) throws ClassNotFoundException {
+	/*
+	 * Shared classes are classes we share with the class loader in which the
+	 * LegacyClassLoader class itself is defined. That way, code inside
+	 * the LegacyClassLoader can refer to the very same classes as code outside.
+	 *
+	 * Known classes contain the shared classes, but also classes whose bytecode
+	 * comes from outside the URLs known to the LegacyClassLoader. The non-shared
+	 * known classes *cannot* be used to communicate between classes inside and
+	 * outside of the LegacyClassLoader.
+	 */
+	private final static Map<String, Class<?>> knownClasses, sharedClasses;
+
+	static {
+		sharedClasses = new HashMap<String, Class<?>>();
+		sharedClasses.put(LegacyHooks.class.getName(), LegacyHooks.class);
+		for (final Class<?> clazz : LegacyHooks.class.getClasses()) {
+			sharedClasses.put(clazz.getName(), clazz);
+		}
+		knownClasses = new HashMap<String, Class<?>>(sharedClasses);
+		knownClasses.put(EssentialLegacyHooks.class.getName(),
+			EssentialLegacyHooks.class);
+		knownClasses.put(HeadlessGenericDialog.class.getName(),
+			HeadlessGenericDialog.class);
+		knownClasses.put(IJ1Callbacks.class.getName(),
+			IJ1Callbacks.class);
+	}
+
+	public LegacyClassLoader(final boolean headless)
+		throws ClassNotFoundException
+	{
 		this();
 		new LegacyInjector().injectHooks(this, headless);
 	}
@@ -63,37 +91,37 @@ public class LegacyClassLoader extends URLClassLoader {
 
 	@Override
 	public URL getResource(final String name) {
-		if (name.startsWith("net/imagej/patcher/")) {
-			for (final Class<?> clazz : knownClasses) {
-				if (name.equals(clazz.getName().replace('.', '/') + ".class")) {
-					return clazz.getResource("/" + name);
-				}
-			}
+		final Class<?> knownClass = !name.endsWith(".class")? null :
+			knownClasses.get(name.substring(0, name.length() - 6).replace('/', '.'));
+		if (knownClass != null) {
+			return knownClass.getResource("/" + name);
 		}
 		return super.getResource(name);
 	}
 
 	@Override
-	public Class<?> findClass(final String className) throws ClassNotFoundException {
-		for (int i = 0; i < knownClasses.length; i++) {
-			if (knownClasses[i].getName().equals(className)) try {
-				if (i < sharedClassCount) return knownClasses[i];
-				final ProtectionDomain domain = knownClasses[i].getProtectionDomain();
-				final InputStream in = knownClasses[i].getResourceAsStream("/" + className.replace('.', '/') + ".class");
-				final ByteArrayOutputStream out = new ByteArrayOutputStream();
-				byte[] buffer = new byte[65536];
-				for (;;) {
-					int count = in.read(buffer);
-					if (count < 0) break;
-					out.write(buffer, 0, count);
-				}
-				in.close();
-				buffer = out.toByteArray();
-				out.close();
-				return defineClass(className, buffer, 0, buffer.length, domain);
-			} catch (IOException e) {
-				throw new ClassNotFoundException("Could not read bytecode for " + className, e);
+	public Class<?> findClass(final String className)
+		throws ClassNotFoundException
+	{
+		final Class<?> knownClass = knownClasses.get(className);
+		if (knownClass != null) try {
+			final Class<?> sharedClass = sharedClasses.get(className);
+			if (sharedClass != null) return sharedClass;
+			final ProtectionDomain domain = knownClass.getProtectionDomain();
+			final InputStream in = knownClass.getResourceAsStream("/" + className.replace('.', '/') + ".class");
+			final ByteArrayOutputStream out = new ByteArrayOutputStream();
+			byte[] buffer = new byte[65536];
+			for (;;) {
+				int count = in.read(buffer);
+				if (count < 0) break;
+				out.write(buffer, 0, count);
 			}
+			in.close();
+			buffer = out.toByteArray();
+			out.close();
+			return defineClass(className, buffer, 0, buffer.length, domain);
+		} catch (IOException e) {
+			throw new ClassNotFoundException("Could not read bytecode for " + className, e);
 		}
 		return super.findClass(className);
 	}
