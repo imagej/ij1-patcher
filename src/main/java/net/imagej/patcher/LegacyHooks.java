@@ -461,9 +461,50 @@ public abstract class LegacyHooks {
 	 * @param display
 	 *            if true, the opened object should be displayed before returning
 	 * @return The opened object, or {@code null} to let ImageJ 1.x open the path.
+	 * @deprecated this will be removed before ij1-patcher 1.0.0
 	 */
 	public Object interceptOpen(final String path, final int planeIndex,
 		final boolean display) {
+		return null;
+	}
+
+	/**
+	 * Optionally override opening resources via legacy hooks.
+	 * <p>
+	 * This is intended as a "HandleExtraFileTypesPlus".
+	 * </p>
+	 * 
+	 * @param path the path to the resource to open, or {@code null} if a dialog
+	 *          needs to be shown
+	 * @return The opened object, or {@code null} to let ImageJ 1.x open the resource.
+	 */
+	public Object interceptFileOpen(final String path) {
+		return null;
+	}
+
+	/**
+	 * Optionally override opening images via legacy hooks.
+	 * <p>
+	 * This is intended as a "HandleExtraFileTypesPlus".
+	 * </p>
+	 * 
+	 * @param path the path to the image to open, or {@code null} if a dialog
+	 *          needs to be shown
+	 * @param planeIndex
+	 *            If applicable - the index of plane to open or -1 for all planes
+	 * @return The opened image, or {@code null} to let ImageJ 1.x open the image.
+	 */
+	public Object interceptOpenImage(final String path, final int planeIndex) {
+		return null;
+	}
+
+	/**
+	 * Optionally override opening recent images via legacy hooks.
+	 * 
+	 * @param path the path to the recent image to open
+	 * @return The opened object, or {@code null} to let ImageJ 1.x open the image.
+	 */
+	public Object interceptOpenRecent(final String path) {
 		return null;
 	}
 
