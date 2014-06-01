@@ -278,6 +278,11 @@ public class LegacyInjector {
 			"public void setVisible(boolean b)",
 			"if (ij.IJ._hooks.isLegacyMode()) { super.setVisible($1); }");
 
+		// avoid NullPointerException upon duplicate dispose()
+		hacker.replaceCallInMethod("ij.Prefs",
+			"public static void savePreferences()",
+			"ij.ImageJ", "savePreferences",
+			"if ($0 != null) $_ = $proceed($$);");
 		LegacyExtensions.injectHooks(hacker, headless);
 
 		return hacker;
