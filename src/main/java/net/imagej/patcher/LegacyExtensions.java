@@ -708,7 +708,7 @@ class LegacyExtensions {
 	static void noPluginClassLoader(final CodeHacker hacker) {
 		hacker.insertAtTopOfMethod("ij.IJ",
 			"public static ClassLoader getClassLoader()",
-			"return ij.IJ.class.getClassLoader();");
+			"return Thread.currentThread().getContextClassLoader();");
 		hacker.insertAtTopOfMethod(LegacyInjector.ESSENTIAL_LEGACY_HOOKS_CLASS,
 			"public <init>()", "addThisLoadersClasspath();");
 		disableRefreshMenus(hacker);
