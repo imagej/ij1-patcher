@@ -205,6 +205,15 @@ public abstract class LegacyHooks {
 	}
 
 	/**
+	 * Returns the version to use in place of the legacy version.
+	 * 
+	 * @return the application version, or null if we do not override
+	 */
+	public String getAppVersion() {
+		return null;
+	}
+
+	/**
 	 * Returns the icon to use in place of the ImageJ microscope.
 	 * 
 	 * @return the URL to the icon to use, or null

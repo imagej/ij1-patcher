@@ -286,6 +286,7 @@ class LegacyExtensions {
 		hacker.handleHTTPS("ij.plugin.ListVirtualStack", "java.lang.String[] open(java.lang.String path)");
 
 		addEditorExtensionPoints(hacker);
+		overrideAppVersion(hacker);
 		insertAppNameHooks(hacker);
 		insertRefreshMenusHook(hacker);
 		overrideStartupMacrosForFiji(hacker);
@@ -352,6 +353,21 @@ class LegacyExtensions {
 			"if (!ij.IJ._hooks.createInEditor($1, $2)) {"
 			+ "  ((ij.plugin.frame.Editor)ij.IJ.runPlugIn(\"ij.plugin.frame.Editor\", \"\")).create($1, $2);"
 			+ "}");
+	}
+
+	private static void overrideAppVersion(final CodeHacker hacker) {
+		hacker.insertAtBottomOfMethod("ij.ImageJ",
+			"public java.lang.String version()",
+			"String version = ij.IJ._hooks.getAppVersion();" +
+			"if (version != null) {" +
+			"  $_ = $_.replace(VERSION, version);" +
+			"}");
+		// Of course there is not a *single* way to obtain the version.
+		// That would have been too easy, wouldn't it?
+		hacker.insertAtTopOfMethod("ij.IJ",
+			"public static String getVersion()",
+			"String version = ij.IJ._hooks.getAppVersion();" +
+			"if (version != null) return version;");
 	}
 
 	/**
