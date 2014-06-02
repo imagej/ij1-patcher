@@ -153,7 +153,7 @@ public class EssentialLegacyHooks extends LegacyHooks {
 	 */
 	void addThisLoadersClasspath() {
 		final StringBuilder errors = new java.lang.StringBuilder();
-		final ClassLoader loader = getClass().getClassLoader();
+		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		final ClassLoader extLoader =
 			ClassLoader.getSystemClassLoader().getParent();
 		for (final File file : getClasspathElements(loader, errors, extLoader)) {
