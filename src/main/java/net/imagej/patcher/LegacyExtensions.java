@@ -739,9 +739,19 @@ class LegacyExtensions {
 	// methods to configure LegacyEnvironment instances
 
 	static void noPluginClassLoader(final CodeHacker hacker) {
+		hacker.insertPrivateStaticField("ij.IJ", ClassLoader.class, "_classLoader");
+		hacker.insertAtTopOfMethod("ij.IJ",
+			"static void init()",
+			"_classLoader = Thread.currentThread().getContextClassLoader();");
+		hacker.insertAtTopOfMethod("ij.IJ",
+			"static void init()",
+			"_classLoader = Thread.currentThread().getContextClassLoader();");
+		hacker.insertAtTopOfMethod("ij.IJ",
+			"static void init(ij.ImageJ imagej, java.applet.Applet theApplet)",
+				"_classLoader = Thread.currentThread().getContextClassLoader();");
 		hacker.insertAtTopOfMethod("ij.IJ",
 			"public static ClassLoader getClassLoader()",
-			"return Thread.currentThread().getContextClassLoader();");
+			"return _classLoader;");
 		hacker.insertAtTopOfMethod(LegacyInjector.ESSENTIAL_LEGACY_HOOKS_CLASS,
 			"public <init>()", "addThisLoadersClasspath();");
 		disableRefreshMenus(hacker);
