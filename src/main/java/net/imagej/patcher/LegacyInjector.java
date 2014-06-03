@@ -346,7 +346,10 @@ public class LegacyInjector {
 		try {
 			final Method findLoadedClass = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
 			findLoadedClass.setAccessible(true);
-			ij = (Class<?>)findLoadedClass.invoke(classLoader, "ij.IJ");
+			for (ClassLoader loader = classLoader; loader != null; loader = loader.getParent()) {
+				ij = (Class<?>)findLoadedClass.invoke(loader, "ij.IJ");
+				if (ij != null) break;
+			}
 			if (ij == null) return false;
 		} catch (Exception e) {
 			// fall through
