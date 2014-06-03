@@ -329,6 +329,7 @@ public class LegacyInjector {
 	}
 
 	public static void preinit(final ClassLoader classLoader) {
+		if (alreadyPatched(classLoader)) return;
 		final boolean headless = GraphicsEnvironment.isHeadless();
 		try {
 			final LegacyEnvironment ij1 = new LegacyEnvironment(classLoader, headless);
