@@ -745,6 +745,13 @@ class LegacyExtensions {
 		hacker.insertAtTopOfMethod(LegacyInjector.ESSENTIAL_LEGACY_HOOKS_CLASS,
 			"public <init>()", "addThisLoadersClasspath();");
 		disableRefreshMenus(hacker);
+
+		// make sure that IJ#runUserPlugIn can execute package-less plugins in subdirectories of $IJ/plugin/
+		final String runUserPlugInSig = "static java.lang.Object runUserPlugIn(java.lang.String commandName, java.lang.String className, java.lang.String arg, boolean createNewLoader)";
+		hacker.insertAtTopOfExceptionHandlers("ij.IJ", runUserPlugInSig, "java.lang.NoClassDefFoundError",
+			"java.lang.ClassLoader loader = " + LegacyInjector.ESSENTIAL_LEGACY_HOOKS_CLASS +
+			"  .missingSubdirs(getClassLoader());" +
+			"if (loader != null) _classLoader = loader;");
 	}
 
 	static void disableRefreshMenus(final CodeHacker hacker) {

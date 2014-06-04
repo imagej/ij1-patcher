@@ -35,6 +35,10 @@ import ij.IJ;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The base {@link LegacyHooks} to be used in the patched ImageJ 1.x.
@@ -106,6 +110,59 @@ public class EssentialLegacyHooks extends LegacyHooks {
 		if (errors.length() > 0) {
 			System.err.println(errors.toString());
 		}
+	}
+
+	/**
+	 * Intended for sole use with patches in {@link ij.IJ}. DO NOT USE.
+	 */
+	public static ClassLoader missingSubdirs(final ClassLoader loader) {
+		if (loader == null || !(loader instanceof URLClassLoader)) return null;
+		final URLClassLoader classLoader = (URLClassLoader) loader;
+		final Set<File> directories = new HashSet<File>();
+		for (final URL url : classLoader.getURLs()) {
+			if (!"file".equals(url.getProtocol())) continue;
+			final File dir = new File(url.getPath());
+			if (!dir.isDirectory()) continue;
+			directories.add(dir);
+		}
+		final Set<File> missing = new HashSet<File>();
+		try {
+			for (final File dir : new HashSet<File>(directories)) {
+				missingSubdirectories(dir, directories, missing);
+			}
+			if (missing.isEmpty()) return null;
+			final URL[] urls = new URL[missing.size()];
+			int i = 0;
+			for (final File dir : missing) {
+				urls[i++] = dir.toURI().toURL();
+			}
+			return new URLClassLoader(urls, loader);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private static boolean missingSubdirectories(final File dir, final Set<File> already, final Set<File> missing) {
+		boolean containsClassFiles = false;
+		for (final File sub : dir.listFiles()) {
+			if (sub.isDirectory()) {
+				if (already.contains(sub) || missing.contains(sub)) continue;
+				if (missingSubdirectories(sub, already, missing)) try {
+					containsClassFiles = true;
+					missing.add(sub);
+				}
+				catch (Exception e) {
+					if (e instanceof RuntimeException) throw (RuntimeException) e;
+					throw new RuntimeException(e);
+				}
+			}
+			else if (sub.getName().endsWith(".class")) {
+				containsClassFiles = true;
+			}
+		}
+		return containsClassFiles;
 	}
 
 	/**
