@@ -353,6 +353,11 @@ class LegacyExtensions {
 			"if (!ij.IJ._hooks.createInEditor($1, $2)) {"
 			+ "  ((ij.plugin.frame.Editor)ij.IJ.runPlugIn(\"ij.plugin.frame.Editor\", \"\")).create($1, $2);"
 			+ "}");
+		hacker.replaceCallInMethod("ij.plugin.Compiler",
+			"void edit()",
+			"ij.IJ", "runPlugIn",
+			"if (ij.IJ._hooks.openInEditor(dir + name)) $_ = null;" +
+			"else $_ = $proceed($$);");
 	}
 
 	private static void overrideAppVersion(final CodeHacker hacker) {
