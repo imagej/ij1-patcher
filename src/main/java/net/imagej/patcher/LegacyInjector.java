@@ -328,7 +328,18 @@ public class LegacyInjector {
 		preinit(Thread.currentThread().getContextClassLoader());
 	}
 
-	public static void preinit(final ClassLoader classLoader) {
+	public static void preinit(ClassLoader classLoader) {
+		if (alreadyPatched(classLoader)) return;
+
+		// find the appropriate class loader in the loader chain
+		for (;;) {
+			final ClassLoader parent = classLoader.getParent();
+			if (parent == null || parent.getResource("ij/IJ.class") == null) {
+				break;
+			}
+			classLoader = parent;
+		}
+
 		final boolean headless = GraphicsEnvironment.isHeadless();
 		try {
 			final LegacyEnvironment ij1 = new LegacyEnvironment(classLoader, headless);
@@ -345,7 +356,10 @@ public class LegacyInjector {
 		try {
 			final Method findLoadedClass = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
 			findLoadedClass.setAccessible(true);
-			ij = (Class<?>)findLoadedClass.invoke(classLoader, "ij.IJ");
+			for (ClassLoader loader = classLoader; loader != null; loader = loader.getParent()) {
+				ij = (Class<?>)findLoadedClass.invoke(loader, "ij.IJ");
+				if (ij != null) break;
+			}
 			if (ij == null) return false;
 		} catch (Exception e) {
 			// fall through
