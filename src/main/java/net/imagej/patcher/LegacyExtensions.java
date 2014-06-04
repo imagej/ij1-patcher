@@ -735,6 +735,14 @@ class LegacyExtensions {
 				"if (result == null) o.open(path);" +
 				"else if (! (result instanceof ij.ImagePlus)) return;");
 
+		// Intercept DragAndDrop openings
+		hacker.insertAtTopOfMethod("ij.plugin.DragAndDrop",
+			"public void openFile(java.io.File f)",
+			"Object result = ij.IJ._hooks.interceptDragAndDropFile($1);" +
+			"if (result != null) {" +
+			"  return;" +
+			"}");
+
 		// Make sure that .lut files are not intercepted
 		hacker.replaceCallInMethod("ij.Executer",
 			"public static boolean loadLut(java.lang.String name)",
