@@ -36,6 +36,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -44,6 +46,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -311,8 +314,57 @@ public abstract class LegacyHooks {
 	 * @param e the exception to handle
 	 * @return true if the error was handled by the legacy hook
 	 */
-	public boolean handleNoSuchMethodError(final NoSuchMethodError e) {
-		return false; // not handled
+	public boolean handleNoSuchMethodError(final NoSuchMethodError error) {
+		String message = error.getMessage();
+		int paren = message.indexOf("(");
+		if (paren < 0) return false;
+		int dot = message.lastIndexOf(".", paren);
+		if (dot < 0) return false;
+		String path = message.substring(0, dot).replace('.', '/') + ".class";
+		Set<String> urls = new LinkedHashSet<String>();
+		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		try {
+			Enumeration<URL> e = loader.getResources(path);
+			while (e.hasMoreElements()) {
+				urls.add(e.nextElement().toString());
+			}
+			e = loader.getResources("/" + path);
+			while (e.hasMoreElements()) {
+				urls.add(e.nextElement().toString());
+			}
+		} catch (Throwable t) {
+			t.printStackTrace();
+			return false;
+		}
+
+		if (urls.size() == 0) return false;
+		StringBuilder buffer = new StringBuilder();
+		buffer.append("There was a problem with the class ");
+		buffer.append(message.substring(0, dot));
+		buffer.append(" which can be found here:\n");
+		for (String url : urls) {
+			if (url.startsWith("jar:")) url = url.substring(4);
+			if (url.startsWith("file:")) url = url.substring(5);
+			int bang = url.indexOf("!");
+			if (bang < 0) buffer.append(url);
+			else buffer.append(url.substring(0, bang));
+			buffer.append("\n");
+		}
+		if (urls.size() > 1) {
+			buffer.append("\nWARNING: multiple locations found!\n");
+		}
+
+		StringWriter writer = new StringWriter();
+		error.printStackTrace(new PrintWriter(writer));
+		buffer.append(writer.toString());
+
+		System.out.println(buffer.toString());
+		final NoSuchMethodException throwable =
+			new NoSuchMethodException("Could not find method " + message +
+				"\n" + buffer);
+		throwable.setStackTrace(error.getStackTrace());
+		error(throwable);
+		return true;
 	}
 
 	/**
