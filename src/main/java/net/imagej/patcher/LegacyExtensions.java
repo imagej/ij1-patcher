@@ -364,6 +364,12 @@ class LegacyExtensions {
 			"if ($1.endsWith(\".txt\")) $1 = $1.substring(0, $1.length() - 4);" +
 			"$1 += \".ijm\";" +
 			"if (!ij.IJ._hooks.createInEditor($1, $2)) $_ = $proceed($$);");
+		hacker.replaceCallInMethod("ij.plugin.CommandFinder",
+			"private boolean showMacro(java.lang.String cmd)",
+			"ij.plugin.frame.Editor", "create",
+			"if ($1.endsWith(\".txt\")) $1 = $1.substring(0, $1.length() - 4);" +
+			"$1 += \".ijm\";" +
+			"if (!ij.IJ._hooks.createInEditor($1, $2)) $_ = $proceed($$);");
 	}
 
 	private static void overrideAppVersion(final CodeHacker hacker) {
