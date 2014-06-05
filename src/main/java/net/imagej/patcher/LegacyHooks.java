@@ -570,6 +570,17 @@ public abstract class LegacyHooks {
 	}
 
 	/**
+	 * Optionally override opening drag-and-dropped files via legacy hooks.
+	 * 
+	 * @param f the file that was dragged onto the IJ UI
+	 * @return The opened object, or {@code null} to let ImageJ 1.x open the file
+	 *         as normal.
+	 */
+	public Object interceptDragAndDropFile(final File f) {
+		return null;
+	}
+
+	/**
 	 * Do not use: for internal use only.
 	 */
 	public static Collection<File> getClasspathElements(
