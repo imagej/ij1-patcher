@@ -734,6 +734,15 @@ class LegacyExtensions {
 				"Object result = ij.IJ._hooks.interceptOpenRecent(path);" +
 				"if (result == null) o.open(path);" +
 				"else if (! (result instanceof ij.ImagePlus)) return;");
+
+		// Make sure that .lut files are not intercepted
+		hacker.replaceCallInMethod("ij.Executer",
+			"public static boolean loadLut(java.lang.String name)",
+			"ij.IJ", "open",
+			"ij.ImagePlus imp = (ij.ImagePlus) ij.IJ.runPlugIn(\"ij.plugin.LutLoader\", $1);" +
+			"if (imp != null && imp.getWidth() > 0) {" +
+			"  imp.show();" +
+			"}");
 	}
 
 	// methods to configure LegacyEnvironment instances
