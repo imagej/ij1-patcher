@@ -9,7 +9,6 @@
 		<relativePath />
 	</parent>
 
-	<groupId>net.imagej</groupId>
 	<artifactId>ij1-patcher</artifactId>
 	<version>0.8.1-SNAPSHOT</version>
 
