@@ -711,21 +711,26 @@ class LegacyExtensions {
 		hacker.insertAtTopOfMethod("ij.IJ",
 			"public static void open(java.lang.String path)",
 			"Object result = ij.IJ._hooks.interceptFileOpen($1);" +
-			"if (result != null) return;");
+			"if (result != null) {" +
+					"if (result instanceof java.lang.String) path = (java.lang.String)result;" +
+					"else return;" +
+			"}");
 		// If openImage is intercepted, we return the opened ImagePlus without displaying it
 		hacker.insertAtTopOfMethod("ij.IJ",
 				"public static ij.ImagePlus openImage(java.lang.String path)",
 				"Object result = ij.IJ._hooks.interceptOpenImage($1, -1);" +
 				"if (result != null) {" +
 						"if (result instanceof ij.ImagePlus) return (ij.ImagePlus)result;" +
-						"return null; " +
+						"else if (result instanceof java.lang.String) path = (java.lang.String)result;" +
+						"else return null; " +
 				"}");
 		hacker.insertAtTopOfMethod("ij.IJ",
 				"public static ij.ImagePlus openImage(java.lang.String path, int sliceIndex)",
 				"Object result = ij.IJ._hooks.interceptOpenImage($1, $2);" +
 				"if (result != null) {" +
 						"if (result instanceof ij.ImagePlus) return (ij.ImagePlus)result;" +
-						"return null; " +
+						"else if (result instanceof java.lang.String) path = (java.lang.String)result;" +
+						"else return null; " +
 				"}");
 
 		// Intercept File > Open Recent
