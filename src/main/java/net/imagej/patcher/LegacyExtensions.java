@@ -744,7 +744,7 @@ class LegacyExtensions {
 		hacker.insertAtTopOfMethod("ij.plugin.DragAndDrop",
 			"public void openFile(java.io.File f)",
 			"Object result = ij.IJ._hooks.interceptDragAndDropFile($1);" +
-			"if (result != null) {" +
+			"if (result != null && !(result instanceof java.lang.String)) {" +
 			"  return;" +
 			"}");
 
