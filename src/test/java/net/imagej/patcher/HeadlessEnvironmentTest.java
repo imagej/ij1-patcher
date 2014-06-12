@@ -31,6 +31,8 @@
 
 package net.imagej.patcher;
 
+import static net.imagej.patcher.TestUtils.construct;
+import static net.imagej.patcher.TestUtils.invoke;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -179,6 +181,26 @@ public class HeadlessEnvironmentTest {
 		System.setProperty(key, "must be overridden");
 		ij1Run.invoke(env, "Set Property", "key=" + key + " value=overridden");
 		assertEquals("overridden", System.getProperty(key));
+	}
+
+	@Test
+	public void testNonOverriddenMethods() throws Exception {
+		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment(true, false);
+		final ClassLoader loader = ij1.getClassLoader();
+		final Object result;
+		final Thread thread = Thread.currentThread();
+		final String threadName = thread.getName();
+		try {
+			ij1.setMacroOptions("Booh!");
+			if (!threadName.startsWith("Run$_")) thread.setName("Run$_" + threadName); // magic! Now Macro.getOptions() is not null!
+			final Object dialog = construct(loader, "ij.gui.GenericDialog", "Test parseDouble");
+			result = invoke(dialog, "parseDouble", "2.182859");
+		} finally {
+			thread.setName(threadName);
+		}
+		assertNotNull(result);
+		assertTrue("Not a Double: " + result.getClass(), result instanceof Double);
+		assertEquals(2.182859, (Double) result, 1e-6);
 	}
 
 	private static boolean runExampleDialogPlugin(final boolean patchHeadless) throws Exception {
