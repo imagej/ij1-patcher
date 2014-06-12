@@ -164,8 +164,8 @@ public class HeadlessGenericDialog {
 		radioButtons.add(getMacroParameter(label, defaultItem));
 	}
 
-	public List<String> getRadioButtonGroups() {
-		return radioButtons;
+	public Vector<String> getRadioButtonGroups() {
+		return new Vector<String>(radioButtons);
 	}
 
 	/** Returns the selected item in the next radio button group. */
