@@ -527,7 +527,7 @@ class CodeHacker {
 	 * @param fullClass
 	 * @param fullNewSuperclass
 	 */
-	public void replaceSuperclass(final String fullClass,
+	public void replaceSuperclassAndStubifyAWTMethods(final String fullClass,
 		final String fullNewSuperclass)
 	{
 		final CtClass clazz = getClass(fullClass);
@@ -551,6 +551,9 @@ class CodeHacker {
 				if (method.getDeclaringClass() == clazz &&
 					!method.getName().startsWith("narf"))
 				{
+					if (!isAWTMethod(method)) {
+						continue;
+					}
 					final CtMethod stub = makeStubMethod(clazz, method);
 					method.setBody(stub, null);
 				}
@@ -563,6 +566,20 @@ class CodeHacker {
 				"Could not replace superclass of " + fullClass + " with " +
 					fullNewSuperclass, e));
 		}
+	}
+
+	private boolean isAWTMethod(final CtMethod method) throws NotFoundException {
+		if (isAWTClass(method.getReturnType())) return true;
+		for (final CtClass type : method.getParameterTypes()) {
+			if (isAWTClass(type)) return true;
+		}
+		return false;
+	}
+
+	private boolean isAWTClass(final CtClass clazz) {
+		if (clazz == null) return false;
+		final String name = clazz.getName();
+		return name != null && name.startsWith("java.awt.");
 	}
 
 	/**

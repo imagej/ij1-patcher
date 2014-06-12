@@ -172,7 +172,7 @@ public class HeadlessCompletenessTest {
 			public void call(CodeHacker hacker) {
 				// simulate new method in the generic dialog
 				hacker.insertNewMethod("ij.gui.GenericDialog",
-					"public java.lang.String intentionalBreakage()",
+					"public java.lang.String intentionalBreakage(java.awt.event.KeyEvent event)",
 					"throw new RuntimeException(\"This must be overridden\");");
 				// allow instantiating the headless generic dialog outside macros
 //				hacker.replaceCallInMethod("net.imagej.patcher.HeadlessGenericDialog",
@@ -184,7 +184,7 @@ public class HeadlessCompletenessTest {
 		Thread.currentThread().setName("Run$_Aaaargh!");
 		ij1.setMacroOptions("Aaaaaaaaargh!!!");
 		final Object dialog = construct(ij1.getClassLoader(), "ij.gui.GenericDialog", "Hello");
-		final Object nextString = invoke(dialog, "intentionalBreakage");
+		final Object nextString = invoke(dialog, "intentionalBreakage", (Object)null);
 		assertNull(nextString);
 	}
 

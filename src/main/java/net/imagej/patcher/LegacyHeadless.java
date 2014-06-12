@@ -83,7 +83,7 @@ class LegacyHeadless  {
 		}
 		hacker.commitClass(HeadlessGenericDialog.class);
 		hacker.replaceWithStubMethods("ij.gui.GenericDialog", "paint", "getInsets", "showHelp");
-		hacker.replaceSuperclass("ij.gui.GenericDialog", HeadlessGenericDialog.class.getName());
+		hacker.replaceSuperclassAndStubifyAWTMethods("ij.gui.GenericDialog", HeadlessGenericDialog.class.getName());
 		hacker.skipAWTInstantiations("ij.gui.GenericDialog");
 
 		hacker.insertAtTopOfMethod("ij.Menus", "void installJarPlugin(java.lang.String jarName, java.lang.String pluginsConfigLine)",
