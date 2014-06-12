@@ -154,6 +154,45 @@ public class TestUtils {
 	}
 
 	/**
+	 * Invokes a method of a given object.
+	 * <p>
+	 * This method tries to find a method matching the given name and the
+	 * parameter list. Just like {@link #newInstance(String, Object...)}, this
+	 * works via reflection to avoid a compile-time dependency on ImageJ2.
+	 * </p>
+	 * 
+	 * @param loader the class loader with which to load the class
+	 * @param object the object whose method is to be called
+	 * @param methodName the name of the static method to be called
+	 * @param parameters the parameters to pass to the static method
+	 * @return the return value of the method, if any
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 * @throws ClassNotFoundException
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T
+		invoke(final Object object,
+			final String methodName, final Object... parameters)
+			throws SecurityException, NoSuchMethodException,
+			IllegalArgumentException, IllegalAccessException,
+			InvocationTargetException, ClassNotFoundException
+	{
+		final Class<?> clazz = object.getClass();
+		for (final Method method : clazz.getMethods()) {
+			if (method.getName().equals(methodName) &&
+				doParametersMatch(method.getParameterTypes(), parameters))
+			{
+				return (T) method.invoke(object, parameters);
+			}
+		}
+		throw new NoSuchMethodException("No matching method found");
+	}
+
+	/**
 	 * Check whether a list of parameters matches a list of parameter types. This
 	 * is used to find matching constructors and (possibly static) methods.
 	 * 
