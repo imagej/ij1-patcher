@@ -31,14 +31,16 @@
 
 package net.imagej.patcher;
 
-import static org.scijava.test.TestUtils.createTemporaryDirectory;
 import static net.imagej.patcher.TestUtils.construct;
+import static net.imagej.patcher.TestUtils.getTestEnvironment;
 import static net.imagej.patcher.TestUtils.invoke;
 import static net.imagej.patcher.TestUtils.invokeStatic;
+import static net.imagej.patcher.TestUtils.makeJar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
+import static org.scijava.test.TestUtils.createTemporaryDirectory;
 import ij.ImageJ;
 
 import java.awt.Frame;
@@ -193,9 +195,9 @@ public class HeadlessCompletenessTest {
 		assumeTrue(!GraphicsEnvironment.isHeadless());
 
 		final File jarFile = new File(tmpDir, "Set_Property.jar");
-		TestUtils.makeJar(jarFile, Set_Property.class.getName());
+		makeJar(jarFile, Set_Property.class.getName());
 
-		final LegacyEnvironment headlessIJ1 = TestUtils.getTestEnvironment();
+		final LegacyEnvironment headlessIJ1 = getTestEnvironment();
 		headlessIJ1.addPluginClasspath(jarFile);
 		headlessIJ1.runMacro("", "");
 		final Map<String, String> menuItems =
@@ -204,7 +206,7 @@ public class HeadlessCompletenessTest {
 		assertTrue("does not have 'Set Property'", menuItems
 			.containsKey("Plugins>Set Property"));
 
-		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment(false, false);
+		final LegacyEnvironment ij1 = getTestEnvironment(false, false);
 		ij1.addPluginClasspath(jarFile);
 		final Frame ij1Frame =
 			construct(ij1.getClassLoader(), "ij.ImageJ", ImageJ.NO_SHOW);

@@ -31,6 +31,7 @@
 
 package net.imagej.patcher;
 
+import static net.imagej.patcher.TestUtils.getTestEnvironment;
 import static org.scijava.test.TestUtils.createTemporaryDirectory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -133,7 +134,7 @@ public class FatJarTest {
 
 		try {
 			System.setProperty("plugins.dir", tmp.getAbsolutePath());
-			final LegacyEnvironment ij1 = TestUtils.getTestEnvironment();
+			final LegacyEnvironment ij1 = getTestEnvironment();
 			assertEquals(expect, ij1.runPlugIn(getClass().getName(), "").toString());
 		}
 		finally {
