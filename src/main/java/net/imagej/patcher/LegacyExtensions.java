@@ -820,4 +820,10 @@ class LegacyExtensions {
 			"}");
 	}
 
+	static void suppressIJ1ScriptDiscovery(CodeHacker hacker) {
+		hacker.insertAtTopOfMethod("ij.Menus",
+			"private static boolean validMacroName(java.lang.String name, boolean hasUnderscore)",
+			"return false;");
+	}
+
 }
