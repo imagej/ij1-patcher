@@ -31,6 +31,8 @@
 
 package net.imagej.patcher;
 
+import static net.imagej.patcher.TestUtils.getTestEnvironment;
+import static net.imagej.patcher.TestUtils.makeJar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -90,13 +92,13 @@ public class ExtraPluginDirsTest {
 	@Test
 	public void findsExtraPluginDir() throws Exception {
 		final File jarFile = new File(tmpDir, "Set_Property.jar");
-		TestUtils.makeJar(jarFile, Set_Property.class.getName());
+		makeJar(jarFile, Set_Property.class.getName());
 		assertTrue(jarFile.getAbsolutePath() + " exists", jarFile.exists());
 		System.setProperty("ij1.plugin.dirs", tmpDir.getAbsolutePath());
 
 		final String key = "random-" + Math.random();
 		System.setProperty(key, "321");
-		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment(true, true);
+		final LegacyEnvironment ij1 = getTestEnvironment(true, true);
 		ij1.run("Set Property", "key=" + key + " value=123");
 		assertEquals("123", System.getProperty(key));
 	}
@@ -107,7 +109,7 @@ public class ExtraPluginDirsTest {
 		assertTrue(pluginsDir.mkdirs());
 		final File jarsDir = new File(tmpDir, "jars");
 		assertTrue(jarsDir.mkdirs());
-		LegacyEnvironment ij1 = TestUtils.getTestEnvironment();
+		LegacyEnvironment ij1 = getTestEnvironment();
 		final String helperClassName = TestUtils.class.getName();
 		try {
 			assertNull(ij1.runPlugIn(helperClassName, null));
@@ -115,9 +117,9 @@ public class ExtraPluginDirsTest {
 			/* all okay, we did not find the class */
 		}
 		final File jarFile = new File(jarsDir, "helper.jar");
-		TestUtils.makeJar(jarFile, helperClassName);
+		makeJar(jarFile, helperClassName);
 		System.setProperty("plugins.dir", pluginsDir.getAbsolutePath());
-		ij1 = TestUtils.getTestEnvironment();
+		ij1 = getTestEnvironment();
 		try {
 			assertNotNull(ij1.runPlugIn(helperClassName, null));
 		} catch (Throwable t) {
@@ -157,7 +159,7 @@ public class ExtraPluginDirsTest {
 		final String property = "ij.patcher.test." + Math.random();
 		System.clearProperty(property);
 		assertNull(System.getProperty(property));
-		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment();
+		final LegacyEnvironment ij1 = getTestEnvironment();
 		ij1.addPluginClasspath(tmpDir);
 		ij1.run(menuLabel, "property=" + property);
 		assertEquals(tmpDir.toURI().toURL().toString() + path, System.getProperty(property));
@@ -169,11 +171,11 @@ public class ExtraPluginDirsTest {
 		final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 		try {
 			final File jarFile = new File(tmpDir, "Submenu_Test.jar");
-			TestUtils.makeJar(jarFile, "Submenu_Test");
+			makeJar(jarFile, "Submenu_Test");
 			assertTrue(jarFile.getAbsolutePath() + " exists", jarFile.exists());
 			System.setProperty("ij1.plugin.dirs", tmpDir.getAbsolutePath());
 
-			final LegacyEnvironment ij1 = TestUtils.getTestEnvironment(false, true);
+			final LegacyEnvironment ij1 = getTestEnvironment(false, true);
 			final Class<?> imagej = ij1.getClassLoader().loadClass(ImageJ.class.getName());
 			imagej.getConstructor(Applet.class, Integer.TYPE).newInstance(null, ImageJ.NO_SHOW);
 			ij1.run("Submenu Test", "menupath=[Plugins>Submenu Test] class=Submenu_Test");

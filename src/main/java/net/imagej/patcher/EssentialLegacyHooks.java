@@ -115,7 +115,7 @@ public class EssentialLegacyHooks extends LegacyHooks {
 	/**
 	 * Intended for sole use with patches in {@link ij.IJ}. DO NOT USE.
 	 */
-	public static ClassLoader missingSubdirs(final ClassLoader loader) {
+	public static ClassLoader missingSubdirs(final ClassLoader loader, final boolean addPluginsDir) {
 		if (loader == null || !(loader instanceof URLClassLoader)) return null;
 		final URLClassLoader classLoader = (URLClassLoader) loader;
 		final Set<File> directories = new HashSet<File>();
@@ -126,6 +126,13 @@ public class EssentialLegacyHooks extends LegacyHooks {
 			directories.add(dir);
 		}
 		final Set<File> missing = new HashSet<File>();
+		if (addPluginsDir) {
+			final File plugins = new File(IJ.getDirectory("plugins"));
+			if (!directories.contains(plugins)) {
+				directories.add(plugins);
+				missing.add(plugins);
+			}
+		}
 		try {
 			for (final File dir : new HashSet<File>(directories)) {
 				missingSubdirectories(dir, directories, missing);

@@ -782,8 +782,22 @@ class LegacyExtensions {
 		final String runUserPlugInSig = "static java.lang.Object runUserPlugIn(java.lang.String commandName, java.lang.String className, java.lang.String arg, boolean createNewLoader)";
 		hacker.insertAtTopOfExceptionHandlers("ij.IJ", runUserPlugInSig, "java.lang.NoClassDefFoundError",
 			"java.lang.ClassLoader loader = " + LegacyInjector.ESSENTIAL_LEGACY_HOOKS_CLASS +
-			"  .missingSubdirs(getClassLoader());" +
+			"  .missingSubdirs(getClassLoader(), false);" +
 			"if (loader != null) _classLoader = loader;");
+		hacker.replaceCallInMethod("ij.IJ", runUserPlugInSig,
+			"java.lang.ClassLoader", "loadClass",
+			"try {" +
+			"  $_ = $proceed($$);" +
+			"} catch (java.lang.ClassNotFoundException e) {" +
+			"  java.lang.ClassLoader loader = " + LegacyInjector.ESSENTIAL_LEGACY_HOOKS_CLASS +
+			"    .missingSubdirs(getClassLoader(), true);" +
+			"  if (loader == null) {" +
+			"    throw e;" +
+			"  } else {" +
+			"    _classLoader = loader;" +
+			"    $_ = loader.loadClass($1);" +
+			"  }" +
+			"}");
 	}
 
 	static void disableRefreshMenus(final CodeHacker hacker) {

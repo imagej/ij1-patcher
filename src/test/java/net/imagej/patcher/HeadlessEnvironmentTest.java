@@ -32,7 +32,9 @@
 package net.imagej.patcher;
 
 import static net.imagej.patcher.TestUtils.construct;
+import static net.imagej.patcher.TestUtils.getTestEnvironment;
 import static net.imagej.patcher.TestUtils.invoke;
+import static net.imagej.patcher.TestUtils.makeJar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -87,7 +89,7 @@ public class HeadlessEnvironmentTest {
 
 	@Test
 	public void testMacro() throws Exception {
-		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment();
+		final LegacyEnvironment ij1 = getTestEnvironment();
 		final String propertyName = "headless.test.property" + Math.random();
 		final String propertyValue = "Hello, world!";
 		System.setProperty(propertyName, "(unset)");
@@ -106,7 +108,7 @@ public class HeadlessEnvironmentTest {
 		Thread.currentThread().setName("Run$_" + threadName);
 		Macro.setOptions("(unset)");
 		assertEquals("(unset) ", Macro.getOptions());
-		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment();
+		final LegacyEnvironment ij1 = getTestEnvironment();
 		ij1.runMacro("call(\"ij.Macro.setOptions\", \"Hello, world!\");",
 				null);
 		assertEquals("(unset) ", Macro.getOptions());
@@ -154,7 +156,7 @@ public class HeadlessEnvironmentTest {
 	public void testWithoutPluginClassLoader() throws Exception {
 		tmpDir = createTemporaryDirectory("class-loader-");
 		final File jarFile = new File(tmpDir, "Set_Property.jar");
-		TestUtils.makeJar(jarFile, Set_Property.class.getName());
+		makeJar(jarFile, Set_Property.class.getName());
 
 		// make a new class loader with the plugin and the classes
 		// required to make a new LegacyEnvironment in it
@@ -185,7 +187,7 @@ public class HeadlessEnvironmentTest {
 
 	@Test
 	public void testNonOverriddenMethods() throws Exception {
-		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment(true, false);
+		final LegacyEnvironment ij1 = getTestEnvironment(true, false);
 		final ClassLoader loader = ij1.getClassLoader();
 		final Object result;
 		final Thread thread = Thread.currentThread();
@@ -208,7 +210,7 @@ public class HeadlessEnvironmentTest {
 	}
 
 	private static boolean runExamplePlugin(final boolean patchHeadless, final String arg, final String macroOptions, final String expectedValue) throws Exception {
-		final LegacyEnvironment ij1 = TestUtils.getTestEnvironment(patchHeadless, false);
+		final LegacyEnvironment ij1 = getTestEnvironment(patchHeadless, false);
 		ij1.addPluginClasspath(HeadlessEnvironmentTest.class.getClassLoader());
 		try {
 			ij1.setMacroOptions(macroOptions);
