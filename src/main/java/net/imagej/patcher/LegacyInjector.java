@@ -345,6 +345,7 @@ public class LegacyInjector {
 			final LegacyEnvironment ij1 = new LegacyEnvironment(classLoader, headless);
 			ij1.disableInitializer();
 			ij1.noPluginClassLoader();
+			ij1.suppressIJ1ScriptDiscovery();
 			ij1.applyPatches();
 		} catch (final ClassNotFoundException e) {
 			throw new RuntimeException(e);

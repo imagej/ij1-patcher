@@ -232,6 +232,26 @@ public class LegacyEnvironment {
 	}
 
 	/**
+	 * Disallows ImageJ 1.x from discovering macros and scripts to put into the
+	 * menu structure.
+	 * <p>
+	 * Some callers -- most notably ImageJ2 and Fiji -- want to improve on the
+	 * scripting support, which unfortunately implies overriding the
+	 * non-extensible script and macro handling of ImageJ 1.x.
+	 * </p>
+	 */
+	public void suppressIJ1ScriptDiscovery() {
+		ensureUninitialized();
+		injector.after.add(new Callback() {
+
+			@Override
+			public void call(final CodeHacker hacker) {
+				LegacyExtensions.suppressIJ1ScriptDiscovery(hacker);
+			}
+		});
+	}
+
+	/**
 	 * Adds the class path of a given {@link ClassLoader} to the plugin class
 	 * loader.
 	 * <p>
