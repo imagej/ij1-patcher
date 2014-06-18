@@ -293,7 +293,7 @@ class LegacyExtensions {
 		handleMacAdapter(hacker);
 		handleMenuCallbacks(hacker, headless);
 		installOpenInterceptor(hacker);
-		handleThreadAncestors(hacker);
+		handleMacroGetOptions(hacker);
 	}
 
 	/**
@@ -759,7 +759,12 @@ class LegacyExtensions {
 			"}");
 	}
 
-	private static void handleThreadAncestors(CodeHacker hacker) {
+	private static void handleMacroGetOptions(CodeHacker hacker) {
+		// remove that pesky, pesky Run$_ restriction
+		hacker.replaceCallInMethod("ij.Macro", "public static java.lang.String getOptions()",
+			"java.lang.String", "startsWith",
+			"$_ = \"Run$_\".equals($1) ? true : $proceed($$);");
+		// look at more threads than just the current one, if the legacy hooks have some for us
 		hacker.replaceCallInMethod("ij.Macro", "public static java.lang.String getOptions()",
 			"java.util.Hashtable", "get",
 			"$_ = $proceed($$);" +
