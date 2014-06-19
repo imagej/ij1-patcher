@@ -782,15 +782,14 @@ class LegacyExtensions {
 
 	static void noPluginClassLoader(final CodeHacker hacker) {
 		hacker.insertPrivateStaticField("ij.IJ", ClassLoader.class, "_classLoader");
+		final String initClassLoader =
+			"_classLoader = Thread.currentThread().getContextClassLoader();";
 		hacker.insertAtTopOfMethod("ij.IJ",
 			"static void init()",
-			"_classLoader = Thread.currentThread().getContextClassLoader();");
-		hacker.insertAtTopOfMethod("ij.IJ",
-			"static void init()",
-			"_classLoader = Thread.currentThread().getContextClassLoader();");
+			initClassLoader);
 		hacker.insertAtTopOfMethod("ij.IJ",
 			"static void init(ij.ImageJ imagej, java.applet.Applet theApplet)",
-				"_classLoader = Thread.currentThread().getContextClassLoader();");
+			initClassLoader);
 		hacker.insertAtTopOfMethod("ij.IJ",
 			"public static ClassLoader getClassLoader()",
 			"return _classLoader;");
