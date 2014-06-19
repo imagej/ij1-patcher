@@ -650,4 +650,22 @@ public abstract class LegacyHooks {
 	public boolean interceptKeyPressed(final KeyEvent e) {
 		return false;
 	}
+
+	/**
+	 * Iterates through the current thread's ancestors.
+	 * <p>
+	 * ImageJ 1.x' macro options are thread-local. Unfortunately, this does not
+	 * take into account thread relationships e.g. when threads are spawned in
+	 * parallel.
+	 * </p>
+	 * <p>
+	 * By overriding this method, legacy hooks can force ImageJ 1.x to look harder
+	 * for macro options.
+	 * </p>
+	 * 
+	 * @return the ancestor(s) of the current thread, or null
+	 */
+	public Iterable<Thread> getThreadAncestors() {
+		return null;
+	}
 }

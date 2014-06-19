@@ -293,6 +293,7 @@ class LegacyExtensions {
 		handleMacAdapter(hacker);
 		handleMenuCallbacks(hacker, headless);
 		installOpenInterceptor(hacker);
+		handleMacroGetOptions(hacker);
 	}
 
 	/**
@@ -755,6 +756,25 @@ class LegacyExtensions {
 			"ij.ImagePlus imp = (ij.ImagePlus) ij.IJ.runPlugIn(\"ij.plugin.LutLoader\", $1);" +
 			"if (imp != null && imp.getWidth() > 0) {" +
 			"  imp.show();" +
+			"}");
+	}
+
+	private static void handleMacroGetOptions(CodeHacker hacker) {
+		// remove that pesky, pesky Run$_ restriction
+		hacker.replaceCallInMethod("ij.Macro", "public static java.lang.String getOptions()",
+			"java.lang.String", "startsWith",
+			"$_ = \"Run$_\".equals($1) ? true : $proceed($$);");
+		// look at more threads than just the current one, if the legacy hooks have some for us
+		hacker.replaceCallInMethod("ij.Macro", "public static java.lang.String getOptions()",
+			"java.util.Hashtable", "get",
+			"$_ = $proceed($$);" +
+			"if ($_ == null) {" +
+			"  java.lang.Iterable ancestors = ij.IJ._hooks.getThreadAncestors();" +
+			"  if (ancestors != null) {" +
+			"    for (java.util.Iterator iter = ancestors.iterator(); $_ == null && iter.hasNext(); ) {" +
+			"      $_ = $proceed(iter.next());" +
+			"    }" +
+			"  }" +
 			"}");
 	}
 
