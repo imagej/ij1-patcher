@@ -790,8 +790,28 @@ class LegacyExtensions {
 		hacker.insertAtTopOfMethod("ij.IJ",
 			"static void init(ij.ImageJ imagej, java.applet.Applet theApplet)",
 			initClassLoader);
+
+		// Make sure that bare .class files in plugins/ and subdirectories are seen by ImageJ 1.x.
+		// This needs to be done *after* Menus made sure that IJ.getDirectory("plugins") returns non-null
+		final String supportBarePlugins =
+			"java.lang.ClassLoader loader = " + LegacyInjector.ESSENTIAL_LEGACY_HOOKS_CLASS +
+			"  .missingSubdirs(_classLoader, true);" +
+			"if (loader != null) {" +
+			"  Thread.currentThread().setContextClassLoader(loader);" +
+			"  _classLoader = loader;" +
+			"}";
+		hacker.insertAtBottomOfMethod("ij.IJ",
+			"static void init()",
+			supportBarePlugins);
+		hacker.insertAtBottomOfMethod("ij.IJ",
+			"static void init(ij.ImageJ imagej, java.applet.Applet theApplet)",
+			supportBarePlugins);
 		hacker.insertAtTopOfMethod("ij.IJ",
 			"public static ClassLoader getClassLoader()",
+			"if (_classLoader == null) {" +
+			initClassLoader +
+			supportBarePlugins +
+			"}" +
 			"return _classLoader;");
 		hacker.insertAtTopOfMethod(LegacyInjector.ESSENTIAL_LEGACY_HOOKS_CLASS,
 			"public <init>()", "addThisLoadersClasspath();");
