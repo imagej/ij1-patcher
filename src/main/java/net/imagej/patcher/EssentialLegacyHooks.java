@@ -127,7 +127,10 @@ public class EssentialLegacyHooks extends LegacyHooks {
 		}
 		final Set<File> missing = new HashSet<File>();
 		if (addPluginsDir) {
-			final String pluginsDir = IJ.getDirectory("plugins");
+			String pluginsDir = IJ.getDirectory("plugins");
+			if (pluginsDir == null) {
+				pluginsDir = System.getProperty("plugins.dir");
+			}
 			if (pluginsDir != null) {
 				final File plugins = new File(pluginsDir);
 				if (!directories.contains(plugins)) {
