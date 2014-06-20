@@ -33,6 +33,7 @@ package net.imagej.patcher;
 
 import static net.imagej.patcher.TestUtils.invokeStatic;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.scijava.test.TestUtils.createTemporaryDirectory;
 
@@ -97,6 +98,48 @@ public class BarePluginsTest {
 			ij1.run("Bare Test Plugin", message);
 			final ClassLoader loader = invokeStatic(ij1.getClassLoader(), "ij.IJ", "getClassLoader");
 			assertEquals("bare " + message, invokeStatic(loader, "Bare_Test_Plugin", "get"));
+		} finally {
+			if (pluginsDir == null) {
+				System.clearProperty("plugins.dir");
+			} else {
+				System.setProperty("plugins.dir", pluginsDir);
+			}
+		}
+	}
+
+	/**
+	 * Verifies that bare {@code HandleExtraFileTypes.class} files are picked up correctly.
+	 * <p>
+	 * See http://imagej.1557.x6.nabble.com/Handle-Extra-Files-Types-not-working-tp5008224.html.
+	 * </p>
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testHandleExtraFileTypes() throws Exception {
+		// generate simple plugin
+		final File tmp = createTemporaryDirectory("handle-extra-file-types-");
+		final File plugins = new File(tmp, "plugins");
+		assertTrue(plugins.mkdir());
+
+		final ClassPool pool = new ClassPool();
+		pool.appendClassPath(new ClassClassPath(getClass()));
+		final CtClass clazz = pool.makeClass("HandleExtraFileTypes");
+		clazz.addMethod(CtMethod.make("public java.lang.String toString() {" +
+			"  return \"It works!\";" +
+			"}",
+			clazz));
+		clazz.writeFile(plugins.getPath());
+
+		final String pluginsDir = System.getProperty("plugins.dir");
+		try {
+			System.setProperty("plugins.dir", plugins.getPath());
+			final LegacyEnvironment ij1 = new LegacyEnvironment(null, true);
+			ij1.noPluginClassLoader();
+			//ij1.runPlugIn("ij.IJ.init", "");
+			Object handleExtraFileTypes = ij1.runPlugIn("HandleExtraFileTypes", "");
+			assertNotNull(handleExtraFileTypes);
+			assertEquals("It works!", handleExtraFileTypes.toString());
 		} finally {
 			if (pluginsDir == null) {
 				System.clearProperty("plugins.dir");
