@@ -63,7 +63,7 @@ import java.util.regex.Pattern;
  * <p>
  * These extension points will be patched into ImageJ 1.x by the
  * {@link CodeHacker}. To override the behavior of ImageJ 1.x, a new instance of
- * this interface needs to be installed into <code>ij.IJ._hooks</code>.
+ * this class needs to be installed into <code>ij.IJ._hooks</code>.
  * </p>
  * <p>
  * The essential functionality of the hooks is provided in the
