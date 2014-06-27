@@ -295,6 +295,7 @@ class LegacyExtensions {
 		installOpenInterceptor(hacker);
 		handleMacroGetOptions(hacker);
 		interceptCloseAllWindows(hacker);
+		interceptDisposal(hacker);
 	}
 
 	// -- methods to install additional hooks into ImageJ 1.x --
@@ -787,6 +788,16 @@ class LegacyExtensions {
 			"if ($_ == true) {" +
 			"  $_ = ij.IJ._hooks.interceptCloseAllWindows();" +
 			"}");
+	}
+
+	private static void interceptDisposal(final CodeHacker hacker) {
+		hacker.replaceCallInMethod("ij.ImageJ", "public void run()", "ij.IJ",
+			"cleanup",
+			"if (!ij.IJ._hooks.disposing()) {" +
+			"  quitting = false;" +
+			"  return;" +
+			"}" +
+			"$_ = $proceed($$);");
 	}
 
 	// -- methods to configure LegacyEnvironment instances --

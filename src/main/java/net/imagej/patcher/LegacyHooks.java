@@ -681,4 +681,20 @@ public abstract class LegacyHooks {
 	public boolean interceptCloseAllWindows() {
 		return true;
 	}
+
+	/**
+	 * Allows interception of ImageJ 1.x's disposal routine while quitting.
+	 * <p>
+	 * This method is called after it has been confirmed that quitting should
+	 * proceed. That is, the user OKed all the windows being closed, etc.
+	 * This method provides one final chance to cancel the quit operation by
+	 * returning false; otherwise, it performs any needed disposal and cleanup.
+	 * </p>
+	 * 
+	 * @return whether ImageJ 1.x should proceed in quitting
+	 * @see ij.ImageJ#run() which is where ImageJ 1.x actually quits
+	 */
+	public boolean disposing() {
+		return true;
+	}
 }
