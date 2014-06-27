@@ -98,9 +98,9 @@ public abstract class LegacyHooks {
 	}
 
 	/**
-	 * Disposes and prepares for quitting.
+	 * Allows interception of ImageJ 1.x's {@link ij.ImageJ#quit()} method.
 	 * 
-	 * @return whether ImageJ 1.x should be allowed to call System.exit()
+	 * @return whether ImageJ 1.x should proceed with its usual quitting routine
 	 */
 	public boolean quit() {
 		return true;
