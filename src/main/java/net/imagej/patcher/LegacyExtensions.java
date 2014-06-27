@@ -294,6 +294,7 @@ class LegacyExtensions {
 		handleMenuCallbacks(hacker, headless);
 		installOpenInterceptor(hacker);
 		handleMacroGetOptions(hacker);
+		interceptCloseAllWindows(hacker);
 	}
 
 	// -- methods to install additional hooks into ImageJ 1.x --
@@ -777,6 +778,14 @@ class LegacyExtensions {
 			"      $_ = $proceed(iter.next());" +
 			"    }" +
 			"  }" +
+			"}");
+	}
+
+	private static void interceptCloseAllWindows(final CodeHacker hacker) {
+		hacker.insertAtBottomOfMethod("ij.WindowManager",
+			"public synchronized static boolean closeAllWindows()",
+			"if ($_ == true) {" +
+			"  $_ = ij.IJ._hooks.interceptCloseAllWindows();" +
 			"}");
 	}
 

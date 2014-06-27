@@ -668,4 +668,17 @@ public abstract class LegacyHooks {
 	public Iterable<Thread> getThreadAncestors() {
 		return null;
 	}
+
+	/**
+	 * Allows closing additional windows at the end of
+	 * {@link ij.WindowManager#closeAllWindows()}.
+	 * <p>
+	 * When returning {@code false}, ImageJ 1.x will be disallowed from quitting.
+	 * </p>
+	 * 
+	 * @return whether it is okay to quit
+	 */
+	public boolean interceptCloseAllWindows() {
+		return true;
+	}
 }
