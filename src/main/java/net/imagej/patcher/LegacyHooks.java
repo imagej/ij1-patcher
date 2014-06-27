@@ -85,7 +85,7 @@ public abstract class LegacyHooks {
 	}
 
 	/**
-	 * Return the current context, if any.
+	 * Returns the current context, if any.
 	 * <p>
 	 * For ImageJ2-specific hooks, the returned object will be the current SciJava
 	 * context, or null if the context is not yet initialized.
