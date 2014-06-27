@@ -296,6 +296,8 @@ class LegacyExtensions {
 		handleMacroGetOptions(hacker);
 	}
 
+	// -- methods to install additional hooks into ImageJ 1.x --
+
 	/**
 	 * Install a hook to optionally run a Runnable at the end of Help>Refresh Menus.
 	 * 
