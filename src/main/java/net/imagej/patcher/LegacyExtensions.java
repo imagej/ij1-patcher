@@ -780,7 +780,7 @@ class LegacyExtensions {
 			"}");
 	}
 
-	// methods to configure LegacyEnvironment instances
+	// -- methods to configure LegacyEnvironment instances --
 
 	static void noPluginClassLoader(final CodeHacker hacker) {
 		hacker.insertPrivateStaticField("ij.IJ", ClassLoader.class, "_classLoader");
