@@ -46,10 +46,12 @@ import java.util.Set;
  * This is the minimal implementation of {@link LegacyHooks} and will be
  * installed by default after patching in the extension points into ImageJ 1.x.
  * On its own, it does not allow to override the extension points (such as the
- * editor) with different implementations; one needs to install different hooks using
- * the {@link net.imagej.patcher.CodeHacker#installHooks(LegacyHooks)} method.
+ * editor) with different implementations; one needs to install different hooks
+ * using the
+ * {@link net.imagej.patcher.LegacyInjector#installHooks(ClassLoader, LegacyHooks)}
+ * method.
  * </p>
- * </p>
+ * <p>
  * This class is also the perfect base class for all implementations of the
  * {@link LegacyHooks} interface, e.g. to offer "real" extension mechanisms such
  * as the SciJava-common plugin framework.
