@@ -285,6 +285,22 @@ public class LegacyInjector {
 			"if ($0 != null) $_ = $proceed($$);");
 		LegacyExtensions.injectHooks(hacker, headless);
 
+		// avoid ClassCastException when ImageJ 1.x can carelessly cast an ImageWindow to a StackWindow
+		hacker.guardCast("ij.ImagePlus",
+			"public void setStack(java.lang.String title, ij.ImageStack newStack)",
+			"ij.gui.StackWindow");
+		hacker.replaceCallInMethod("ij.ImagePlus",
+			"public void setStack(java.lang.String title, ij.ImageStack newStack)",
+			"ij.gui.StackWindow", "validDimensions",
+			"$_ = $0 == null ? false : $proceed($$);");
+
+		// avoid showing newly-created StackWindow instances in batch mode
+		hacker.replaceCallInMethod("ij.gui.StackWindow",
+			"public <init>(ij.ImagePlus imp, ij.gui.ImageCanvas ic)",
+			"ij.gui.StackWindow",
+			"show",
+			"if (!ij.macro.Interpreter.batchMode) show();");
+
 		return hacker;
 	}
 

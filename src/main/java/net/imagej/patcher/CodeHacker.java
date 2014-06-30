@@ -72,6 +72,7 @@ import javassist.bytecode.ConstPool;
 import javassist.bytecode.InstructionPrinter;
 import javassist.bytecode.MethodInfo;
 import javassist.bytecode.Opcode;
+import javassist.expr.Cast;
 import javassist.expr.ConstructorCall;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
@@ -722,6 +723,48 @@ class CodeHacker {
 		catch (final Throwable e) {
 			maybeThrow(new IllegalArgumentException("Cannot handle replace call to " +
 				calledMethodName + " in " + fullClass + "'s " + methodSig, e));
+		}
+	}
+
+	/**
+	 * Guards a careless cast behind an {@code instanceof} test.
+	 * <p>
+	 * Defensive programming entails verifying that an object can be cast to a
+	 * certain class before doing so. This method applies that technique,
+	 * assigning {@code null} as cast result when the object is not actually of
+	 * the correct type.
+	 * </p>
+	 * 
+	 * @param fullClass the class of the method to edit
+	 * @param methodSig the signature of the method to edit
+	 * @param targetClass the target class of the cast
+	 */
+	public void guardCast(final String fullClass,
+		final String methodSig, final String targetClass) {
+		final CtBehavior method = getBehavior(fullClass, methodSig);
+		try {
+			method.instrument(new ExprEditor() {
+				@Override
+				public void edit(final Cast cast) {
+					try {
+						if (cast.getType().getName().equals(targetClass)) {
+							cast.replace("if ($1 != null && $1 instanceof " + targetClass + ") {" + //
+								"  $_ = (" + targetClass + ") $1;" + //
+								"} else {" + //
+								"  $_ = null;" + //
+								"}");
+						}
+					}
+					catch (Exception e) {
+						maybeThrow(new IllegalArgumentException(
+							"Cannot handle cast to " + targetClass, e));
+					}
+				}
+			});
+		}
+		catch (final Throwable e) {
+			maybeThrow(new IllegalArgumentException("Cannot handle cast to " +
+				targetClass + " in " + fullClass + "'s " + methodSig, e));
 		}
 	}
 
