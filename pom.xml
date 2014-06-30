@@ -17,8 +17,6 @@
 
 	<properties>
 		<ij1-patcher.jar>${project.build.directory}/${project.build.finalName}.jar</ij1-patcher.jar>
-		<!-- TEMP: needed until pom-scijava 2.6, to let tests pass even on Windows -->
-		<scijava-common.version>2.20.2</scijava-common.version>
 	</properties>
 
 	<dependencies>
