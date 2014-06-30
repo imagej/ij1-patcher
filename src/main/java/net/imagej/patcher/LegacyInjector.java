@@ -294,6 +294,13 @@ public class LegacyInjector {
 			"ij.gui.StackWindow", "validDimensions",
 			"$_ = $0 == null ? false : $proceed($$);");
 
+		// avoid showing newly-created StackWindow instances in batch mode
+		hacker.replaceCallInMethod("ij.gui.StackWindow",
+			"public <init>(ij.ImagePlus imp, ij.gui.ImageCanvas ic)",
+			"ij.gui.StackWindow",
+			"show",
+			"if (!ij.macro.Interpreter.batchMode) show();");
+
 		return hacker;
 	}
 
