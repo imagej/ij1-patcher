@@ -737,6 +737,13 @@ class LegacyExtensions {
 						"else if (result instanceof java.lang.String) path = (java.lang.String)result;" +
 						"else return null; " +
 				"}");
+		hacker.replaceCallInMethod("ij.plugin.FolderOpener", "public void run(java.lang.String arg)", "ij.io.Opener", "openImage",
+			"Object result = ij.IJ._hooks.interceptOpenImage($1 + $2, -1);" +
+			"if (result != null && result instanceof ij.ImagePlus) {" +
+			"  $_ = (ij.ImagePlus)result;" +
+			"} else {" +
+			"  $_ = $proceed($$);" +
+			"}");
 
 		// Intercept File > Open Recent
 		hacker.replaceCallInMethod("ij.RecentOpener", "public void run()",
