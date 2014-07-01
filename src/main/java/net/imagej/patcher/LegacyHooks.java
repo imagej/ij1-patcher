@@ -63,7 +63,7 @@ import java.util.regex.Pattern;
  * <p>
  * These extension points will be patched into ImageJ 1.x by the
  * {@link CodeHacker}. To override the behavior of ImageJ 1.x, a new instance of
- * this interface needs to be installed into <code>ij.IJ._hooks</code>.
+ * this class needs to be installed into <code>ij.IJ._hooks</code>.
  * </p>
  * <p>
  * The essential functionality of the hooks is provided in the
@@ -85,7 +85,7 @@ public abstract class LegacyHooks {
 	}
 
 	/**
-	 * Return the current context, if any.
+	 * Returns the current context, if any.
 	 * <p>
 	 * For ImageJ2-specific hooks, the returned object will be the current SciJava
 	 * context, or null if the context is not yet initialized.
@@ -98,9 +98,9 @@ public abstract class LegacyHooks {
 	}
 
 	/**
-	 * Disposes and prepares for quitting.
+	 * Allows interception of ImageJ 1.x's {@link ij.ImageJ#quit()} method.
 	 * 
-	 * @return whether ImageJ 1.x should be allowed to call System.exit()
+	 * @return whether ImageJ 1.x should proceed with its usual quitting routine
 	 */
 	public boolean quit() {
 		return true;
@@ -667,5 +667,34 @@ public abstract class LegacyHooks {
 	 */
 	public Iterable<Thread> getThreadAncestors() {
 		return null;
+	}
+
+	/**
+	 * Allows closing additional windows at the end of
+	 * {@link ij.WindowManager#closeAllWindows()}.
+	 * <p>
+	 * When returning {@code false}, ImageJ 1.x will be disallowed from quitting.
+	 * </p>
+	 * 
+	 * @return whether it is okay to quit
+	 */
+	public boolean interceptCloseAllWindows() {
+		return true;
+	}
+
+	/**
+	 * Allows interception of ImageJ 1.x's disposal routine while quitting.
+	 * <p>
+	 * This method is called after it has been confirmed that quitting should
+	 * proceed. That is, the user OKed all the windows being closed, etc.
+	 * This method provides one final chance to cancel the quit operation by
+	 * returning false; otherwise, it performs any needed disposal and cleanup.
+	 * </p>
+	 * 
+	 * @return whether ImageJ 1.x should proceed in quitting
+	 * @see ij.ImageJ#run() which is where ImageJ 1.x actually quits
+	 */
+	public boolean disposing() {
+		return true;
 	}
 }

@@ -294,7 +294,11 @@ class LegacyExtensions {
 		handleMenuCallbacks(hacker, headless);
 		installOpenInterceptor(hacker);
 		handleMacroGetOptions(hacker);
+		interceptCloseAllWindows(hacker);
+		interceptDisposal(hacker);
 	}
+
+	// -- methods to install additional hooks into ImageJ 1.x --
 
 	/**
 	 * Install a hook to optionally run a Runnable at the end of Help>Refresh Menus.
@@ -778,7 +782,25 @@ class LegacyExtensions {
 			"}");
 	}
 
-	// methods to configure LegacyEnvironment instances
+	private static void interceptCloseAllWindows(final CodeHacker hacker) {
+		hacker.insertAtBottomOfMethod("ij.WindowManager",
+			"public synchronized static boolean closeAllWindows()",
+			"if ($_ == true) {" +
+			"  $_ = ij.IJ._hooks.interceptCloseAllWindows();" +
+			"}");
+	}
+
+	private static void interceptDisposal(final CodeHacker hacker) {
+		hacker.replaceCallInMethod("ij.ImageJ", "public void run()", "ij.IJ",
+			"cleanup",
+			"if (!ij.IJ._hooks.disposing()) {" +
+			"  quitting = false;" +
+			"  return;" +
+			"}" +
+			"$_ = $proceed($$);");
+	}
+
+	// -- methods to configure LegacyEnvironment instances --
 
 	static void noPluginClassLoader(final CodeHacker hacker) {
 		hacker.insertPrivateStaticField("ij.IJ", ClassLoader.class, "_classLoader");
