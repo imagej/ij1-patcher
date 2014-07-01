@@ -35,8 +35,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
+
 import ij.IJ;
 import ij.ImageJ;
+
+import java.awt.GraphicsEnvironment;
 
 import org.junit.Test;
 
@@ -66,6 +70,9 @@ public class LegacyHooksTest {
 	 */
 	@Test
 	public void testShutdownHooks() throws Exception {
+		// we really cannot test this in headless mode
+		assumeTrue(!GraphicsEnvironment.isHeadless());
+
 		final Boolean[] results = new Boolean[3];
 		final Thread[] quitThread = new Thread[1];
 
