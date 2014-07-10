@@ -464,11 +464,10 @@ public class LegacyEnvironment {
 				}
 				runPlugIn("ij.IJ.init", null);
 				return null;
-			} else {
-				final Class<?> clazz = getClassLoader().loadClass("ij.ImageJ");
-				final int mode = hidden ? 2 /* NO_SHOW */: 0 /* STANDALONE */;
-				return clazz.getConstructor(Integer.TYPE).newInstance(mode);
 			}
+			final Class<?> clazz = getClassLoader().loadClass("ij.ImageJ");
+			final int mode = hidden ? 2 /* NO_SHOW */: 0 /* STANDALONE */;
+			return clazz.getConstructor(Integer.TYPE).newInstance(mode);
 		} catch (Throwable t) {
 			if (t instanceof RuntimeException) throw (RuntimeException) t;
 			if (t instanceof Error) throw (Error) t;
