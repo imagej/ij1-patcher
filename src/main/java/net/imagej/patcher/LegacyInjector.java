@@ -76,6 +76,22 @@ public class LegacyInjector {
 	List<Callback> after = new ArrayList<Callback>();
 
 	/**
+	 * Determines the ImageJ 1.x version without loading the ImageJ 1.x classes.
+	 * 
+	 * @param hacker the {@link CodeHacker} instance to use
+	 * @return the ImageJ 1.x version
+	 */
+	public static String getImageJ1Version(final CodeHacker hacker) {
+		try {
+			return hacker.getConstant("ij.ImageJ", "VERSION");
+		}
+		catch (final NotFoundException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	/**
 	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
 	 * 
 	 * @param classLoader the class loader into which to load the patched classes
