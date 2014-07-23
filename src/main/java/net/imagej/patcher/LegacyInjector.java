@@ -91,6 +91,12 @@ public class LegacyInjector {
 		}
 	}
 
+	public static boolean isImageJ1VersionAtLeast(final CodeHacker hacker, final String minimalVersion) {
+		final String imagej1Version = getImageJ1Version(hacker);
+		if (imagej1Version == null) return false;
+		return Utils.ij1VersionCompare(imagej1Version, minimalVersion) >= 0;
+	}
+
 	/**
 	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
 	 * 
