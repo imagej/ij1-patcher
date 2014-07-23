@@ -1524,4 +1524,9 @@ class CodeHacker {
 	public void commitClass(String clazz) {
 		getClass(clazz);
 	}
+
+	public String getConstant(final String clazz, final String fieldName) throws NotFoundException {
+		final CtClass c = getClass(clazz);
+		return (String) c.getField(fieldName).getConstantValue();
+	}
 }

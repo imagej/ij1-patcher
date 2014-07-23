@@ -76,6 +76,28 @@ public class LegacyInjector {
 	List<Callback> after = new ArrayList<Callback>();
 
 	/**
+	 * Determines the ImageJ 1.x version without loading the ImageJ 1.x classes.
+	 * 
+	 * @param hacker the {@link CodeHacker} instance to use
+	 * @return the ImageJ 1.x version
+	 */
+	public static String getImageJ1Version(final CodeHacker hacker) {
+		try {
+			return hacker.getConstant("ij.ImageJ", "VERSION");
+		}
+		catch (final NotFoundException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static boolean isImageJ1VersionAtLeast(final CodeHacker hacker, final String minimalVersion) {
+		final String imagej1Version = getImageJ1Version(hacker);
+		if (imagej1Version == null) return false;
+		return Utils.ij1VersionCompare(imagej1Version, minimalVersion) >= 0;
+	}
+
+	/**
 	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
 	 * 
 	 * @param classLoader the class loader into which to load the patched classes
@@ -300,6 +322,16 @@ public class LegacyInjector {
 			"ij.gui.StackWindow",
 			"show",
 			"if (!ij.macro.Interpreter.batchMode) show();");
+
+		// fix Window menu items being carelessly appended to the end, always
+		if (!headless) {
+			hacker.replaceCallInMethod("ij.Menus",
+				"static synchronized void addWindowMenuItem(ij.ImagePlus imp)",
+				"java.awt.Menu", "add",
+				"$0.insert($1, WINDOW_MENU_ITEMS + windowMenuItems2" +
+				"  + ij.WindowManager.getWindowCount() - 1);" +
+				"$_ = $1;");
+		}
 
 		return hacker;
 	}
