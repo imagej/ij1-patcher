@@ -45,6 +45,8 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Provides some functions originally found in SciJava-common.
@@ -339,5 +341,37 @@ class Utils {
 			if (haystack.contains(needle)) return true;
 		}
 		return false;
+	}
+
+	public static int ij1VersionCompare(final String a, final String b) {
+		final Pattern pattern = Pattern.compile("(\\d+)\\.(\\d+)(([a-z])(\\d+)?)?");
+		final Matcher matcherA = pattern.matcher(a);
+		if (!matcherA.matches()) return -1;
+		final Matcher matcherB = pattern.matcher(b);
+		if (!matcherB.matches()) return +1;
+		// 1.35 < 2.1
+		int compare = Integer.parseInt(matcherA.group(1)) - Integer.parseInt(matcherB.group(1));
+		if (compare != 0) return compare;
+		// 1.5 < 1.35
+		compare = Integer.parseInt(matcherA.group(2)) - Integer.parseInt(matcherB.group(2));
+		if (compare != 0) return compare;
+		final String letterA = matcherA.group(4);
+		final String letterB = matcherB.group(4);
+		// 1.49 > 1.49a
+		if (letterA == null) return letterB == null ? 0 : +1;
+		// 1.49a < 1.49
+		if (letterB == null) return -1;
+		compare = letterA.compareTo(letterB);
+		if (compare != 0) return compare;
+
+		final String dailyA = matcherA.group(5);
+		final String dailyB = matcherB.group(5);
+		// 1.49a > 1.49a2
+		if (dailyA == null) {
+			return dailyB == null ? 0 : +1;
+		}
+		// 1.49a2 < 1.49a
+		if (dailyB == null) return -1;
+		return Integer.parseInt(dailyA) - Integer.parseInt(dailyB);
 	}
 }

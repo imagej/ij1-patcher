@@ -32,6 +32,7 @@
 package net.imagej.patcher;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.net.URL;
 import java.util.HashSet;
@@ -212,6 +213,19 @@ public class ImageJ1EncapsulationTest {
 			}
 			catch (NotFoundException e2) {
 				throw new RuntimeException(e2);
+			}
+		}
+	}
+
+	@Test
+	public void testVersionCompare() {
+		final String[] versions = { "1.48", "1.49a2", "1.49a12", "1.49a", "1.49e5", "1.49g", "1.49" };
+		for (int i = 0; i < versions.length; i++) {
+			for (int j = 0; j < versions.length; j++) {
+				int compare = Utils.ij1VersionCompare(versions[i], versions[j]);
+				if (i < j) assertTrue(compare < 0);
+				else if (i > j) assertTrue(compare > 0);
+				else assertTrue(compare == 0);
 			}
 		}
 	}
