@@ -323,6 +323,16 @@ public class LegacyInjector {
 			"show",
 			"if (!ij.macro.Interpreter.batchMode) show();");
 
+		// fix Window menu items being carelessly appended to the end, always
+		if (!headless) {
+			hacker.replaceCallInMethod("ij.Menus",
+				"static synchronized void addWindowMenuItem(ij.ImagePlus imp)",
+				"java.awt.Menu", "add",
+				"$0.insert($1, WINDOW_MENU_ITEMS + windowMenuItems2" +
+				"  + ij.WindowManager.getWindowCount() - 1);" +
+				"$_ = $1;");
+		}
+
 		return hacker;
 	}
 
