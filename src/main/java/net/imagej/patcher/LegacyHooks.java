@@ -593,9 +593,8 @@ public abstract class LegacyHooks {
 		final List<File> result = new ArrayList<File>();
 		for (ClassLoader loader = fromClassLoader; loader != null; loader =
 				loader.getParent()) {
-			if (loader == null || exclude.contains(loader)) {
-				break;
-			}
+			if (exclude.contains(loader)) break;
+
 			if (!(loader instanceof URLClassLoader)) {
 				errors.append("Cannot add class path from ClassLoader of type ")
 				.append(fromClassLoader.getClass().getName()).append("\n");
