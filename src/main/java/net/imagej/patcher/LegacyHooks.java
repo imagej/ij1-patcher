@@ -524,6 +524,7 @@ public abstract class LegacyHooks {
 	 * @return The opened object, or {@code null} to let ImageJ 1.x open the path.
 	 * @deprecated this will be removed before ij1-patcher 1.0.0
 	 */
+	@Deprecated
 	public Object interceptOpen(final String path, final int planeIndex,
 		final boolean display) {
 		return null;
