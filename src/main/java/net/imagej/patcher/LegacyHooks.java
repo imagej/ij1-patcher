@@ -405,7 +405,7 @@ public abstract class LegacyHooks {
 			class. Improvements to this Pattern string should also be mirrored there.
 			*/
 			final Pattern pattern =
-				Pattern.compile("(batik|jython|jruby)(-[0-9].*)?\\.jar");
+				Pattern.compile("(batik|jython|jython-standalone|jruby)(-[0-9].*)?\\.jar");
 			Arrays.sort(names, new FatJarNameComparator(pattern));
 		}
 		return names;
