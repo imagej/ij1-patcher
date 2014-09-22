@@ -331,6 +331,7 @@ public class LegacyInjector {
 			return true;
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 			throw CodeHacker.javaAgentHint("No _hooks field found in ij.IJ", e);
 		}
 	}
