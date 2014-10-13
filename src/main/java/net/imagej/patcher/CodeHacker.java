@@ -44,7 +44,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
@@ -98,7 +99,7 @@ class CodeHacker {
 
 	private final ClassPool pool;
 	protected final ClassLoader classLoader;
-	private final Set<CtClass> handledClasses = new LinkedHashSet<CtClass>();
+	private final Map<String, CtClass> handledClasses = new LinkedHashMap<String, CtClass>();
 	private final boolean onlyLogExceptions;
 
 	public CodeHacker(final ClassLoader classLoader, final ClassPool classPool) {
@@ -848,7 +849,7 @@ class CodeHacker {
 			// ignore
 		}
 
-		final Iterator<CtClass> iter = handledClasses.iterator();
+		final Iterator<CtClass> iter = handledClasses.values().iterator();
 		while (iter.hasNext()) {
 			final CtClass classRef = iter.next();
 			if (!classRef.isFrozen() && classRef.isModified()) {
@@ -861,7 +862,7 @@ class CodeHacker {
 	/** Gets the list of patched classes. */
 	Collection<CtClass> getPatchedClasses() {
 		final Set<CtClass> result = new HashSet<CtClass>();
-		for (final CtClass clazz : handledClasses) {
+		for (final CtClass clazz : handledClasses.values()) {
 			if (!clazz.isFrozen() && clazz.isModified()) {
 				result.add(clazz);
 			}
@@ -873,7 +874,7 @@ class CodeHacker {
 	CtClass getClass(final String fullClass) {
 		try {
 			final CtClass classRef = pool.get(fullClass);
-			if (classRef.getClassPool() == pool) handledClasses.add(classRef);
+			if (classRef.getClassPool() == pool) handledClasses.put(classRef.getName(), classRef);
 			return classRef;
 		}
 		catch (final NotFoundException e) {
@@ -1355,7 +1356,7 @@ class CodeHacker {
 	public void writeJar(final File path) throws IOException {
 		final JarOutputStream jar = new JarOutputStream(new FileOutputStream(path));
 		final DataOutputStream dataOut = new DataOutputStream(jar);
-		for (final CtClass clazz : handledClasses) {
+		for (final CtClass clazz : handledClasses.values()) {
 			if (!clazz.isModified() && !clazz.getName().startsWith("net.imagej.patcher.")) continue;
 			final ZipEntry entry =
 				new ZipEntry(clazz.getName().replace('.', '/') + ".class");
@@ -1399,7 +1400,7 @@ class CodeHacker {
 			}
 			dataOut.flush();
 		}
-		for (final CtClass clazz : handledClasses) {
+		for (final CtClass clazz : handledClasses.values()) {
 			if (!clazz.isModified() && !clazz.getName().startsWith("net.imagej.patcher.")) continue;
 			final ZipEntry entry =
 				new ZipEntry(clazz.getName().replace('.', '/') + ".class");
@@ -1485,7 +1486,7 @@ class CodeHacker {
 
 	protected void verify(final PrintWriter out) {
 		out.println("Verifying " + handledClasses.size() + " classes");
-		for (final CtClass clazz : handledClasses) {
+		for (final CtClass clazz : handledClasses.values()) {
 			out.println("Verifying class " + clazz.getName());
 			out.flush();
 			verify(clazz, out);
