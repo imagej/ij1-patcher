@@ -745,6 +745,15 @@ class LegacyExtensions {
 			"  $_ = $proceed($$);" +
 			"}");
 
+		// Make VirtualStack use LegacyOpener
+		hacker.replaceCallInMethod("ij.VirtualStack", "public ij.process.ImageProcessor getProcessor(int n)",
+			"ij.io.Opener", "openImage", 
+			"$_ = (ij.ImagePlus)null;" +
+			"Object result = ij.IJ._hooks.interceptOpenImage($1 + $2, -1);" +
+			"if (result != null && (result instanceof ij.ImagePlus)) $_ = (ij.ImagePlus)result;" +
+			"else $_ = $proceed($$);");
+			
+
 		// Intercept File > Open Recent
 		hacker.replaceCallInMethod("ij.RecentOpener", "public void run()",
 				"ij.io.Opener", "open",
