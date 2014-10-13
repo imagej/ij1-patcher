@@ -43,7 +43,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -849,13 +848,26 @@ class CodeHacker {
 			// ignore
 		}
 
-		final Iterator<CtClass> iter = handledClasses.values().iterator();
-		while (iter.hasNext()) {
-			final CtClass classRef = iter.next();
+		for (final CtClass classRef : handledClasses.values()) {
 			if (!classRef.isFrozen() && classRef.isModified()) {
 				loadClass(classRef);
+//				@SuppressWarnings("unchecked")
+//				final Collection<String> refNames = classRef.getRefClasses();
+//
+//				// This method is ensuring all modified classes are defined
+//				// in the ClassLoader. If one of these modified classes has
+//				// dependencies on other classes that are modified, the
+//				// dependencies will be loaded but not frozen by Javassist.
+//				// If they haven't been loaded by this method yet, this will
+//				// cause duplicate load exceptions. Thus, for each referenced
+//				// class, if it's contained in the handledClasses map we will
+//				// freeze it, knowing it was loaded as a side effect of
+//				// loading the current class.
+//				for  (final String name : refNames) {
+//					final CtClass c = handledClasses.get(name);
+//					if (c != null) c.freeze();
+//				}
 			}
-			iter.remove();
 		}
 	}
 
