@@ -752,6 +752,13 @@ class LegacyExtensions {
 				"if (result == null) o.open(path);" +
 				"else if (! (result instanceof ij.ImagePlus)) return;");
 
+		// Intercept File > Import Image Sequence...
+		hacker.insertAtTopOfMethod("ij.plugin.FolderOpener", "public void run(java.lang.String arg)",
+			"Object scifio_result = null;" +
+			"String scifio_path = $1 == null || $1.isEmpty() ? null : $1;" +
+			"scifio_result = ij.IJ._hooks.interceptFileOpen(scifio_path);" +
+			"if (scifio_result != null && scifio_result instanceof ij.ImagePlus) return;");
+
 		// Intercept DragAndDrop openings
 		hacker.insertAtTopOfMethod("ij.plugin.DragAndDrop",
 			"public void openFile(java.io.File f)",
