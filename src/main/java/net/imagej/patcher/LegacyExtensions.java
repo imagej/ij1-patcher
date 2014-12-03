@@ -226,7 +226,9 @@ class LegacyExtensions {
 			"$_ = $0.equals($1) || $0.startsWith($1 + \"-\") || $0.startsWith($1 + \" -\");");
 
 		// make sure Rhino gets the correct class loader
-		hacker.insertAtTopOfMethod("JavaScriptEvaluator", "public void run()",
+		final String javascript = hacker.existsClass("JavaScriptEvaluator") ?
+			"JavaScriptEvaluator" : "ij.plugin.JavaScriptEvaluator";
+		hacker.insertAtTopOfMethod(javascript, "public void run()",
 			"Thread.currentThread().setContextClassLoader(ij.IJ.getClassLoader());");
 
 		// make sure that the check for Bio-Formats is correct
