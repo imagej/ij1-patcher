@@ -873,21 +873,9 @@ class LegacyExtensions {
 	static void disableRefreshMenus(final CodeHacker hacker) {
 		hacker.insertAtTopOfMethod("ij.IJ",
 			"static void setClassLoader(java.lang.ClassLoader loader)",
-			"ij.IJ.log(\"WARNING: The PluginClassLoader cannot be reset\");" +
+			"ij.IJ.log(\"NOTICE: Please restart ImageJ to complete plugin or macro installation, add " +
+			"new commands to the menus, etc...\");" +
 			"return;");
-		hacker.insertAtBottomOfMethod("ij.Menus", "java.lang.String addMenuBar()",
-			"if (mbar != null) {" +
-			"  final java.awt.Menu help = mbar.getHelpMenu();" +
-			"  if (help != null) {" +
-			"    for (int i = 0; i < help.getItemCount(); i++) {" +
-			"      final java.awt.MenuItem item = help.getItem(i);" +
-			"      if (\"Refresh Menus\".equals(item.getLabel())) {" +
-			"        item.setEnabled(false);" +
-			"        break;" +
-			"      }" +
-			"    }" +
-			"  }" +
-			"}");
 	}
 
 	static void suppressIJ1ScriptDiscovery(CodeHacker hacker) {
