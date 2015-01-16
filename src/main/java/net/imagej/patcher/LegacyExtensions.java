@@ -873,7 +873,7 @@ class LegacyExtensions {
 	static void disableRefreshMenus(final CodeHacker hacker) {
 		hacker.insertAtTopOfMethod("ij.IJ",
 			"static void setClassLoader(java.lang.ClassLoader loader)",
-			"ij.IJ.log(\"NOTICE: Please restart ImageJ to complete plugin or macro installation, add " +
+			"ij.IJ.showMessage(\"NOTICE: Please restart ImageJ to complete plugin or macro installation, add " +
 			"new commands to the menus, etc...\");" +
 			"return;");
 	}
