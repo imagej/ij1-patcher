@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>ij1-patcher</artifactId>
-	<version>0.11.2-SNAPSHOT</version>
+	<version>0.11.3-SNAPSHOT</version>
 
 	<name>Runtime patcher to introduce extension points into ImageJ 1.x</name>
 	<description>This project offers extension points for use with ImageJ2 and it also offers (limited) support for headless operations.</description>
