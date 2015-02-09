@@ -67,6 +67,8 @@ public class HeadlessGenericDialog {
 	protected boolean invalidNumber;
 	protected String errorMessage;
 
+	protected DialogListener listener;
+
 	public HeadlessGenericDialog() {
 		if (Macro.getOptions() == null)
 			throw new RuntimeException("Cannot instantiate headless dialog except in macro mode");
@@ -187,6 +189,14 @@ public class HeadlessGenericDialog {
 		checkboxIndex = 0;
 		choiceIndex = 0;
 		textAreaIndex = 0;
+
+		// NB: ImageJ 1.x has logic to call the first DialogListener at least once,
+		// in case the plugin _only_ updates its values via the dialogItemChanged
+		// method. See the bottom of the ij.gui.GenericDialog#showDialog() method.
+		if (listener != null) {
+			// NB: Thanks to Javassist, this class _will_ be a GenericDialog object.
+			listener.dialogItemChanged((ij.gui.GenericDialog) (Object) this, null);
+		}
 	}
 
 	public boolean wasCanceled() {
@@ -198,7 +208,11 @@ public class HeadlessGenericDialog {
 	}
 
 	public void dispose() {}
-	public void addDialogListener(DialogListener dl) {}
+	public void addDialogListener(DialogListener dl) {
+		if (listener != null) return;
+		// NB: Save the first DialogListener, for access during showDialog().
+		listener = dl;
+	}
 	public void addHelp(String url) {}
 	public void addMessage(String text) {}
 	public void addMessage(String text, Font font) {}
