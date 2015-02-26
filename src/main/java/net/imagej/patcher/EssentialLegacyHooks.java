@@ -99,22 +99,6 @@ public class EssentialLegacyHooks extends LegacyHooks {
 	}
 
 	/**
-	 * Intended for sole use with {@link LegacyExtensions#noPluginClassLoader(CodeHacker)}.
-	 */
-	void addThisLoadersClasspath() {
-		final StringBuilder errors = new java.lang.StringBuilder();
-		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		final ClassLoader extLoader =
-			ClassLoader.getSystemClassLoader().getParent();
-		for (final File file : getClasspathElements(loader, errors, extLoader)) {
-			addPluginClasspath(file);
-		}
-		if (errors.length() > 0) {
-			System.err.println(errors.toString());
-		}
-	}
-
-	/**
 	 * Intended for sole use with patches in {@link ij.IJ}. DO NOT USE.
 	 */
 	public static ClassLoader missingSubdirs(final ClassLoader loader, final boolean addPluginsDir) {

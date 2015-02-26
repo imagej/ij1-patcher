@@ -844,8 +844,6 @@ class LegacyExtensions {
 			supportBarePlugins +
 			"}" +
 			"return _classLoader;");
-		hacker.insertAtTopOfMethod(LegacyInjector.ESSENTIAL_LEGACY_HOOKS_CLASS,
-			"public <init>()", "addThisLoadersClasspath();");
 		disableRefreshMenus(hacker);
 
 		// make sure that IJ#runUserPlugIn can execute package-less plugins in subdirectories of $IJ/plugin/
