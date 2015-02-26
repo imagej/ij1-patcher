@@ -306,7 +306,7 @@ class LegacyExtensions {
 	 * Install a hook to optionally run a Runnable at the end of Help>Refresh Menus.
 	 * 
 	 * <p>
-	 * See {@link LegacyExtensions#runAfterRefreshMenus(Runnable)}.
+	 * See {@link LegacyHooks#runAfterRefreshMenus()}.
 	 * </p>
 	 * 
 	 * @param hacker the {@link CodeHacker} to use for patching
