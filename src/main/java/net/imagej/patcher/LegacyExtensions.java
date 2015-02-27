@@ -306,7 +306,7 @@ class LegacyExtensions {
 	 * Install a hook to optionally run a Runnable at the end of Help>Refresh Menus.
 	 * 
 	 * <p>
-	 * See {@link LegacyExtensions#runAfterRefreshMenus(Runnable)}.
+	 * See {@link LegacyHooks#runAfterRefreshMenus()}.
 	 * </p>
 	 * 
 	 * @param hacker the {@link CodeHacker} to use for patching
@@ -844,8 +844,6 @@ class LegacyExtensions {
 			supportBarePlugins +
 			"}" +
 			"return _classLoader;");
-		hacker.insertAtTopOfMethod(LegacyInjector.ESSENTIAL_LEGACY_HOOKS_CLASS,
-			"public <init>()", "addThisLoadersClasspath();");
 		disableRefreshMenus(hacker);
 
 		// make sure that IJ#runUserPlugIn can execute package-less plugins in subdirectories of $IJ/plugin/
