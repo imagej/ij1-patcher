@@ -31,6 +31,8 @@
 
 package net.imagej.patcher;
 
+import ij.gui.ImageWindow;
+
 import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -680,6 +682,14 @@ public abstract class LegacyHooks {
 	 */
 	public boolean interceptCloseAllWindows() {
 		return true;
+	}
+
+	/**
+	 * Hook to ensure {@link ij.gui.ImageWindow}s are fully cleaned up when
+	 * they are closed.
+	 */
+	public void interceptImageWindowClose(final Object window) {
+		// nothing to do
 	}
 
 	/**

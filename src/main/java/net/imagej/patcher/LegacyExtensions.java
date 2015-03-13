@@ -297,6 +297,7 @@ class LegacyExtensions {
 		installOpenInterceptor(hacker);
 		handleMacroGetOptions(hacker);
 		interceptCloseAllWindows(hacker);
+		interceptImageWindowClose(hacker);
 		interceptDisposal(hacker);
 	}
 
@@ -797,6 +798,18 @@ class LegacyExtensions {
 			"if ($_ == true) {" +
 			"  $_ = ij.IJ._hooks.interceptCloseAllWindows();" +
 			"}");
+	}
+
+	private static void interceptImageWindowClose(final CodeHacker hacker) {
+		// Ensure that even if an ImageWindow is closed during quitting, it is
+		// still disposed.
+
+		hacker.replaceCallInMethod("ij.gui.ImageWindow",
+			"public boolean close()",
+			"ij.WindowManager",
+			"removeWindow",
+			"ij.IJ._hooks.interceptImageWindowClose(this);" +
+			"ij.WindowManager.removeWindow((java.awt.Frame)this);");
 	}
 
 	private static void interceptDisposal(final CodeHacker hacker) {
