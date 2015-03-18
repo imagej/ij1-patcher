@@ -124,6 +124,7 @@ public class HeadlessCompletenessTest {
 			"addImage(ij.ImagePlus)",
 			"adjustmentValueChanged(java.awt.event.AdjustmentEvent)",
 			"getInsets(int,int,int,int)", "getValue(java.lang.String)",
+			"isMacro()",
 			"isMatch(java.lang.String,java.lang.String)",
 			"itemStateChanged(java.awt.event.ItemEvent)",
 			"keyPressed(java.awt.event.KeyEvent)",
