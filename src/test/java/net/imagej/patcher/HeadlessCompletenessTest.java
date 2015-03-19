@@ -118,7 +118,11 @@ public class HeadlessCompletenessTest {
 			methods.put(name, method);
 		}
 
-		// these do not need to be overridden
+		// these do not need to be overridden because they are either:
+		// a) explicitly stubified in LegacyHeadless
+		// b) AWT-inherited methods implicitly stubified in LegacyHeadless
+		// c) non-public API
+		// d) function correctly while headless
 		for (final String name : new String[] {
 			"actionPerformed(java.awt.event.ActionEvent)",
 			"addImage(ij.ImagePlus)",
