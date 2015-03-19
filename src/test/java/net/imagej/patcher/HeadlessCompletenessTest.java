@@ -125,7 +125,6 @@ public class HeadlessCompletenessTest {
 		// d) function correctly while headless
 		for (final String name : new String[] {
 			"actionPerformed(java.awt.event.ActionEvent)",
-			"addImage(ij.ImagePlus)",
 			"adjustmentValueChanged(java.awt.event.AdjustmentEvent)",
 			"getInsets(int,int,int,int)", "getValue(java.lang.String)",
 			"isMacro()",

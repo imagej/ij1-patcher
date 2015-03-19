@@ -30,6 +30,7 @@
  */
 package net.imagej.patcher;
 
+import ij.ImagePlus;
 import ij.Macro;
 import ij.gui.DialogListener;
 import ij.plugin.filter.PlugInFilterRunner;
@@ -233,6 +234,7 @@ public class HeadlessGenericDialog {
 		listener = dl;
 	}
 	public void addHelp(String url) {}
+	public void addImage(ImagePlus image) {}
 	public void addMessage(String text) {}
 	public void addMessage(String text, Font font) {}
 	public void addMessage(String text, Font font, Color color) {}
