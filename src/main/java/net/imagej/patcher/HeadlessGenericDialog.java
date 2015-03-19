@@ -49,7 +49,26 @@ import java.util.Vector;
 
 /**
  * Rump implementation of a pseudo dialog intended to stand in for the
- * {@link ij.gui.GenericDialog} in headless mode.
+ * {@link ij.gui.GenericDialog} in headless mode. This class is inserted as the
+ * <i>superclass</i> to <code>GenericDialog</code>, cutting off its AWT
+ * inheritance. Then the methods of this class are given precedence, effectively
+ * reverse-overriding its subclass.
+ * <p>
+ * The guidelines for whether or not an {@link ij.gui.GenericDialog} method
+ * should be overridden by this class or not are:
+ * <ul>
+ * <li>If the method is not public, it does not need to be overridden.</li>
+ * <li>If the method is inherited from an AWT superclass it will automatically
+ * be converted to a stub and does not need to be overridden.</li>
+ * <li>If the method is explicitly stubified by {@link LegacyHeadless}, it does
+ * not need to be overridden.</li>
+ * <li>If the method is public but can still function as normal while headless,
+ * it does not need to be overridden.</li>
+ * <p>
+ * All other public methods should be overridden.
+ * </p>
+ * </ul>
+ * </p>
  * 
  * @author Johannes Schindelin
  */
