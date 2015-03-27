@@ -282,7 +282,7 @@ public class HeadlessGenericDialog {
 	 * @return the boolean value
 	 */
 	private static boolean getMacroParameter(String label, boolean defaultValue) {
-		return findBooleanMacroParameter(label) || defaultValue;
+		return findBooleanMacroParameter(label);
 	}
 
 	/**
