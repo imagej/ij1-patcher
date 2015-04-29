@@ -1113,15 +1113,15 @@ class CodeHacker {
 
 	private static String stripPackage(final String className) {
 		int lastDot = -1;
-		for (int i = 0;; i++) {
-			if (i >= className.length()) return className.substring(lastDot + 1);
+		for (int i = 0; i < className.length(); i++) {
 			final char c = className.charAt(i);
 			if (c == '.' || c == '$') lastDot = i;
-			else if (c >= 'A' && c <= 'Z') ; // continue
-			else if (c >= 'a' && c <= 'z') ; // continue
-			else if (i > lastDot + 1 && c >= '0' && c <= '9') ; // continue
+			else if (c >= 'A' && c <= 'Z') continue;
+			else if (c >= 'a' && c <= 'z') continue;
+			else if (i > lastDot + 1 && c >= '0' && c <= '9') continue;
 			else return className.substring(lastDot + 1);
 		}
+		return className.substring(lastDot + 1);
 	}
 
 	private void skipAWTInstantiations(final CtClass clazz)
