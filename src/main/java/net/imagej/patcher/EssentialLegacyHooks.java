@@ -171,7 +171,7 @@ public class EssentialLegacyHooks extends LegacyHooks {
 	 * is how its runtime patches get installed. It calls the
 	 * {@link LegacyEnvironment}, of course, but the idea is for said environment
 	 * to install the essential {@link LegacyHooks} which then give ImageJ's
-	 * DefaultLegacyService a chance to spin up all of the legacy patches,
+	 * {@code LegacyService} a chance to spin up all of the legacy patches,
 	 * including Fiji's (which are add-ons on top of {@code imagej-legacy}).
 	 * </p>
 	 * <p>
@@ -201,13 +201,24 @@ public class EssentialLegacyHooks extends LegacyHooks {
 					// "Something" failed... Darn.
 					t.printStackTrace();
 
-					// Try again, with the bare minimum of services: DefaultLegacyService and friends
+					// Try again, with the bare minimum of services: LegacyService and friends
 					Class<?> legacyServiceClass;
 					try {
-						legacyServiceClass = IJ.getClassLoader().loadClass("net.imagej.legacy.DefaultLegacyService");
+						// NB: Old concrete LegacyService class, which no longer exists.
+						legacyServiceClass = IJ.getClassLoader().loadClass(
+							"net.imagej.legacy.DefaultLegacyService");
 					}
 					catch (Throwable t2) {
-						legacyServiceClass = IJ.getClassLoader().loadClass("imagej.legacy.DefaultLegacyService");
+						try {
+							// NB: Current concrete LegacyService class.
+							legacyServiceClass = IJ.getClassLoader().loadClass(
+								"net.imagej.legacy.LegacyService");
+						}
+						catch (Throwable t3) {
+							// NB: _Really_ old concrete LegacyService class, long gone.
+							legacyServiceClass = IJ.getClassLoader().loadClass(
+								"imagej.legacy.DefaultLegacyService");
+						}
 					}
 					Constructor<?> ctor = contextClass.getConstructor((Class<?>) Class[].class);
 					return ctor.newInstance((Object) new Class<?>[] { legacyServiceClass });

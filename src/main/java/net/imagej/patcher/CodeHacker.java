@@ -802,8 +802,7 @@ class CodeHacker {
 		}
 		catch (final CannotCompileException e) {
 			// Cannot use LogService; it will not be initialized by the time the
-			// DefaultLegacyService
-			// class is loaded, which is when the CodeHacker is run
+			// LegacyService class is loaded, which is when the CodeHacker is run
 			if (e.getCause() != null && e.getCause() instanceof LinkageError) {
 				throw javaAgentHint("Cannot load class: " + classRef.getName() +
 					" (loader: " + classLoader + ")", e.getCause());
