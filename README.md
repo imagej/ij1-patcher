@@ -1,4 +1,4 @@
-![](http://jenkins.imagej.net/job/ImageJ1-patcherlastBuild/badge/icon)
+[![](http://jenkins.imagej.net/job/ImageJ1-patcherlastBuild/badge/icon)](http://jenkins.imagej.net/job/ImageJ1-patcher)
 
 # Welcome to the ImageJ 1.x patcher
 
