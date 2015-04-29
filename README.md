@@ -1,3 +1,5 @@
+![](http://jenkins.imagej.net/job/ImageJ1-patcherlastBuild/badge/icon)
+
 # Welcome to the ImageJ 1.x patcher
 
 ## What is it?
