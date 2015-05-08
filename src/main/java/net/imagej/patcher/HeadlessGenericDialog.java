@@ -204,11 +204,7 @@ public class HeadlessGenericDialog {
 	public void showDialog() {
 		if (Macro.getOptions() == null)
 			throw new RuntimeException("Cannot run dialog headlessly");
-		numberfieldIndex = 0;
-		stringfieldIndex = 0;
-		checkboxIndex = 0;
-		choiceIndex = 0;
-		textAreaIndex = 0;
+		resetCounters();
 
 		// NB: ImageJ 1.x has logic to call the first DialogListener at least once,
 		// in case the plugin _only_ updates its values via the dialogItemChanged
@@ -216,7 +212,19 @@ public class HeadlessGenericDialog {
 		if (listener != null) {
 			// NB: Thanks to Javassist, this class _will_ be a GenericDialog object.
 			listener.dialogItemChanged((ij.gui.GenericDialog) (Object) this, null);
+			resetCounters();
 		}
+	}
+
+    /**
+     * Resets the counters before reading the dialog parameters.
+     */
+	private void resetCounters() {
+		numberfieldIndex = 0;
+		stringfieldIndex = 0;
+		checkboxIndex = 0;
+		choiceIndex = 0;
+		textAreaIndex = 0;
 	}
 
 	public boolean wasCanceled() {
