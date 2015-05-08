@@ -43,7 +43,6 @@ import ij.Macro;
 
 import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -69,7 +68,6 @@ public class HeadlessEnvironmentTest {
 
 	private String threadName;
 	private ClassLoader threadLoader;
-	private File tmpDir;
 
 	@Before
 	public void saveThreadName() {
