@@ -43,7 +43,6 @@ import ij.Macro;
 
 import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -69,7 +68,6 @@ public class HeadlessEnvironmentTest {
 
 	private String threadName;
 	private ClassLoader threadLoader;
-	private File tmpDir;
 
 	@Before
 	public void saveThreadName() {
@@ -122,6 +120,16 @@ public class HeadlessEnvironmentTest {
 	public void testPatchIsRequired() throws Exception {
 		assumeTrue(GraphicsEnvironment.isHeadless());
 		assertFalse(runExampleDialogPlugin(false));
+	}
+
+	@Test
+	public void testPluginWithDialogListener() throws Exception {
+		final LegacyEnvironment ij1 = getTestEnvironment(true, false);
+		ij1.addPluginClasspath(HeadlessEnvironmentTest.class.getClassLoader());
+		ij1.setMacroOptions("please=123");
+		final String value = ij1.runPlugIn(
+				Plugin_With_DialogListener.class.getName(), "").toString();
+		assertEquals("value: 123\nevent: null\nfinal value: 123\n", value);
 	}
 
 	@Test
