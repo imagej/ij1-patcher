@@ -123,6 +123,16 @@ public class HeadlessEnvironmentTest {
 	}
 
 	@Test
+	public void testPluginWithDialogListener() throws Exception {
+		final LegacyEnvironment ij1 = getTestEnvironment(true, false);
+		ij1.addPluginClasspath(HeadlessEnvironmentTest.class.getClassLoader());
+		ij1.setMacroOptions("please=123");
+		final String value = ij1.runPlugIn(
+				Plugin_With_DialogListener.class.getName(), "").toString();
+		assertEquals("value: 123\nevent: null\nfinal value: 123\n", value);
+	}
+
+	@Test
 	public void saveDialog() throws Exception {
 		assertTrue(runExamplePlugin(true, "SaveDialog", "file=README.txt", "true"));
 	}
