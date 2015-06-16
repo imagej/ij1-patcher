@@ -12,8 +12,8 @@
 	<artifactId>ij1-patcher</artifactId>
 	<version>0.12.3-SNAPSHOT</version>
 
-	<name>Runtime patcher to introduce extension points into ImageJ 1.x</name>
-	<description>This project offers extension points for use with ImageJ2 and it also offers (limited) support for headless operations.</description>
+	<name>ImageJ 1.x Patcher</name>
+	<description>A runtime patcher to introduce extension points into ImageJ 1.x. This project offers extension points for use with ImageJ2 and it also offers (limited) support for headless operations.</description>
 
 	<properties>
 		<ij1-patcher.jar>${project.build.directory}/${project.build.finalName}.jar</ij1-patcher.jar>
