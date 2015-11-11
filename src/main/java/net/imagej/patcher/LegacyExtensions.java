@@ -546,14 +546,14 @@ class LegacyExtensions {
 		hacker.insertPrivateStaticField("ij.Menus", String.class, "_currentMenuPath");
 		// so that addSubMenu() has the correct menu path -- even in headless mode
 		hacker.insertAtTopOfMethod("ij.Menus",
-				"private static java.awt.Menu getMenu(java.lang.String menuName, boolean readFromProps)",
+				"private static javax.swing.JMenu getMenu(java.lang.String menuName, boolean readFromProps)",
 				"_currentMenuPath = $1;");
 		// so that addPlugInItem() has the correct menu path -- even in headless mode
 		hacker.insertAtBottomOfMethod("ij.Menus",
-				"private static java.awt.Menu getMenu(java.lang.String menuName, boolean readFromProps)",
+				"private static javax.swing.JMenu getMenu(java.lang.String menuName, boolean readFromProps)",
 				"_currentMenuPath = $1;");
 		hacker.insertAtTopOfMethod("ij.Menus",
-				"static java.awt.Menu addSubMenu(java.awt.Menu menu, java.lang.String name)",
+				"static javax.swing.JMenu addSubMenu(javax.swing.JMenu menu, java.lang.String name)",
 				"_currentMenuPath += \">\" + $2.replace('_', ' ');");
 		hacker.replaceCallInMethod("ij.Menus",
 				"void addPluginsMenu()",
@@ -600,10 +600,10 @@ class LegacyExtensions {
 				"ij.IJ._hooks.addMenuItem(_currentMenuPath, $_);",
 				4);
 		hacker.insertAtTopOfMethod("ij.Menus",
-				"void addPlugInItem(java.awt.Menu menu, java.lang.String label, java.lang.String className, int shortcut, boolean shift)",
+				"void addPlugInItem(javax.swing.JMenu menu, java.lang.String label, java.lang.String className, int shortcut, boolean shift)",
 				"ij.IJ._hooks.addMenuItem(_currentMenuPath + \">\" + $2, $3);");
 		hacker.insertAtTopOfMethod("ij.Menus",
-				"static void addPluginItem(java.awt.Menu submenu, java.lang.String s)",
+				"static void addPluginItem(javax.swing.JMenu submenu, java.lang.String s)",
 				"int comma = $2.lastIndexOf(',');" +
 				"if (comma > 0) {" +
 				"  java.lang.String label = $2.substring(1, comma - 1);" +
@@ -624,9 +624,9 @@ class LegacyExtensions {
 				"    $2.substring(comma + 1));" +
 				"}");
 		hacker.insertAtTopOfMethod("ij.Menus",
-				"java.awt.CheckboxMenuItem addCheckboxItem(java.awt.Menu menu, java.lang.String label, java.lang.String className)",
+				"java.awt.CheckboxMenuItem addCheckboxItem(javax.swing.JMenu menu, java.lang.String label, java.lang.String className)",
 				"ij.IJ._hooks.addMenuItem(_currentMenuPath + \">\" + $2, $3);");
-		// handle separators (we cannot simply look for java.awt.Menu#addSeparator
+		// handle separators (we cannot simply look for javax.swing.JMenu#addSeparator
 		// because we might be running in headless mode)
 		hacker.replaceCallInMethod("ij.Menus",
 				"java.lang.String addMenuBar()",
@@ -663,14 +663,14 @@ class LegacyExtensions {
 				"}" +
 				"$_ = $proceed($$);");
 		hacker.replaceCallInMethod("ij.Menus",
-				"static java.awt.Menu addSubMenu(java.awt.Menu menu, java.lang.String name)",
+				"static javax.swing.JMenu addSubMenu(javax.swing.JMenu menu, java.lang.String name)",
 				"java.lang.String",
 				"equals",
 				"$_ = $proceed($$);" +
 				"if ($_ && \"-\".equals($1))" +
 				"  ij.IJ._hooks.addMenuItem(_currentMenuPath + \">-\", null);");
 		hacker.replaceCallInMethod("ij.Menus",
-				"static void addLuts(java.awt.Menu submenu)",
+				"static void addLuts(javax.swing.JMenu submenu)",
 				"ij.IJ",
 				"isLinux",
 				"ij.IJ._hooks.addMenuItem(_currentMenuPath + \">-\", null);" +
@@ -683,7 +683,7 @@ class LegacyExtensions {
 				"if ($_ != null && $_.startsWith(\"-\"))" +
 				"  ij.IJ._hooks.addMenuItem(\"Plugins>-\", null);");
 		hacker.insertAtTopOfMethod("ij.Menus",
-				"static void addSeparator(java.awt.Menu menu)",
+				"static void addSeparator(javax.swing.JMenu menu)",
 				"ij.IJ._hooks.addMenuItem(_currentMenuPath + \">-\", null);");
 		hacker.replaceCallInMethod("ij.Menus", "void installPlugins()",
 				"ij.Prefs", "getString",
@@ -707,7 +707,7 @@ class LegacyExtensions {
 			hacker.replaceCallInMethod("ij.Menus", "void installPlugins()",
 					"java.lang.String", "substring",
 					"$_ = $proceed($$);" +
-					"if (_currentMenuPath != null) addPluginItem((java.awt.Menu) null, $_);", 2);
+					"if (_currentMenuPath != null) addPluginItem((javax.swing.JMenu) null, $_);", 2);
 		}
 	}
 

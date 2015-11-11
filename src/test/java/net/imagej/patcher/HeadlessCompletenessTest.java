@@ -55,10 +55,16 @@ import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+
 import javassist.ClassClassPath;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
+
 import net.imagej.patcher.LegacyInjector.Callback;
 
 import org.junit.After;
@@ -213,14 +219,14 @@ public class HeadlessCompletenessTest {
 
 		final LegacyEnvironment ij1 = getTestEnvironment(false, false);
 		ij1.addPluginClasspath(jarFile);
-		final Frame ij1Frame =
+		final JFrame ij1Frame =
 			construct(ij1.getClassLoader(), "ij.ImageJ", ImageJ.NO_SHOW);
-		final MenuBar menuBar = ij1Frame.getMenuBar();
+		final JMenuBar menuBar = ij1Frame.getJMenuBar();
 
 		final Hashtable<String, String> commands =
 			invokeStatic(ij1.getClassLoader(), "ij.Menus", "getCommands");
 		for (int i = 0; i < menuBar.getMenuCount(); i++) {
-			final Menu menu = menuBar.getMenu(i);
+			final JMenu menu = menuBar.getMenu(i);
 			assertMenuItems(menuItems, commands, menu.getLabel() + ">", menu);
 		}
 		assertTrue("Left-over menu items: " + menuItems.keySet(),
@@ -229,15 +235,16 @@ public class HeadlessCompletenessTest {
 
 	private void assertMenuItems(final Map<String, String> menuItems,
 		final Hashtable<String, String> commands, final String prefix,
-		final Menu menu)
+		final JMenu menu)
 	{
 		int separatorCounter = 0;
 		for (int i = 0; i < menu.getItemCount(); i++) {
-			final MenuItem item = menu.getItem(i);
+			final JMenuItem item = menu.getItem(i);
+			if (item == null) continue;
 			final String label = item.getLabel();
 			String menuPath = prefix + label;
-			if (item instanceof Menu) {
-				assertMenuItems(menuItems, commands, menuPath + ">", (Menu) item);
+			if (item instanceof JMenu) {
+				assertMenuItems(menuItems, commands, menuPath + ">", (JMenu) item);
 			}
 			else if ("-".equals(label)) {
 				final String menuPath2 = menuPath + ++separatorCounter;

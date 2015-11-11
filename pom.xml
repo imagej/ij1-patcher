@@ -5,18 +5,20 @@
 	<parent>
 		<groupId>net.imagej</groupId>
 		<artifactId>pom-imagej</artifactId>
-		<version>8.0.0</version>
+		<version>13.3.0</version>
 		<relativePath />
 	</parent>
 
 	<artifactId>ij1-patcher</artifactId>
-	<version>0.12.3-SNAPSHOT</version>
+	<version>0.13.0-SNAPSHOT</version>
 
 	<name>ImageJ 1.x Patcher</name>
 	<description>A runtime patcher to introduce extension points into ImageJ 1.x. This project offers extension points for use with ImageJ2 and it also offers (limited) support for headless operations.</description>
 
 	<properties>
 		<ij1-patcher.jar>${project.build.directory}/${project.build.finalName}.jar</ij1-patcher.jar>
+		<imagej1.version>1.50e-SNAPSHOT</imagej1.version>
+		<enforcer.skip>true</enforcer.skip>
 	</properties>
 
 	<dependencies>
@@ -27,7 +29,6 @@
 		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
-			<version>3.16.1-GA</version>
 		</dependency>
 
 		<dependency>

@@ -327,7 +327,7 @@ public class LegacyInjector {
 		if (!headless) {
 			hacker.replaceCallInMethod("ij.Menus",
 				"static synchronized void addWindowMenuItem(ij.ImagePlus imp)",
-				"java.awt.Menu", "add",
+				"javax.swing.JMenu", "add",
 				"$0.insert($1, WINDOW_MENU_ITEMS + windowMenuItems2" +
 				"  + ij.WindowManager.getWindowCount() - 1);" +
 				"$_ = $1;");

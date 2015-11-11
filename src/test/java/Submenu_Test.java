@@ -33,9 +33,9 @@ import ij.Menus;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 
-import java.awt.Menu;
-import java.awt.MenuBar;
-import java.awt.MenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 
 
 public class Submenu_Test implements PlugIn {
@@ -60,13 +60,14 @@ public class Submenu_Test implements PlugIn {
 
 	private String findMenuItem(String menuPath) {
 		final String[] list = menuPath.split(">");
-		MenuItem menu = null;
+		JMenuItem menu = null;
 		outer:
 		for (int i = 0; i < list.length; i++) {
 			if (i == 0) {
-				final MenuBar bar = IJ.getInstance().getMenuBar();
+				final JMenuBar bar = IJ.getInstance().getJMenuBar();
 				for (int j = 0; j < bar.getMenuCount(); j++) {
-					final Menu candidate = bar.getMenu(j);
+					final JMenu candidate = bar.getMenu(j);
+					if (candidate == null) continue;
 					if (list[i].equals(candidate.getLabel())) {
 						menu = candidate;
 						continue outer;
@@ -74,8 +75,9 @@ public class Submenu_Test implements PlugIn {
 				}
 				throw new RuntimeException("Top-level menu " + list[i] + " not found!"); 
 			}
-			for (int j = 0; j < ((Menu) menu).getItemCount(); j++) {
-				final MenuItem candidate = ((Menu) menu).getItem(j);
+			for (int j = 0; j < ((JMenu) menu).getItemCount(); j++) {
+				final JMenuItem candidate = ((JMenu) menu).getItem(j);
+				if (candidate == null) continue;
 				if (list[i].equals(candidate.getLabel())) {
 					menu = candidate;
 					continue outer;
