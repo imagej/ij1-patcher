@@ -124,23 +124,26 @@ public class HeadlessCompletenessTest {
 		// c) non-public API
 		// d) function correctly while headless
 		for (final String name : new String[] {
-			"actionPerformed(java.awt.event.ActionEvent)",
-			"adjustmentValueChanged(java.awt.event.AdjustmentEvent)",
-			"getInsets(int,int,int,int)", "getValue(java.lang.String)",
-			"isMacro()",
-			"isMatch(java.lang.String,java.lang.String)",
-			"itemStateChanged(java.awt.event.ItemEvent)",
-			"keyPressed(java.awt.event.KeyEvent)",
-			"keyReleased(java.awt.event.KeyEvent)",
-			"keyTyped(java.awt.event.KeyEvent)", "paint(java.awt.Graphics)",
-			"parseDouble(java.lang.String)", "setCancelLabel(java.lang.String)",
-			"textValueChanged(java.awt.event.TextEvent)",
-			"windowActivated(java.awt.event.WindowEvent)",
-			"windowClosed(java.awt.event.WindowEvent)",
-			"windowClosing(java.awt.event.WindowEvent)",
-			"windowDeactivated(java.awt.event.WindowEvent)",
-			"windowDeiconified(java.awt.event.WindowEvent)",
-			"windowIconified(java.awt.event.WindowEvent)",
+			"actionPerformed(java.awt.event.ActionEvent)", //
+			"adjustmentValueChanged(java.awt.event.AdjustmentEvent)", //
+			"getInsets(int,int,int,int)", //
+			"getValue(java.lang.String)", //
+			"isMacro()", //
+			"isMatch(java.lang.String,java.lang.String)", //
+			"itemStateChanged(java.awt.event.ItemEvent)", //
+			"keyPressed(java.awt.event.KeyEvent)", //
+			"keyReleased(java.awt.event.KeyEvent)", //
+			"keyTyped(java.awt.event.KeyEvent)", //
+			"paint(java.awt.Graphics)", //
+			"parseDouble(java.lang.String)", //
+			"setCancelLabel(java.lang.String)", //
+			"textValueChanged(java.awt.event.TextEvent)", //
+			"windowActivated(java.awt.event.WindowEvent)", //
+			"windowClosed(java.awt.event.WindowEvent)", //
+			"windowClosing(java.awt.event.WindowEvent)", //
+			"windowDeactivated(java.awt.event.WindowEvent)", //
+			"windowDeiconified(java.awt.event.WindowEvent)", //
+			"windowIconified(java.awt.event.WindowEvent)", //
 			"windowOpened(java.awt.event.WindowEvent)" })
 		{
 			methods.put(name, null);
