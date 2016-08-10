@@ -82,7 +82,7 @@ class LegacyHeadless  {
 			return;
 		}
 		hacker.commitClass(HeadlessGenericDialog.class);
-		hacker.replaceWithStubMethods("ij.gui.GenericDialog", "paint", "getInsets", "showHelp");
+		hacker.replaceWithStubMethods("ij.gui.GenericDialog", "paint", "getInsets", "repaint", "showHelp");
 		hacker.replaceSuperclassAndStubifyAWTMethods("ij.gui.GenericDialog", HeadlessGenericDialog.class.getName());
 		hacker.skipAWTInstantiations("ij.gui.GenericDialog");
 

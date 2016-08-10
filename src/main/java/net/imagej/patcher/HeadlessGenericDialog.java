@@ -278,6 +278,7 @@ public class HeadlessGenericDialog {
 	public void accessTextFields() {}
 	public void showHelp() {}
 	public void setLocation(int x, int y) {}
+	public void setDefaultString(int index, String str) {}
 	public boolean isPreviewActive() { return false; }
 
 	/**
