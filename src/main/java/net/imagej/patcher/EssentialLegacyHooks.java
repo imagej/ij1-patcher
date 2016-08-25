@@ -37,6 +37,7 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -106,7 +107,7 @@ public class EssentialLegacyHooks extends LegacyHooks {
 		for (final URL url : classLoader.getURLs()) {
 			if (!"file".equals(url.getProtocol())) continue;
 			final File dir = new File(url.getPath());
-			if (!dir.isDirectory()) continue;
+			if (!dir.isDirectory() || isBuildDirectory(dir)) continue;
 			directories.add(dir);
 		}
 		final Set<File> missing = new HashSet<File>();
@@ -139,6 +140,16 @@ public class EssentialLegacyHooks extends LegacyHooks {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	/**
+	 * Tests whether the given directory is a build directory in a development
+	 * environment. E.g., with Maven, class files typically reside in
+	 * subdirectories of a directory called {@code target}.
+	 */
+	private static boolean isBuildDirectory(final File dir) {
+		final String[] buildDirs = {"target", "build", "bin"};
+		return Arrays.asList(buildDirs).contains(dir.getParentFile().getName());
 	}
 
 	private static boolean missingSubdirectories(final File dir, final Set<File> already, final Set<File> missing) {
