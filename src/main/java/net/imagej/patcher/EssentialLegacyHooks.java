@@ -61,13 +61,11 @@ import java.util.Set;
  */
 public class EssentialLegacyHooks extends LegacyHooks {
 
-	/** @inherit */
 	@Override
 	public void error(Throwable t) {
 		IJ.handleException(t);
 	}
 
-	/** @inherit */
 	@Override
 	public void initialized() {
 		runInitializer();
