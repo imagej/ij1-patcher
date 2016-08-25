@@ -38,7 +38,7 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -103,14 +103,14 @@ public class EssentialLegacyHooks extends LegacyHooks {
 	public static ClassLoader missingSubdirs(final ClassLoader loader, final boolean addPluginsDir) {
 		if (loader == null || !(loader instanceof URLClassLoader)) return null;
 		final URLClassLoader classLoader = (URLClassLoader) loader;
-		final Set<File> directories = new HashSet<File>();
+		final Set<File> directories = new LinkedHashSet<>();
 		for (final URL url : classLoader.getURLs()) {
 			if (!"file".equals(url.getProtocol())) continue;
 			final File dir = new File(url.getPath());
 			if (!dir.isDirectory() || isBuildDirectory(dir)) continue;
 			directories.add(dir);
 		}
-		final Set<File> missing = new HashSet<File>();
+		final Set<File> missing = new LinkedHashSet<>();
 		if (addPluginsDir) {
 			String pluginsDir = IJ.getDirectory("plugins");
 			if (pluginsDir == null) {
@@ -125,7 +125,7 @@ public class EssentialLegacyHooks extends LegacyHooks {
 			}
 		}
 		try {
-			for (final File dir : new HashSet<File>(directories)) {
+			for (final File dir : directories) {
 				missingSubdirectories(dir, directories, missing);
 			}
 			if (missing.isEmpty()) return null;
