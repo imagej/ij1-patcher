@@ -1,0 +1,9 @@
+language: java
+install: true
+script: ".travis/build.sh"
+after_success: ".travis/notify.sh Travis-Success"
+after_failure: ".travis/notify.sh Travis-Failure"
+env:
+  global:
+  - secure: kmDSu10wKkwx8EvXJ3Lq1cryUshpnBLb9OahtfnzQ3uIDutE32aiXeb7O74JRAC70XuODnNk1o/r01ucyjWVnbn9ZKBZUboFe3AUHugVSeWYB+/ctyWN4Hy4x10SWxBEaMpJ9wj3NtCCuRKzQYkDSyGKltpzd1jB9HLdV8O5Kug=
+  - secure: I9b0zIu6KEM758HJnR/f1WZ0eTO45H8pvPmbKNzTSvTLwwee9Sz4dFg14P8aNNTusI2Ux2aOKNMqZzHg1qbTXsiQdWwFXiOmnfsZOJiD2NhH3ILGB97S1qLLW4g2W+4bizqWsW+KmK1mnUe2bCVLqsGlRfXhdK22oFQNmorM2TQ=
