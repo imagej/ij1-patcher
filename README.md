@@ -1,5 +1,5 @@
 [![](https://img.shields.io/maven-central/v/net.imagej/ij1-patcher.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22net.imagej%22%20AND%20a%3A%22ij1-patcher%22)
-[![](http://jenkins.imagej.net/job/ImageJ-1.x-patcher/lastBuild/badge/icon)](http://jenkins.imagej.net/job/ImageJ-1.x-patcher)
+[![](https://travis-ci.org/imagej/ij1-patcher.svg?branch=master)](https://travis-ci.org/imagej/ij1-patcher)
 
 # Welcome to the ImageJ 1.x patcher
 
