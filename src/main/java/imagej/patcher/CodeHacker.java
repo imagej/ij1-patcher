@@ -592,7 +592,7 @@ class CodeHacker {
 				public void edit(final FieldAccess access)
 					throws CannotCompileException
 				{
-					if (access.getFieldName().equals(access)) {
+					if (access.getFieldName().equals(fieldName)) {
 						access.replace(newCode);
 						markEdited();
 					}

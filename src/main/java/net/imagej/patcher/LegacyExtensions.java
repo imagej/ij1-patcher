@@ -217,7 +217,7 @@ class LegacyExtensions {
 			prefsDir = System.getenv("user.home");
 		}
 		if (prefsDir != null) {
-			hacker.overrideFieldWrite("ij.Prefs", "public java.lang.String load(java.lang.Object ij, java.applet.Applet applet)",
+			hacker.overrideFieldWrite("ij.Prefs", "public static java.lang.String getPrefsDir()",
 				"prefsDir", "$_ = \"" + prefsDir + "\";");
 		}
 
