@@ -416,7 +416,11 @@ class LegacyExtensions {
 		} else {
 			hacker.replaceAppNameInCall("ij.plugin.Options", "public void appearance()", "showMessage", 2, appName);
 		}
-		hacker.replaceAppNameInCall("ij.gui.YesNoCancelDialog", "public <init>(java.awt.Frame parent, java.lang.String title, java.lang.String msg)", "super", 2, appName);
+		if (hacker.hasMethod("ij.gui.YesNoCancelDialog", "public <init>(java.awt.Frame parent, java.lang.String title, java.lang.String msg, java.lang.String yesLabel, java.lang.String noLabel)")) {
+			hacker.replaceAppNameInCall("ij.gui.YesNoCancelDialog", "public <init>(java.awt.Frame parent, java.lang.String title, java.lang.String msg, java.lang.String yesLabel, java.lang.String noLabel)", "super", 2, appName);
+		} else {
+			hacker.replaceAppNameInCall("ij.gui.YesNoCancelDialog", "public <init>(java.awt.Frame parent, java.lang.String title, java.lang.String msg)", "super", 2, appName);
+		}
 		hacker.replaceAppNameInCall("ij.gui.Toolbar", "private void showMessage(int toolId)", "showStatus", 1, appName);
 	}
 
