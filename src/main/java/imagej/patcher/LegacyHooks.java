@@ -125,7 +125,7 @@ public abstract class LegacyHooks {
 	}
 
 	/**
-	 * Updates the progress bar, where 0 <= progress <= 1.0.
+	 * Updates the progress bar, where 0 &lt;= progress &lt;= 1.0.
 	 * 
 	 * @param progress between 0.0 and 1.0
 	 */

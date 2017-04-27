@@ -48,9 +48,9 @@ import java.util.Set;
  * installed by default after patching in the extension points into ImageJ 1.x.
  * On its own, it does not allow to override the extension points (such as the
  * editor) with different implementations; one needs to install different hooks using
- * the {@link imagej.patcher.CodeHacker#installHooks(LegacyHooks)} method.
+ * the {@link imagej.patcher.LegacyInjector#installHooks(ClassLoader, LegacyHooks)} method.
  * </p>
- * </p>
+ * <p>
  * This class is also the perfect base class for all implementations of the
  * {@link LegacyHooks} interface, e.g. to offer "real" extension mechanisms such
  * as the SciJava-common plugin framework.
@@ -61,13 +61,11 @@ import java.util.Set;
 @Deprecated
 public class EssentialLegacyHooks extends LegacyHooks {
 
-	/** @inherit */
 	@Override
 	public void error(Throwable t) {
 		IJ.handleException(t);
 	}
 
-	/** @inherit */
 	@Override
 	public boolean handleNoSuchMethodError(NoSuchMethodError error) {
 		String message = error.getMessage();
@@ -117,7 +115,6 @@ public class EssentialLegacyHooks extends LegacyHooks {
 		return true;
 	}
 
-	/** @inherit */
 	@Override
 	public void initialized() {
 		final String property = System.getProperty("ij1.patcher.initializer");
