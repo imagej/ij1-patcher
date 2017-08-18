@@ -138,16 +138,16 @@ public abstract class LegacyHooks {
 	}
 
 	/**
-	 * Updates the progress bar, where 0 <= progress <= 1.0.
+	 * Updates the progress bar, where {@code 0 <= progress <= 1.0}.
 	 * 
 	 * @param progress between 0.0 and 1.0
 	 */
 	public void showProgress(final double progress) {}
 
 	/**
-	 * Updates the progress bar, where the length of the bar is set to (
-	 * <code>currentValue + 1) / finalValue</code> of the maximum bar length. The
-	 * bar is erased if <code>currentValue &gt;= finalValue</code>.
+	 * Updates the progress bar, where the length of the bar is set to
+	 * {@code (currentValue + 1) / finalValue} of the maximum bar length. The bar
+	 * is erased if {@code currentValue >= finalValue}.
 	 * 
 	 * @param currentIndex the step that was just started
 	 * @param finalIndex the final step.
@@ -313,7 +313,7 @@ public abstract class LegacyHooks {
 	 * Extension point to enhance ImageJ 1.x' error reporting upon
 	 * {@link NoSuchMethodError}.
 	 * 
-	 * @param e the exception to handle
+	 * @param error the exception to handle
 	 * @return true if the error was handled by the legacy hook
 	 */
 	public boolean handleNoSuchMethodError(final NoSuchMethodError error) {
