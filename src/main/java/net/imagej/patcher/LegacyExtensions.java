@@ -365,8 +365,15 @@ class LegacyExtensions {
 			"ij.IJ", "runPlugIn",
 			"if (ij.IJ._hooks.openInEditor(dir + name)) $_ = null;" +
 			"else $_ = $proceed($$);");
+		// hacker.hasMethod check for private void showCode(String title, String code) then replace in there otherwise keep the existing code
+		String methodSig;
+		if (hacker.hasMethod("ij.gui.Toolbar", "private void showCode(java.lang.String title, java.lang.String code)")) {
+			methodSig = "private void showCode(java.lang.String title, java.lang.String code)";
+		} else {
+			methodSig = "public void itemStateChanged(java.awt.event.ItemEvent e)";
+		}
 		hacker.replaceCallInMethod("ij.gui.Toolbar",
-			"public void itemStateChanged(java.awt.event.ItemEvent e)",
+			methodSig,
 			"ij.plugin.frame.Editor", "create",
 			"if ($1.endsWith(\".txt\")) $1 = $1.substring(0, $1.length() - 4);" +
 			"$1 += \".ijm\";" +
@@ -526,12 +533,21 @@ class LegacyExtensions {
 				" java.io.File fijiFile = new java.io.File(fijiPath);" +
 				" $_ = fijiFile.exists() ? fijiFile : new java.io.File($1);" +
 				"} else $_ = new java.io.File($1);");
-		hacker.replaceCallInMethod("ij.Menus", "void installStartupMacroSet()", "ij.plugin.MacroInstaller", "installFile",
+		if (hacker.hasMethod("ij.plugin.MacroInstaller", "public void installStartupMacros(java.lang.String path)")) {
+			hacker.replaceCallInMethod("ij.plugin.MacroInstaller", "public void installStartupMacros(java.lang.String path)", "ij.plugin.MacroInstaller", "installFile",
+					"if ($1.endsWith(\"StartupMacros.txt\")) {" +
+					" java.lang.String fijiPath = $1.substring(0, $1.length() - 3) + \"fiji.ijm\";" +
+					" java.io.File fijiFile = new java.io.File(fijiPath);" +
+					" $0.installFile(fijiFile.exists() ? fijiFile.getPath() : $1);" +
+					"} else $0.installFile($1);");
+		} else {
+			hacker.replaceCallInMethod("ij.Menus", "void installStartupMacroSet()", "ij.plugin.MacroInstaller", "installFile",
 				"if ($1.endsWith(\"StartupMacros.txt\")) {" +
 				" java.lang.String fijiPath = $1.substring(0, $1.length() - 3) + \"fiji.ijm\";" +
 				" java.io.File fijiFile = new java.io.File(fijiPath);" +
 				" $0.installFile(fijiFile.exists() ? fijiFile.getPath() : $1);" +
 				"} else $0.installFile($1);");
+		}
 	}
 
 	private static void handleMacAdapter(final CodeHacker hacker) {
