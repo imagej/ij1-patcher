@@ -11,7 +11,7 @@
 
 	<groupId>net.imagej</groupId>
 	<artifactId>ij1-patcher</artifactId>
-	<version>0.12.8-SNAPSHOT</version>
+	<version>0.12.9-SNAPSHOT</version>
 
 	<name>ImageJ 1.x Patcher</name>
 	<description>A runtime patcher to introduce extension points into ImageJ 1.x. This project offers extension points for use with ImageJ2 and it also offers (limited) support for headless operations.</description>
