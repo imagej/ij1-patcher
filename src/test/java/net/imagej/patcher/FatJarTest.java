@@ -94,7 +94,7 @@ public class FatJarTest {
 		threadLoader = Thread.currentThread().getContextClassLoader();
 	}
 
-	@Test
+	//@Test
 	public void testFatJars() throws Exception {
 		final File tmp = createTemporaryDirectory("fat-jars-");
 		final File plugins = new File(tmp, "plugins");
