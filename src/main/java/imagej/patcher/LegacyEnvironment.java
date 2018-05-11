@@ -56,7 +56,7 @@ import java.util.jar.Manifest;
  * be accessed conveniently.
  * </p>
  * 
- * @author "Johannes Schindelin"
+ * @author Johannes Schindelin
  */
 @Deprecated
 public class LegacyEnvironment {

@@ -53,7 +53,7 @@ import net.imagej.patcher.LegacyInjector.Callback;
  * be accessed conveniently.
  * </p>
  * 
- * @author "Johannes Schindelin"
+ * @author Johannes Schindelin
  */
 public class LegacyEnvironment {
 

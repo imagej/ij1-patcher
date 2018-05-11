@@ -62,7 +62,7 @@ import java.util.regex.Pattern;
  * <i>scijava-common</i> instead.
  * </p>
  * 
- * @author "Johannes Schindelin"
+ * @author Johannes Schindelin
  */
 class Utils {
 

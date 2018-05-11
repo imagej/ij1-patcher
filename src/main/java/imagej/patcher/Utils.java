@@ -60,7 +60,7 @@ import java.util.jar.JarFile;
  * <i>scijava-common</i> instead.
  * </p>
  * 
- * @author "Johannes Schindelin"
+ * @author Johannes Schindelin
  */
 @Deprecated
 class Utils {
