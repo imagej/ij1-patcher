@@ -81,6 +81,7 @@ public class LegacyEnvironment {
 		this(loader, headless, new LegacyInjector());
 	}
 
+	@SuppressWarnings("unused")
 	LegacyEnvironment(final ClassLoader loader, final boolean headless,
 		final LegacyInjector injector) throws ClassNotFoundException
 	{
