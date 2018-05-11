@@ -369,7 +369,7 @@ public class LegacyEnvironment {
 			run.invoke(null, command, options);
 		}
 		catch (final Exception e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException(errorMessage(run, e), e);
 		}
 		finally {
 			thread.setContextClassLoader(savedLoader);
@@ -394,7 +394,7 @@ public class LegacyEnvironment {
 			runMacro.invoke(null, macro, arg);
 		}
 		catch (final Exception e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException(errorMessage(runMacro, e), e);
 		}
 		finally {
 			thread.setName(savedName);
@@ -420,7 +420,7 @@ public class LegacyEnvironment {
 			return runPlugIn.invoke(null, className, arg);
 		}
 		catch (final Exception e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException(errorMessage(runPlugIn, e), e);
 		}
 		finally {
 			thread.setName(savedName);
@@ -559,4 +559,43 @@ public class LegacyEnvironment {
 		}
 	}
 
+	/**
+	 * Extracts the error message from inside ImageJ1 when a macro is aborted.
+	 * <p>
+	 * When a macro is aborted, a message is stashed in the private
+	 * {@code lastErrorMessage} field of {@code ij.IJ}, and then a
+	 * {@link RuntimeException} is thrown with message
+	 * {@code ij.Macro#MACRO_CANCELED} (i.e., "Macro canceled"). The stashed error
+	 * message is obtainable via the {@code IJ.getErrorMessage()} method, but then
+	 * it gets nulled out as a side effect.
+	 * <p>
+	 * We want this error message, but without the side effect, since nulling it
+	 * out might have adverse effects on downstream execution later. This method
+	 * tries to use reflection to extract the error message without altering it.
+	 * </p>
+	 * 
+	 * @param m The method whose execution triggered the exception.
+	 * @param t The exception from which to extract the error message.
+	 * @return The extracted error message, or null if it could not be extracted.
+	 */
+	private static String errorMessage(final Method m, final Throwable t) {
+		if (t == null) return null;
+		final Throwable cause = t.getCause();
+		if (cause != null) return errorMessage(m, cause);
+		if (t.getClass() != RuntimeException.class) return null;
+		if (!"Macro canceled".equals(t.getMessage())) return null;
+		final Class<?> c = m.getDeclaringClass();
+		if (!"ij.IJ".equals(c.getName())) return null;
+		try {
+			final Field f = c.getDeclaredField("lastErrorMessage");
+			f.setAccessible(true);
+			final Object value = f.get(null);
+			return value instanceof String ? (String) value : null;
+		}
+		catch (final NoSuchFieldException | SecurityException
+				| IllegalArgumentException | IllegalAccessException exc)
+		{
+			return null;
+		}
+	}
 }
