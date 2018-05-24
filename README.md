@@ -31,7 +31,7 @@ interfere with ImageJ 1.x instances living in other class loaders. Example:
 ## How can I use it?
 
 Add the following section to your `pom.xml` file (if you do not use
-[Maven](https://maven.apache.org/) yet, [you should](http://fiji.sc/Maven)):
+[Maven](https://maven.apache.org/) yet, [you should](https://imagej.net/Maven)):
 
 ```xml
 	<dependencies>
@@ -116,18 +116,18 @@ For details about the headless mode, see the section below.
 
 ## Where does it come from?
 
-[ImageJ 1.x](http://imagej.net/) is a very successful project that -- as any
+[ImageJ 1.x](https://imagej.net/) is a very successful project that -- as any
 major project -- benefits from some refactoring from time to time. A first
 attempt at improving ImageJ 1.x was made in the
 [`ImageJA`](https://github.com/imagej/ImageJA) project (which now serves as a
 Mavenized version of ImageJ 1.x, automatically tracking ImageJ 1.x' releases).
 
-[Fiji](http://fiji.sc/), a related project aiming to provide a distribution of
+[Fiji](https://fiji.sc/), a related project aiming to provide a distribution of
 ImageJ, tapped into the ImageJA project to provide extension points not offered
 by ImageJ 1.x, and later also to provide the headless mode (see below). Over
 time, maintaining the ImageJA fork became very burdensome.
 
-With [ImageJ2](http://developer.imagej.net/), a major effort was started to
+With [ImageJ2](https://imagej.net/ImageJ2), a major effort was started to
 provide a new software architecture.  The benefits to the Fiji project were
 immediately obvious and over the course of time, Fiji first imitated ImageJ2's
 approach by replacing the ImageJA-specific ImageJ 1.x patches with runtime
@@ -160,4 +160,4 @@ subclass of `java.awt.Dialog`.
 Summary: the headless mode works for most plugins but fails for plugins assuming
 that a graphical user environment is readily available.
 
-Please see the [Fiji Wiki](http://fiji.sc/Headless) for more information.
+Please see the [ImageJ Wiki](https://imagej.net/Headless) for more information.
