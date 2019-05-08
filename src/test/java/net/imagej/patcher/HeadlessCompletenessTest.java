@@ -109,7 +109,7 @@ public class HeadlessCompletenessTest {
 		final String headlessName = HeadlessGenericDialog.class.getName();
 		final CtClass headless = pool.get(headlessName);
 
-		final Map<String, CtMethod> methods = new HashMap<String, CtMethod>();
+		final Map<String, CtMethod> methods = new HashMap<>();
 		for (final CtMethod method : headless.getMethods()) {
 			if (headless != method.getDeclaringClass()) continue;
 			String name = method.getLongName();
@@ -211,7 +211,7 @@ public class HeadlessCompletenessTest {
 		headlessIJ1.addPluginClasspath(jarFile);
 		headlessIJ1.runMacro("", "");
 		final Map<String, String> menuItems =
-			new LinkedHashMap<String, String>(headlessIJ1.getMenuStructure());
+			new LinkedHashMap<>(headlessIJ1.getMenuStructure());
 
 		assertTrue("does not have 'Set Property'", menuItems
 			.containsKey("Plugins>Set Property"));

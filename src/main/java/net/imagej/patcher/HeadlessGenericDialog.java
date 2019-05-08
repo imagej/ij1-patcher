@@ -296,7 +296,7 @@ public class HeadlessGenericDialog {
 	/**
 	 * Looks whether a boolean was specified in the macro parameters.
 	 * 
-	 * @param label
+	 * @param labelString
 	 *            the label to look for
 	 * @return whether the label was found
 	 */
