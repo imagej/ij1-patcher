@@ -125,6 +125,7 @@ public class HeadlessCompletenessTest {
 		// d) function correctly while headless
 		for (final String name : new String[] {
 			"actionPerformed(java.awt.event.ActionEvent)", //
+			"addToSameRow()", //
 			"adjustmentValueChanged(java.awt.event.AdjustmentEvent)", //
 			"getInsets(int,int,int,int)", //
 			"getInstance()", //
@@ -139,6 +140,7 @@ public class HeadlessCompletenessTest {
 			"parseDouble(java.lang.String)", //
 			"repaint()", //
 			"setCancelLabel(java.lang.String)", //
+			"setFont(java.awt.Font)", //
 			"textValueChanged(java.awt.event.TextEvent)", //
 			"windowActivated(java.awt.event.WindowEvent)", //
 			"windowClosed(java.awt.event.WindowEvent)", //
@@ -156,6 +158,7 @@ public class HeadlessCompletenessTest {
 			String name = method.getLongName();
 			assertTrue(name.startsWith(originalName + "."));
 			name = name.substring(originalName.length() + 1);
+			if (name.startsWith("access$")) continue; // skip synthetic methods
 			assertTrue(name + " is not overridden", methods.containsKey(name));
 		}
 	}

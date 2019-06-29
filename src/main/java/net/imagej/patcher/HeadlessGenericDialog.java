@@ -136,6 +136,10 @@ public class HeadlessGenericDialog {
 		numbers.add(getMacroParameter(label, defaultValue));
 	}
 
+	public void addSlider(String label, double minValue, double maxValue, double defaultValue, double stepSize) {
+		addSlider(label, minValue, maxValue, defaultValue);
+	}
+
 	public void addStringField(String label, String defaultText) {
 		strings.add(getMacroParameter(label, defaultText));
 	}

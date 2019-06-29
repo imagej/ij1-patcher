@@ -490,6 +490,10 @@ public abstract class LegacyHooks {
 		if (menuPath == null) {
 			menuStructure.clear();
 		}
+		else if (menuPath.startsWith("Help>Examples>")) {
+			// NB: Skip the Help>Examples menu. We do not need it in headless mode.
+			return;
+		}
 		else if (menuPath.endsWith(">-")) {
 			int i = 1;
 			while (menuStructure.containsKey(menuPath + i)) {

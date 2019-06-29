@@ -597,8 +597,12 @@ class LegacyExtensions {
 				"  _currentMenuPath = \"Image\";" +
 				"else if (\"Image Calculator...\".equals($2))" +
 				"  _currentMenuPath = \"Process\";" +
-				"else if (\"About ImageJ...\".equals($2))" +
+				"else if (\"About ImageJ...\".equals($2) || \"Update ImageJ...\".equals($2))" +
 				"  _currentMenuPath = \"Help\";" +
+				"else if (\"Open as Panel\".equals($2))" +
+				"  _currentMenuPath = \"Help>Examples\";" +
+				"else if ($3.startsWith(\"ij.plugin.SimpleCommands(\\\"showdir\"))" +
+				"  _currentMenuPath = \"File>Show Folder\";" +
 				"$_ = $proceed($$);");
 		// Wow. There are so many different ways ImageJ 1.x adds menu entries. See e.g. "Repeat Command".
 		hacker.replaceCallInMethod("ij.Menus",
