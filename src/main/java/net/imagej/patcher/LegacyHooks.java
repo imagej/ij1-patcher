@@ -31,8 +31,6 @@
 
 package net.imagej.patcher;
 
-import ij.gui.ImageWindow;
-
 import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
