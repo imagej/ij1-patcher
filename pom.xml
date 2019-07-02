@@ -84,6 +84,7 @@
 	</ciManagement>
 
 	<properties>
+		<premain-class>net.imagej.patcher.JavaAgent</premain-class>
 		<package-name>net.imagej.patcher</package-name>
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>Board of Regents of the University of
@@ -117,16 +118,6 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 
 	<build>
 		<plugins>
-			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifestEntries>
-							<Premain-Class>net.imagej.patcher.JavaAgent</Premain-Class>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
