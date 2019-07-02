@@ -43,7 +43,7 @@ import org.junit.Test;
  * 
  * @author Johannes Schindelin
  */
-public class ImagePlusTest {
+public class ImagePlusIT {
 	@Test
 	public void testAddSliceTo2DCompositeImage() throws ClassNotFoundException {
 		assumeTrue(!GraphicsEnvironment.isHeadless());

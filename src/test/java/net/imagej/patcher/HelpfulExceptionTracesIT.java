@@ -40,7 +40,7 @@ import net.imagej.patcher.LegacyInjector.Callback;
 
 import org.junit.Test;
 
-public class HelpfulExceptionTracesTest {
+public class HelpfulExceptionTracesIT {
 
 	@Test
 	public void testHelpfulTrace() throws Exception {
