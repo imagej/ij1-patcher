@@ -166,7 +166,7 @@ class LegacyExtensions {
 							+ "if (!originalClassName.replace('.', '/').equals(realClassName)) {"
 							+ " if (realClassName.startsWith(\"javax/vecmath/\") || realClassName.startsWith(\"com/sun/j3d/\") || realClassName.startsWith(\"javax/media/j3d/\"))"
 							+ "  ij.IJ.error(\"The class \" + originalClassName + \" did not find Java3D (\" + realClassName + \")\\nPlease call Plugins>3D Viewer to install\");"
-							+ " else"
+							+ " else if (!realClassName.startsWith(\"com/apple/\"))"
 							+ "  ij.IJ.handleException($1);"
 							+ " return null;"
 							+ "}");
