@@ -129,6 +129,7 @@ public class HeadlessCompletenessTest {
 			"adjustmentValueChanged(java.awt.event.AdjustmentEvent)", //
 			"getInsets(int,int,int,int)", //
 			"getInstance()", //
+			"getParentFrame()", //
 			"getValue(java.lang.String)", //
 			"isMacro()", //
 			"isMatch(java.lang.String,java.lang.String)", //

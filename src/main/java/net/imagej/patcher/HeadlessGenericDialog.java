@@ -40,6 +40,7 @@ import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Insets;
 import java.awt.Panel;
 import java.awt.TextArea;
@@ -226,7 +227,7 @@ public class HeadlessGenericDialog {
     /**
      * Resets the counters before reading the dialog parameters.
      */
-	private void resetCounters() {
+	void resetCounters() {
 		numberfieldIndex = 0;
 		stringfieldIndex = 0;
 		checkboxIndex = 0;
