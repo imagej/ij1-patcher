@@ -93,7 +93,7 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 		<license.projectName>ImageJ software for multidimensional image processing and analysis.</license.projectName>
 		<ij1-patcher.jar>${project.build.directory}/${project.build.finalName}.jar</ij1-patcher.jar>
 
-		<imagej1.version>1.53a</imagej1.version>
+		<imagej1.version>1.53b</imagej1.version>
 	</properties>
 
 	<dependencies>

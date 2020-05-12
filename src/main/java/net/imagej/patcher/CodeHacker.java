@@ -1130,6 +1130,18 @@ class CodeHacker {
 		clazz.instrument(new ExprEditor() {
 
 			@Override
+			public void edit(final ConstructorCall call) throws CannotCompileException {
+				try {
+					if (call.getConstructor().getLongName().equals("ij.gui.GenericDialog(java.lang.String,java.awt.Frame)")) {
+						call.replace("super();");
+					}
+				} catch (NotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+			@Override
 			public void edit(final NewExpr expr) throws CannotCompileException {
 				final String name = expr.getClassName();
 				if (name.startsWith("java.awt.Menu") ||
