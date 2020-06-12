@@ -40,6 +40,7 @@ import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Insets;
 import java.awt.Panel;
 import java.awt.TextArea;
@@ -124,12 +125,16 @@ public class HeadlessGenericDialog {
 		choices.add(items[index]);
 	}
 
-	public void addNumericField(String label, double defaultValue, int digits) {
+	public void addNumericField(String label, double defaultValue) {
 		numbers.add(getMacroParameter(label, defaultValue));
 	}
 
+	public void addNumericField(String label, double defaultValue, int digits) {
+		addNumericField(label, defaultValue);
+	}
+
 	public void addNumericField(String label, double defaultValue, int digits, int columns, String units) {
-		addNumericField(label, defaultValue, digits);
+		addNumericField(label, defaultValue);
 	}
 
 	public void addSlider(String label, double minValue, double maxValue, double defaultValue) {
@@ -222,7 +227,7 @@ public class HeadlessGenericDialog {
     /**
      * Resets the counters before reading the dialog parameters.
      */
-	private void resetCounters() {
+	void resetCounters() {
 		numberfieldIndex = 0;
 		stringfieldIndex = 0;
 		checkboxIndex = 0;
@@ -257,6 +262,7 @@ public class HeadlessGenericDialog {
 	public void setSmartRecording(boolean smartRecording) {}
 	public void enableYesNoCancel() {}
 	public void enableYesNoCancel(String yesLabel, String noLabel) {}
+	public void finalizeRecording() {}
 	public void focusGained(FocusEvent e) {}
 	public void focusLost(FocusEvent e) {}
 	public Button[] getButtons() { return null; }
@@ -279,6 +285,7 @@ public class HeadlessGenericDialog {
 	public void setOKLabel(String label) {}
 	protected void setup() {}
 	public void accessTextFields() {}
+	public void show() {}
 	public void showHelp() {}
 	public void setLocation(int x, int y) {}
 	public void setDefaultString(int index, String str) {}

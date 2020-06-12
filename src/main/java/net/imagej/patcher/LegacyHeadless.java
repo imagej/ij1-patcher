@@ -82,7 +82,7 @@ class LegacyHeadless  {
 			return;
 		}
 		hacker.commitClass(HeadlessGenericDialog.class);
-		hacker.replaceWithStubMethods("ij.gui.GenericDialog", "paint", "getInsets", "repaint", "showHelp");
+		hacker.replaceWithStubMethods("ij.gui.GenericDialog", "paint", "getInsets", "getParentFrame", "repaint", "showHelp");
 		hacker.replaceSuperclassAndStubifyAWTMethods("ij.gui.GenericDialog", HeadlessGenericDialog.class.getName());
 		hacker.skipAWTInstantiations("ij.gui.GenericDialog");
 
@@ -95,6 +95,8 @@ class LegacyHeadless  {
 		hacker.skipAWTInstantiations("ij.plugin.HyperStackConverter");
 
 		hacker.skipAWTInstantiations("ij.plugin.Duplicator");
+
+		hacker.skipAWTInstantiations("ij.gui.GUI");
 
 		hacker.insertAtTopOfMethod("ij.plugin.filter.ScaleDialog",
 			"java.awt.Panel makeButtonPanel(ij.plugin.filter.SetScaleDialog gd)",
