@@ -123,11 +123,14 @@ public class HeadlessCompletenessTest {
 		// d) function correctly while headless
 		for (final String name : new String[] {
 			"actionPerformed(java.awt.event.ActionEvent)", //
+			"addImageChoice(java.lang.String,java.lang.String)", //
 			"addToSameRow()", //
 			"adjustmentValueChanged(java.awt.event.AdjustmentEvent)", //
 			"getInsets(int,int,int,int)", //
 			"getInstance()", //
 			"getLabel()", //
+			"getNextImage()", //
+			"getString(java.awt.dnd.DropTargetDropEvent)", //
 			"getValue(java.lang.String)", //
 			"isMacro()", //
 			"isMatch(java.lang.String,java.lang.String)", //
@@ -140,6 +143,7 @@ public class HeadlessCompletenessTest {
 			"repaint()", //
 			"setCancelLabel(java.lang.String)", //
 			"setFont(java.awt.Font)", //
+			"stripSuffix(java.lang.String,java.lang.String)", //
 			"textValueChanged(java.awt.event.TextEvent)", //
 			"windowActivated(java.awt.event.WindowEvent)", //
 			"windowClosed(java.awt.event.WindowEvent)", //

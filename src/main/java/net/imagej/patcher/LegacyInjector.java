@@ -285,7 +285,7 @@ public class LegacyInjector {
 		// override behavior of MacAdapter, if needed
 		if (Utils.hasClass("com.apple.eawt.ApplicationListener")) {
 			// NB: If com.apple.eawt package is present, override IJ1's MacAdapter.
-			hacker.insertAtTopOfMethod("MacAdapter",
+			hacker.insertAtTopOfMethod("ij.plugin.MacAdapter",
 				"public void run(java.lang.String arg)",
 				"if (!ij.IJ._hooks.isLegacyMode()) return;");
 		}

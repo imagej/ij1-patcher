@@ -151,6 +151,22 @@ public class HeadlessGenericDialog {
 		addStringField(label, defaultText);
 	}
 
+	public void addDirectoryField(String label, String defaultPath) {
+		strings.add(getMacroParameter(label, defaultPath));
+	}
+
+	public void addDirectoryField(String label, String defaultPath, int columns) {
+		addDirectoryField(label, defaultPath);
+	}
+
+	public void addFileField(String label, String defaultPath) {
+		strings.add(getMacroParameter(label, defaultPath));
+	}
+
+	public void addFileField(String label, String defaultPath, int columns) {
+		addFileField(label, defaultPath);
+	}
+
 	public void addTextAreas(String text1, String text2, int rows, int columns) {
 		textArea1 = text1;
 		textArea2 = text2;

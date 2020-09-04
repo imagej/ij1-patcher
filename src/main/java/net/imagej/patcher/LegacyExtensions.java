@@ -255,6 +255,7 @@ class LegacyExtensions {
 			+ "return null;");
 
 		// Add back the "Convert to 8-bit Grayscale" checkbox to Import>Image Sequence
+		/*
 		if (!hacker.hasField("ij.plugin.FolderOpener", "convertToGrayscale")) {
 			hacker.insertPrivateStaticField("ij.plugin.FolderOpener", Boolean.TYPE, "convertToGrayscale");
 			hacker.replaceCallInMethod("ij.plugin.FolderOpener", "public void run(java.lang.String arg)", "ij.io.Opener", "openImage",
@@ -277,6 +278,7 @@ class LegacyExtensions {
 					+ "  return false;"
 					+ "}", 1);
 		}
+		*/
 
 		// handle HTTPS in addition to HTTP
 		hacker.handleHTTPS("ij.macro.Functions", "java.lang.String exec()");
@@ -553,7 +555,7 @@ class LegacyExtensions {
 		// to load it if we patched the class.
 		if (!hacker.existsClass("com.apple.eawt.ApplicationListener")) return;
 
-		hacker.insertAtTopOfMethod("MacAdapter", "public void run(java.lang.String arg)",
+		hacker.insertAtTopOfMethod("ij.plugin.MacAdapter", "public void run(java.lang.String arg)",
 			"return;");
 	}
 
