@@ -264,12 +264,14 @@ class LegacyExtensions {
 				+ "  ij.IJ.run($_, \"8-bit\", \"\");"
 				+ "  if (saved != null && !saved.equals(\"\")) ij.Macro.setOptions(saved);"
 				+ "}");
-			hacker.replaceCallInMethod("ij.plugin.FolderOpener", "boolean showDialog(ij.ImagePlus imp, java.lang.String[] list)",
-				"ij.plugin.FolderOpener$FolderOpenerDialog", "addCheckbox",
+			hacker.replaceCallInMethod("ij.plugin.FolderOpener",
+				"boolean showDialog()",
+				"ij.gui.GenericDialog", "addCheckbox",
 				"$0.addCheckbox(\"Convert to 8-bit Grayscale\", convertToGrayscale);"
 				+ "$0.addCheckbox($1, $2);", 1);
-			hacker.replaceCallInMethod("ij.plugin.FolderOpener", "boolean showDialog(ij.ImagePlus imp, java.lang.String[] list)",
-					"ij.plugin.FolderOpener$FolderOpenerDialog", "getNextBoolean",
+			hacker.replaceCallInMethod("ij.plugin.FolderOpener",
+				"boolean showDialog()",
+				"ij.gui.GenericDialog", "getNextBoolean",
 					"convertToGrayscale = $0.getNextBoolean();"
 					+ "$_ = $0.getNextBoolean();"
 					+ "if (convertToGrayscale && $_) {"

@@ -39,7 +39,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.scijava.test.TestUtils.createTemporaryDirectory;
-import ij.ImageJ;
 
 import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
@@ -53,15 +52,17 @@ import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javassist.ClassClassPath;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtMethod;
 import net.imagej.patcher.LegacyInjector.Callback;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import ij.ImageJ;
+import javassist.ClassClassPath;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtMethod;
 
 /**
  * Tests whether the headless functionality is complete.
@@ -128,6 +129,7 @@ public class HeadlessCompletenessTest {
 			"getInsets(int,int,int,int)", //
 			"getInstance()", //
 			"getLabel()", //
+			"getString(java.awt.dnd.DropTargetDropEvent)", //
 			"getValue(java.lang.String)", //
 			"isMacro()", //
 			"isMatch(java.lang.String,java.lang.String)", //
@@ -140,6 +142,7 @@ public class HeadlessCompletenessTest {
 			"repaint()", //
 			"setCancelLabel(java.lang.String)", //
 			"setFont(java.awt.Font)", //
+			"stripSuffix(java.lang.String,java.lang.String)", //
 			"textValueChanged(java.awt.event.TextEvent)", //
 			"windowActivated(java.awt.event.WindowEvent)", //
 			"windowClosed(java.awt.event.WindowEvent)", //

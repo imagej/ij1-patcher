@@ -28,24 +28,24 @@
  */
 package net.imagej.patcher;
 
-import ij.ImagePlus;
-import ij.Macro;
-import ij.gui.DialogListener;
-import ij.plugin.filter.PlugInFilterRunner;
-
 import java.awt.Button;
 import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.Insets;
 import java.awt.Panel;
 import java.awt.TextArea;
 import java.awt.event.FocusEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+
+import ij.ImagePlus;
+import ij.Macro;
+import ij.gui.DialogListener;
+import ij.plugin.filter.PlugInFilterRunner;
 
 /**
  * Rump implementation of a pseudo dialog intended to stand in for the
@@ -80,6 +80,8 @@ public class HeadlessGenericDialog {
 	protected List<Integer> choiceIndices;
 	protected String textArea1, textArea2;
 	protected List<String> radioButtons;
+	protected List<File> files;
+	protected List<File> directories;
 
 	protected int numberfieldIndex = 0, stringfieldIndex = 0, checkboxIndex = 0, choiceIndex = 0, textAreaIndex = 0, radioButtonIndex = 0;
 	protected boolean invalidNumber;
@@ -263,6 +265,12 @@ public class HeadlessGenericDialog {
 	public void finalizeRecording() {}
 	public void focusGained(FocusEvent e) {}
 	public void focusLost(FocusEvent e) {}
+	public void addFileField(String label, String defaultPath) {}
+	public void addFileField(String label, String defaultPath, int columns) {}
+	public void addDirectoryField(String label, String defaultPath) {}
+	public void addDirectoryField(String label, String defaultPath, int columns) {}
+	public void addImageChoice(String label, String defaultImage) {}
+	public ImagePlus getNextImage() { return null; }
 	public Button[] getButtons() { return null; }
 	public Vector<?> getCheckboxes() { return null; }
 	public Vector<?> getChoices() { return null; }
