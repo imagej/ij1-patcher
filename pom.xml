@@ -79,8 +79,8 @@
 		<url>https://github.com/imagej/ij1-patcher/issues</url>
 	</issueManagement>
 	<ciManagement>
-		<system>Travis CI</system>
-		<url>https://travis-ci.org/imagej/ij1-patcher</url>
+		<system>GitHub Actions</system>
+		<url>https://github.com/imagej/ij1-patcher/actions</url>
 	</ciManagement>
 
 	<properties>
