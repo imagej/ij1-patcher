@@ -14,8 +14,8 @@
 	<version>1.2.2-SNAPSHOT</version>
 
 	<name>ImageJ 1.x Patcher</name>
-	<description>A runtime patcher to introduce extension points into ImageJ 1.x. This project offers extension points for use with ImageJ2 and it also offers (limited) support for headless operations.</description>
-	<url>https://imagej.net/ImageJ_Legacy</url>
+	<description>A runtime patcher to introduce extension points into the original ImageJ (1.x). This project offers extension points for use with ImageJ2 and it also offers limited support for headless operations.</description>
+	<url>https://imagej.net/libs/imagej-legacy</url>
 	<inceptionYear>2009</inceptionYear>
 	<organization>
 		<name>ImageJ</name>
@@ -32,7 +32,7 @@
 		<developer>
 			<id>ctrueden</id>
 			<name>Curtis Rueden</name>
-			<url>https://imagej.net/User:Rueden</url>
+			<url>https://imagej.net/people/ctrueden</url>
 			<roles>
 				<role>lead</role>
 				<role>developer</role>
@@ -46,13 +46,13 @@
 	<contributors>
 		<contributor>
 			<name>Johannes Schindelin</name>
-			<url>https://imagej.net/User:Schindelin</url>
+			<url>https://imagej.net/people/dscho</url>
 			<roles><role>founder</role></roles>
 			<properties><id>dscho</id></properties>
 		</contributor>
 		<contributor>
 			<name>Mark Hiner</name>
-			<url>https://imagej.net/User:Hinerm</url>
+			<url>https://imagej.net/people/hinerm</url>
 			<properties><id>hinerm</id></properties>
 		</contributor>
 		<contributor>
@@ -87,8 +87,8 @@
 		<premain-class>net.imagej.patcher.JavaAgent</premain-class>
 		<package-name>net.imagej.patcher</package-name>
 		<license.licenseName>bsd_2</license.licenseName>
-		<license.copyrightOwners>ImageJ developers.</license.copyrightOwners>
-		<license.projectName>ImageJ software for multidimensional image processing and analysis.</license.projectName>
+		<license.copyrightOwners>ImageJ2 developers.</license.copyrightOwners>
+		<license.projectName>ImageJ2 software for multidimensional image processing and analysis.</license.projectName>
 		<ij1-patcher.jar>${project.build.directory}/${project.build.finalName}.jar</ij1-patcher.jar>
 	</properties>
 
