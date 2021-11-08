@@ -69,7 +69,7 @@
 	</mailingLists>
 
 	<scm>
-		<connection>scm:git:git://github.com/imagej/ij1-patcher</connection>
+		<connection>scm:git:https://github.com/imagej/ij1-patcher</connection>
 		<developerConnection>scm:git:git@github.com:imagej/ij1-patcher</developerConnection>
 		<tag>HEAD</tag>
 		<url>https://github.com/imagej/ij1-patcher</url>
