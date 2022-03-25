@@ -319,7 +319,13 @@ class LegacyExtensions {
 	private static void addEditorExtensionPoints(final CodeHacker hacker) {
 		hacker.insertAtTopOfMethod("ij.io.Opener", "public void open(java.lang.String path)",
 			"if (isText($1) && ij.IJ._hooks.openInEditor($1)) return;");
-		if (!LegacyInjector.isImageJ1VersionAtLeast(hacker, "1.53g")) {
+		if (LegacyInjector.isImageJ1VersionAtLeast(hacker, "1.53g")) {
+			// Don't let ImageJ call "new Editor(...)".
+			hacker.replaceCallInMethod("ij.plugin.frame.Recorder", "void createMacro()",
+				"ij.plugin.frame.Editor", "<init>",
+				"$_ = null;");
+		}
+		else {
 			hacker.dontReturnOnNull("ij.plugin.frame.Recorder", "void createMacro()");
 			hacker.replaceCallInMethod("ij.plugin.frame.Recorder", "void createMacro()",
 				"ij.IJ", "runPlugIn",
