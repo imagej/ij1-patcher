@@ -109,7 +109,7 @@ public class LegacyEnvironment {
 			main = imagej.getMethod("main", String[].class);
 		}
 		catch (final Exception e) {
-			throw new RuntimeException("Found incompatible ij.IJ class", e);
+			throw new RuntimeException("Found incompatible ImageJ class", e);
 		}
 		// TODO: if we want to allow calling IJ#run(ImagePlus, String, String),
 		// we will need a data translator
