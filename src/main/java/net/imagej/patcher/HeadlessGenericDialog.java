@@ -100,6 +100,21 @@ public class HeadlessGenericDialog {
 		radioButtons = new ArrayList<String>();
 	}
 
+	public <E extends Enum<E>> void addEnumChoice(String label, Enum<E> defaultItem) {
+		Class<E> enumClass = defaultItem.getDeclaringClass();
+		E[] enums = enumClass.getEnumConstants();
+		String[] items = new String[enums.length];
+		for (int i = 0; i < enums.length; i++) {
+			items[i] = enums[i].name();
+		}
+		this.addChoice(label, items, defaultItem.name());
+	}
+
+	public <E extends Enum<E>> E getNextEnumChoice(Class<E> enumClass) {
+		String choiceString = this.getNextChoice();
+		return Enum.valueOf(enumClass, choiceString);
+	}
+
 	public void addCheckbox(String label, boolean defaultValue) {
 		checkboxes.add(getMacroParameter(label, defaultValue));
 	}
