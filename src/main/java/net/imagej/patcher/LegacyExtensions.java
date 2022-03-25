@@ -319,10 +319,12 @@ class LegacyExtensions {
 	private static void addEditorExtensionPoints(final CodeHacker hacker) {
 		hacker.insertAtTopOfMethod("ij.io.Opener", "public void open(java.lang.String path)",
 			"if (isText($1) && ij.IJ._hooks.openInEditor($1)) return;");
-		hacker.dontReturnOnNull("ij.plugin.frame.Recorder", "void createMacro()");
-		hacker.replaceCallInMethod("ij.plugin.frame.Recorder", "void createMacro()",
-			"ij.IJ", "runPlugIn",
-			"$_ = null;");
+		if (!LegacyInjector.isImageJ1VersionAtLeast(hacker, "1.53g")) {
+			hacker.dontReturnOnNull("ij.plugin.frame.Recorder", "void createMacro()");
+			hacker.replaceCallInMethod("ij.plugin.frame.Recorder", "void createMacro()",
+				"ij.IJ", "runPlugIn",
+				"$_ = null;");
+		}
 		hacker.replaceCallInMethod("ij.plugin.frame.Recorder", "void createMacro()",
 			"ij.plugin.frame.Editor", "createMacro",
 			"if ($1.endsWith(\".txt\")) {"
