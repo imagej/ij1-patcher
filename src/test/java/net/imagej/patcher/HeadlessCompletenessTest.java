@@ -150,7 +150,9 @@ public class HeadlessCompletenessTest {
 			"windowDeactivated(java.awt.event.WindowEvent)", //
 			"windowDeiconified(java.awt.event.WindowEvent)", //
 			"windowIconified(java.awt.event.WindowEvent)", //
-			"windowOpened(java.awt.event.WindowEvent)" })
+			"windowOpened(java.awt.event.WindowEvent)",
+			"addButton(java.lang.String,java.awt.event.ActionListener)"
+			})
 		{
 			methods.put(name, null);
 		}
