@@ -33,6 +33,7 @@ import static net.imagej.patcher.TestUtils.getTestEnvironment;
 import static org.scijava.test.TestUtils.createTemporaryDirectory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -93,7 +94,7 @@ public class FatJarTest {
 	}
 
 	// NB: Disabled until we can address why this test fails on GitHub Actions CI.
-	//@Test
+	@Test
 	public void testFatJars() throws Exception {
 		final File tmp = createTemporaryDirectory("fat-jars-");
 		final File plugins = new File(tmp, "plugins");
@@ -111,23 +112,26 @@ public class FatJarTest {
 		hacker.writeJar(new File(jars, "batik.jar"));
 
 		hacker = new CodeHacker(new URLClassLoader(new URL[0], getClass().getClassLoader()), new ClassPool(true));
-		hacker.insertNewMethod(getClass().getName(), "public java.lang.String toString()", "return \"2\";");
-		hacker.writeJar(new File(jars, "xalan.jar"));
+		hacker.insertNewMethod(getClass().getName(), "public java.lang.String toString()", "return \"xalan0\";");
+		hacker.writeJar(new File(jars, "xalan0.jar"));
 
 		// At this point, we expect batik.jar to be discovered before xalan.jar
-		String expect = "2";
-		if (!jars.list()[0].equals("batik.jar")) {
-			System.err.println("first entry is " + jars.list()[0]);
-			// if not, make it so!
-			assertTrue(new File(jars, "batik.jar").renameTo(new File(jars, "xalax.jar")));
-			assertTrue(new File(jars, "xalan.jar").renameTo(new File(jars, "batik.jar")));
-			System.err.println("Now, first entry is " + jars.list()[0]);
-			if (!jars.list()[0].equals("batik.jar")) {
-				assertTrue(new File(jars, "xalax.jar").renameTo(new File(jars, "xalaa.jar")));
-			}
-			assertTrue(jars.list()[0].equals("batik.jar"));
-			expect = "1";
+		String expect = "xalan0";
+		int count = 0;
+		while (!jars.list()[0].equals("batik.jar")) {
+			// The wrong JAR is first. Delete it and try again.
+			assertTrue(new File(jars, expect + ".jar").delete());
+			if (count++ > 20) fail("Failed to force batik.jar first after 20 tries.");
+			expect = "xalan" + count;
+
+			hacker = new CodeHacker(
+					new URLClassLoader(new URL[0], getClass().getClassLoader()),
+					new ClassPool(true));
+			hacker.insertNewMethod(getClass().getName(),
+					"public java.lang.String toString()", "return \"" + expect + "\";");
+			hacker.writeJar(new File(jars, expect + ".jar"));
 		}
+		assertEquals("batik.jar", jars.list()[0]);
 
 		final String savedPluginsDir = System.getProperty("plugins.dir");
 
