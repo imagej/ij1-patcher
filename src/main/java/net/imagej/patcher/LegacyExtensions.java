@@ -319,10 +319,18 @@ class LegacyExtensions {
 	private static void addEditorExtensionPoints(final CodeHacker hacker) {
 		hacker.insertAtTopOfMethod("ij.io.Opener", "public void open(java.lang.String path)",
 			"if (isText($1) && ij.IJ._hooks.openInEditor($1)) return;");
-		hacker.dontReturnOnNull("ij.plugin.frame.Recorder", "void createMacro()");
-		hacker.replaceCallInMethod("ij.plugin.frame.Recorder", "void createMacro()",
-			"ij.IJ", "runPlugIn",
-			"$_ = null;");
+		if (LegacyInjector.isImageJ1VersionAtLeast(hacker, "1.53g")) {
+			// Don't let ImageJ call "new Editor(...)".
+			hacker.replaceCallInMethod("ij.plugin.frame.Recorder", "void createMacro()",
+				"ij.plugin.frame.Editor", "<init>",
+				"$_ = null;");
+		}
+		else {
+			hacker.dontReturnOnNull("ij.plugin.frame.Recorder", "void createMacro()");
+			hacker.replaceCallInMethod("ij.plugin.frame.Recorder", "void createMacro()",
+				"ij.IJ", "runPlugIn",
+				"$_ = null;");
+		}
 		hacker.replaceCallInMethod("ij.plugin.frame.Recorder", "void createMacro()",
 			"ij.plugin.frame.Editor", "createMacro",
 			"if ($1.endsWith(\".txt\")) {"
@@ -763,13 +771,23 @@ class LegacyExtensions {
 						"else if (result instanceof java.lang.String) path = (java.lang.String)result;" +
 						"else return null; " +
 				"}");
-		hacker.replaceCallInMethod("ij.plugin.FolderOpener", "public void run(java.lang.String arg)", "ij.io.Opener", "openImage",
-			"Object result = ij.IJ._hooks.interceptOpenImage($1 + $2, -1);" +
-			"if (result != null && result instanceof ij.ImagePlus) {" +
-			"  $_ = (ij.ImagePlus)result;" +
-			"} else {" +
-			"  $_ = $proceed($$);" +
-			"}");
+		if (LegacyInjector.isImageJ1VersionAtLeast(hacker, "1.53m")) {
+			hacker.replaceCallInMethod("ij.plugin.FolderOpener", "public void run(java.lang.String arg)", "ij.io.Opener", "openTempImage",
+				"Object result = ij.IJ._hooks.interceptOpenImage($1 + $2, -1);" +
+				"if (result != null && result instanceof ij.ImagePlus) {" +
+				"  $_ = (ij.ImagePlus)result;" +
+				"} else {" +
+				"  $_ = $proceed($$);" +
+				"}");
+		} else {
+			hacker.replaceCallInMethod("ij.plugin.FolderOpener", "public void run(java.lang.String arg)", "ij.io.Opener", "openImage",
+					"Object result = ij.IJ._hooks.interceptOpenImage($1 + $2, -1);" +
+					"if (result != null && result instanceof ij.ImagePlus) {" +
+					"  $_ = (ij.ImagePlus)result;" +
+					"} else {" +
+					"  $_ = $proceed($$);" +
+					"}");
+		}
 
 		// Intercept File > Open Recent
 		hacker.replaceCallInMethod("ij.RecentOpener", "public void run()",
