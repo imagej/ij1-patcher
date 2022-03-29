@@ -371,7 +371,9 @@ public class LegacyInjector {
 	}
 
 	public static void preinit() {
-		preinit(Thread.currentThread().getContextClassLoader());
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		if (cl == null) cl = ClassLoader.getSystemClassLoader();
+		preinit(cl);
 	}
 
 	public static void preinit(ClassLoader classLoader) {
