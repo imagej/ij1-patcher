@@ -120,7 +120,7 @@ For details about the headless mode, see the section below.
 -- as any major project -- benefits from some refactoring from time to time:
 
 * A first attempt at improving ImageJ was made in the
-	[`ImageJA`](https://imagej.net/software/imageja) project, which started as a
+	[`ImageJA`](https://imagej.net/libs/imageja) project, which started as a
 	lightweight fork of ImageJ, then became a Mavenized version of ImageJ,
 	automatically tracking ImageJ's releases, and finally was retired in 2022
 	once ImageJ itself started publishing its own releases to Maven Central.
@@ -130,11 +130,11 @@ For details about the headless mode, see the section below.
 	by ImageJ, and later also to provide the headless mode (see below). Over
 	time, maintaining the ImageJA fork became very burdensome.
 
-* With [ImageJ2](https://imagej.net/ImageJ2), a major effort was started to
-	provide a new software architecture. The benefits to the Fiji project were
-	immediately obvious and over the course of time, Fiji first imitated
-	ImageJ2's approach by replacing the ImageJA-specific ImageJ patches with
-	runtime patches (see above). Later, the Fiji-specific patches moved from
+* With [ImageJ2](https://imagej.net/software/imagej2), a major effort was
+	started to provide a new software architecture. The benefits to the Fiji
+	project were immediately obvious and over the course of time, Fiji first
+	imitated ImageJ2's approach by replacing the ImageJA-specific ImageJ patches
+	with runtime patches (see above). Later, the Fiji-specific patches moved from
 	Fiji's `fiji-compat` component into ImageJ's `ij-legacy` component.
 
 * In the last step, the runtime patching code in ImageJ was separated out from
