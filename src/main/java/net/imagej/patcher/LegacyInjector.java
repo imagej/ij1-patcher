@@ -42,7 +42,7 @@ import javassist.ClassPool;
 import javassist.NotFoundException;
 
 /**
- * Overrides class behavior of ImageJ1 classes using bytecode manipulation. This
+ * Overrides class behavior of ImageJ classes using bytecode manipulation. This
  * class uses the {@link CodeHacker} (which uses Javassist) to inject method
  * hooks, which are implemented in the {@link net.imagej.patcher} package.
  * 
@@ -58,7 +58,7 @@ public class LegacyInjector {
 		"net.imagej.patcher.EssentialLegacyHooks";
 
 	/**
-	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
+	 * Overrides class behavior of ImageJ classes by injecting method hooks.
 	 * 
 	 * @param classLoader the class loader into which to load the patched classes
 	 */
@@ -74,10 +74,10 @@ public class LegacyInjector {
 	List<Callback> after = new ArrayList<Callback>();
 
 	/**
-	 * Determines the ImageJ 1.x version without loading the ImageJ 1.x classes.
+	 * Determines the ImageJ version without loading the ImageJ classes.
 	 * 
 	 * @param hacker the {@link CodeHacker} instance to use
-	 * @return the ImageJ 1.x version
+	 * @return the ImageJ version
 	 */
 	public static String getImageJ1Version(final CodeHacker hacker) {
 		try {
@@ -305,7 +305,7 @@ public class LegacyInjector {
 			"if ($0 != null) $_ = $proceed($$);");
 		LegacyExtensions.injectHooks(hacker, headless);
 
-		// avoid ClassCastException when ImageJ 1.x can carelessly cast an ImageWindow to a StackWindow
+		// avoid ClassCastException when ImageJ can carelessly cast an ImageWindow to a StackWindow
 		hacker.guardCast("ij.ImagePlus",
 			"public void setStack(java.lang.String title, ij.ImageStack newStack)",
 			"ij.gui.StackWindow");
@@ -339,7 +339,7 @@ public class LegacyInjector {
 	 * 
 	 * @param outputJar the .jar file to write to
 	 * @param headless whether to include the headless patches
-	 * @param fullIJJar whether to include unpatched ImageJ 1.x classes and
+	 * @param fullIJJar whether to include unpatched ImageJ classes and
 	 *          resources, too
 	 * @throws ClassNotFoundException
 	 * @throws IOException

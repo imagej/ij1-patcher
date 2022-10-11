@@ -84,8 +84,8 @@ import javassist.expr.NewExpr;
  * before they are loaded, for the purpose of injecting new methods and/or
  * altering existing ones.
  * <p>
- * In ImageJ, this mechanism is used to provide new seams into legacy ImageJ1
- * code, so that (e.g.) the modern UI is aware of legacy ImageJ events as they
+ * In ImageJ2, this mechanism is used to provide new seams into original ImageJ
+ * code, so that (e.g.) the modern UI is aware of original ImageJ events as they
  * occur.
  * </p>
  * 

@@ -101,8 +101,8 @@ public class LegacyHooksTest {
 				}
 			});
 
-		// NB: It is OK to reference ImageJ1 classes here, as a variable *inside*
-		// a method, because the static class initializer (and hence the
+		// NB: It is OK to reference original ImageJ classes here, as a variable
+		// *inside* a method, because the static class initializer (and hence the
 		// LegacyInjector.preinit() call) will be run before loading them. This
 		// would not be the case if e.g. any class reference leak into the API as
 		// method arguments, return values or field types.
@@ -111,26 +111,26 @@ public class LegacyHooksTest {
 		ij.exitWhenQuitting(false);
 		ij.quit();
 
-		final long timeout = 10; // maximum timeout during ImageJ1 shutdown
+		final long timeout = 10; // maximum timeout during ImageJ shutdown
 
 		// verify that there is an IJ1 Quit thread now
 		synchronized (quitThread) {
 			if (quitThread[0] == null) quitThread.wait(1000 * timeout);
 		}
-		assertNotNull("ImageJ1 Quit thread is not set", quitThread[0]);
+		assertNotNull("ImageJ Quit thread is not set", quitThread[0]);
 
 		// verify that IJ1 indeed spawned a new thread to quit
 		if (quitThread[0] == Thread.currentThread()) {
-			fail("ImageJ1 is not quitting on a new thread");
+			fail("ImageJ is not quitting on a new thread");
 		}
 
 		// wait for the IJ1 Quit thread to terminate
 		quitThread[0].join(1000 * timeout);
 		if (quitThread[0].isAlive()) {
-			fail("ImageJ1 failed to quit after " + timeout + " seconds");
+			fail("ImageJ failed to quit after " + timeout + " seconds");
 		}
 
-		// verify that ImageJ1 has shut down
+		// verify that ImageJ has shut down
 		assertNull(IJ.getInstance());
 
 		// verify that legacy hooks methods were called correctly

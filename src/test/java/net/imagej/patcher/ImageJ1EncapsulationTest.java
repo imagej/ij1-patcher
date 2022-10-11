@@ -55,7 +55,7 @@ import javassist.expr.NewExpr;
 import org.junit.Test;
 
 /**
- * Verifies that ImageJ 1.x classes are not used everywhere.
+ * Verifies that original ImageJ classes are not used everywhere.
  * 
  * @author Johannes Schindelin
  */
@@ -107,7 +107,7 @@ public class ImageJ1EncapsulationTest {
 
 		private void test(final CtClass c) {
 			if (c != null && c.getName().startsWith("ij.")) {
-				throw new RuntimeException("ImageJ 1.x class used: " + c.getName());
+				throw new RuntimeException("Original ImageJ class used: " + c.getName());
 			}
 		}
 

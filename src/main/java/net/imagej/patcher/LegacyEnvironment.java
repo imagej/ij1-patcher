@@ -443,13 +443,13 @@ public class LegacyEnvironment {
 	}
 
 	/**
-	 * Initializes a new ImageJ 1.x instance.
+	 * Initializes a new instance of {@code ij.ImageJ}.
 	 * <p>
-	 * This method starts up a fully-patched ImageJ 1.x, optionally hidden (in
+	 * This method starts up a fully-patched ImageJ, optionally hidden (in
 	 * {@code headless} mode, it <b>must</b> be hidden).
 	 * </p>
 	 * 
-	 * @param hidden whether to hide the ImageJ 1.x main window upon startup
+	 * @param hidden whether to hide the ImageJ main window upon startup
 	 * @return the instance of the {@link ij.ImageJ} class, or {@code null} in
 	 *         headless mode
 	 */
@@ -523,7 +523,7 @@ public class LegacyEnvironment {
 	}
 
 	/**
-	 * Launches a fully-patched, self-contained ImageJ 1.x.
+	 * Launches a fully-patched, self-contained ImageJ.
 	 * 
 	 * @throws ClassNotFoundException
 	 */
@@ -535,7 +535,7 @@ public class LegacyEnvironment {
 	}
 
 	/**
-	 * Determines whether there is already an ImageJ 1.x instance.
+	 * Determines whether there is already an original ImageJ instance.
 	 * <p>
 	 * In contrast to {@link ij.IJ#getInstance()}, this method avoids loading any
 	 * ImageJ 1.x class, and is therefore suitable for testing whether a
@@ -558,7 +558,7 @@ public class LegacyEnvironment {
 	}
 
 	/**
-	 * Extracts the error message from inside ImageJ1 when a macro is aborted.
+	 * Extracts the error message from inside ImageJ when a macro is aborted.
 	 * <p>
 	 * When a macro is aborted, a message is stashed in the private
 	 * {@code lastErrorMessage} field of {@code ij.IJ}, and then a
