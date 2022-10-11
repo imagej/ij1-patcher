@@ -99,6 +99,32 @@ class LegacyHeadless  {
 		hacker.insertAtTopOfMethod("ij.plugin.filter.ScaleDialog",
 			"java.awt.Panel makeButtonPanel(ij.plugin.filter.SetScaleDialog gd)",
 			"return null;");
+
+		//-------------------------------------------------------------------------
+		// HACK: Make a best effort to force batch mode to stay on permanently.
+		// Without batch mode, calling ImagePlus.show() triggers HeadlessException.
+		//-------------------------------------------------------------------------
+
+		// Set the Interpreter.batchMode flag to true immediately.
+		hacker.addToClassInitializer("ij.IJ",
+			"ij.macro.Interpreter.batchMode = true;");
+
+		// Make Interpreter.isBatchMode always report true.
+		hacker.insertAtTopOfMethod("ij.macro.Interpreter",
+			"public static boolean isBatchMode()", "if (true) return true;");
+
+		// Purge all known places where batchMode flag gets reset to false.
+		final String[] methodsThatResetBatchMode = {
+			"public void run(ij.macro.Program)",
+			"void error(java.lang.String)",
+			"void finishUp()",
+			"public void abortMacro()",
+			"static void setBatchMode(boolean)"
+		};
+		for (final String methodSig : methodsThatResetBatchMode) {
+			hacker.overrideFieldWrite("ij.macro.Interpreter", methodSig,
+				"batchMode", "true;");
+		}
 	}
 
 }
