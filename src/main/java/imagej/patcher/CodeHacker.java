@@ -79,18 +79,7 @@ import javassist.expr.NewExpr;
 import net.imagej.patcher.JavaAgent;
 
 /**
- * The code hacker provides a mechanism for altering the behavior of classes
- * before they are loaded, for the purpose of injecting new methods and/or
- * altering existing ones.
- * <p>
- * In ImageJ, this mechanism is used to provide new seams into legacy ImageJ1
- * code, so that (e.g.) the modern UI is aware of legacy ImageJ events as they
- * occur.
- * </p>
- * 
- * @author Curtis Rueden
- * @author Rick Lentz
- * @author Johannes Schindelin
+ * @deprecated Use {@link net.imagej.patcher.CodeHacker} instead.
  */
 @Deprecated
 class CodeHacker {

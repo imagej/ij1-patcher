@@ -42,20 +42,11 @@ import javassist.ClassPool;
 import javassist.NotFoundException;
 
 /**
- * Overrides class behavior of ImageJ1 classes using bytecode manipulation. This
- * class uses the {@link CodeHacker} (which uses Javassist) to inject method
- * hooks, which are implemented in the {@link imagej.patcher} package.
- * 
- * @author Curtis Rueden
+ * @deprecated Use {@link net.imagej.patcher.LegacyInjector} instead.
  */
 @Deprecated
 public class LegacyInjector {
 
-	/**
-	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
-	 * 
-	 * @param classLoader the class loader into which to load the patched classes
-	 */
 	public void injectHooks(final ClassLoader classLoader) {
 		injectHooks(classLoader, GraphicsEnvironment.isHeadless());
 	}
@@ -67,12 +58,6 @@ public class LegacyInjector {
 	List<Callback> before = new ArrayList<Callback>();
 	List<Callback> after = new ArrayList<Callback>();
 
-	/**
-	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
-	 * 
-	 * @param classLoader the class loader into which to load the patched classes
-	 * @param headless whether to include headless patches
-	 */
 	public void injectHooks(final ClassLoader classLoader, boolean headless) {
 		if (alreadyPatched(classLoader)) return;
 
@@ -86,13 +71,6 @@ public class LegacyInjector {
 		hacker.loadClasses();
 	}
 
-	/**
-	 * Overrides class behavior of ImageJ1 classes by injecting method hooks.
-	 * 
-	 * @param classLoader the class loader into which to load the patched classes
-	 * @param headless whether to include headless patches
-	 * @return the CodeHacker instance for further patching or .jar writing
-	 */
 	private CodeHacker inject(final ClassLoader classLoader,
 			final boolean headless) {
 		final CodeHacker hacker = new CodeHacker(classLoader, new ClassPool(false));

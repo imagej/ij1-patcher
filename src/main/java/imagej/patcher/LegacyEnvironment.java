@@ -47,14 +47,7 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 /**
- * Encapsulates an ImageJ 1.x "instance".
- * <p>
- * This class is a partner to the {@link LegacyClassLoader}, intended to make
- * sure that the ImageJ 1.x contained in a given class loader is patched and can
- * be accessed conveniently.
- * </p>
- * 
- * @author Johannes Schindelin
+ * @deprecated Use {@link net.imagej.patcher.LegacyEnvironment} instead.
  */
 @Deprecated
 public class LegacyEnvironment {
@@ -66,17 +59,6 @@ public class LegacyEnvironment {
 	private Method setOptions, run, runMacro, runPlugIn, main;
 	private Field _hooks;
 
-	/**
-	 * Constructs a new legacy environment.
-	 * 
-	 * @param loader the {@link ClassLoader} to use for loading the (patched)
-	 *          ImageJ 1.x classes; if {@code null}, a {@link LegacyClassLoader}
-	 *          is constructed.
-	 * @param headless whether to patch in support for headless operation
-	 *          (compatible only with "well-behaved" plugins, i.e. plugins that do
-	 *          not use graphical components directly)
-	 * @throws ClassNotFoundException
-	 */
 	public LegacyEnvironment(final ClassLoader loader, final boolean headless)
 		throws ClassNotFoundException
 	{
@@ -145,20 +127,6 @@ public class LegacyEnvironment {
 		});
 	}
 
-	/**
-	 * Adds the class path of a given {@link ClassLoader} to the plugin class
-	 * loader.
-	 * <p>
-	 * This method is intended to be used in unit tests as well as interactive
-	 * debugging from inside an Integrated Development Environment where the
-	 * plugin's classes are not available inside a {@code .jar} file.
-	 * </p>
-	 * <p>
-	 * At the moment, the only supported parameters are {@link URLClassLoader}s.
-	 * </p>
-	 * 
-	 * @param fromClassLoader the class path donor
-	 */
 	public void addPluginClasspath(final ClassLoader fromClassLoader) {
 		if (fromClassLoader == null) return;
 		ensureUninitialized();
@@ -218,31 +186,6 @@ public class LegacyEnvironment {
 		}
 	}
 
-	/**
-	 * Adds extra elements to the class path of ImageJ 1.x' plugin class loader.
-	 * <p>
-	 * The typical use case for a {@link LegacyEnvironment} is to run specific
-	 * plugins in an encapsulated environment. However, in the case of multiple
-	 * one wants to use multiple legacy environments with separate sets of plugins
-	 * enabled, it becomes impractical to pass the location of the plugins'
-	 * {@code .jar} files via the {@code plugins.dir} system property (because of
-	 * threading issues).
-	 * </p>
-	 * <p>
-	 * In other cases, the plugins' {@code .jar} files are not located in a single
-	 * directory, or worse: they might be contained in a directory among
-	 * {@code .jar} files one might <i>not</i> want to add to the plugin class
-	 * loader's class path.
-	 * </p>
-	 * <p>
-	 * This method addresses that need by allowing to add individual {@code .jar}
-	 * files to the class path of the plugin class loader and ensuring that their
-	 * {@code plugins.config} files are parsed.
-	 * </p>
-	 * 
-	 * @param classpathEntries the class path entries containing ImageJ 1.x
-	 *          plugins
-	 */
 	public void addPluginClasspath(final File... classpathEntries) {
 		if (classpathEntries.length == 0) return;
 		ensureUninitialized();
@@ -263,21 +206,6 @@ public class LegacyEnvironment {
 		});
 	}
 
-	/**
-	 * Sets the macro options.
-	 * <p>
-	 * Both {@link #run(String, String)} and {@link #runMacro(String, String)}
-	 * take an argument that is typically recorded by the macro recorder. For
-	 * {@link #runPlugIn(String, String)}, however, only the {@code arg} parameter
-	 * that is to be passed to the plugins {@code run()} or {@code setup()} method
-	 * can be specified. For those use cases where one wants to call a plugin
-	 * class directly, but still provide macro options, this method is the
-	 * solution.
-	 * </p>
-	 * 
-	 * @param options the macro options to use for the next call to
-	 *          {@link #runPlugIn(String, String)}
-	 */
 	public void setMacroOptions(final String options) {
 		initialize();
 		try {
@@ -288,12 +216,6 @@ public class LegacyEnvironment {
 		}
 	}
 
-	/**
-	 * Runs {@code IJ.run(command, options)} in the legacy environment.
-	 * 
-	 * @param command the command to run
-	 * @param options the options to pass to the command
-	 */
 	public void run(final String command, final String options) {
 		initialize();
 		final Thread thread = Thread.currentThread();
@@ -310,13 +232,6 @@ public class LegacyEnvironment {
 		}
 	}
 
-	/**
-	 * Runs {@code IJ.runMacro(macro, arg)} in the legacy environment.
-	 * 
-	 * @param macro the macro code to run
-	 * @param arg an optional argument (which can be retrieved in the macro code
-	 *          via {@code getArgument()})
-	 */
 	public void runMacro(final String macro, final String arg) {
 		initialize();
 		final Thread thread = Thread.currentThread();
@@ -336,13 +251,6 @@ public class LegacyEnvironment {
 		}
 	}
 
-	/**
-	 * Runs {@code IJ.runPlugIn(className, arg)} in the legacy environment.
-	 * 
-	 * @param className the plugin class to run
-	 * @param arg an optional argument (which get passed to the {@code run()} or
-	 *          {@code setup()} method of the plugin)
-	 */
 	public Object runPlugIn(final String className, final String arg) {
 		initialize();
 		final Thread thread = Thread.currentThread();
@@ -362,11 +270,6 @@ public class LegacyEnvironment {
 		}
 	}
 
-	/**
-	 * Runs {@code ImageJ.main(args)} in the legacy environment.
-	 * 
-	 * @param args the arguments to pass to the main() method
-	 */
 	public void main(final String... args) {
 		initialize();
 		Thread.currentThread().setContextClassLoader(loader);
@@ -378,20 +281,11 @@ public class LegacyEnvironment {
 		}
 	}
 
-	/**
-	 * Gets the class loader containing the ImageJ 1.x classes used in this legacy
-	 * environment.
-	 * 
-	 * @return the class loader
-	 */
 	public ClassLoader getClassLoader() {
 		initialize();
 		return loader;
 	}
 
-	/**
-	 * Gets the ImageJ 1.x menu structure as a map
-	 */
 	public Map<String, String> getMenuStructure() {
 		initialize();
 		try {
@@ -406,11 +300,6 @@ public class LegacyEnvironment {
 		}
 	}
 
-	/**
-	 * Launches a fully-patched, self-contained ImageJ 1.x.
-	 * 
-	 * @throws ClassNotFoundException
-	 */
 	public static LegacyEnvironment getPatchedImageJ1()
 		throws ClassNotFoundException
 	{

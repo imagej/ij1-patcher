@@ -38,11 +38,7 @@ import java.net.URLClassLoader;
 import java.security.ProtectionDomain;
 
 /**
- * A special purpose class loader to encapsulate ImageJ 1.x "instances" from each other.
- * 
- * @see LegacyEnvironment
- * 
- * @author Johannes Schindelin
+ * @deprecated Use {@link net.imagej.patcher.LegacyClassLoader} instead.
  */
 @Deprecated
 public class LegacyClassLoader extends URLClassLoader {
