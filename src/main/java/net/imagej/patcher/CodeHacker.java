@@ -618,7 +618,7 @@ class CodeHacker {
 				public void edit(final FieldAccess access)
 					throws CannotCompileException
 				{
-					if (access.getFieldName().equals(fieldName)) {
+					if (access.isWriter() && access.getFieldName().equals(fieldName)) {
 						access.replace(newCode);
 						markEdited();
 					}

@@ -216,7 +216,7 @@ class LegacyExtensions {
 		}
 		if (prefsDir != null) {
 			hacker.overrideFieldWrite("ij.Prefs", "public static java.lang.String getPrefsDir()",
-				"prefsDir", "$_ = \"" + prefsDir + "\";");
+				"prefsDir", "\"" + prefsDir + "\";");
 		}
 
 		// tool names can be prefixes of other tools, watch out for that!
