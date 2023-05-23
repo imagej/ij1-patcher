@@ -165,6 +165,9 @@ public class LegacyInjector {
 		// override behavior of ij.ImageJ
 		hacker.insertAtTopOfMethod("ij.ImageJ", "public void quit()",
 			"if (!ij.IJ._hooks.quit()) return;");
+		// Prevent duplicate quit() calls if we're already in the process of quitting
+		hacker.insertAtTopOfMethod("ij.ImageJ", "public void quit()",
+			"if (quitting) return;");
 		// intercept key pressed handling
 		hacker.insertAtTopOfMethod("ij.ImageJ",
 			"public void keyPressed(java.awt.event.KeyEvent e)",
