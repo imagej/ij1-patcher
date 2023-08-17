@@ -29,6 +29,9 @@
 
 package net.imagej.patcher;
 
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ScanResult;
+
 import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -590,57 +593,14 @@ public abstract class LegacyHooks {
 		final ClassLoader fromClassLoader, final StringBuilder errors,
 		final ClassLoader... excludeClassLoaders)
 	{
-		final Set<ClassLoader> exclude =
-			new HashSet<ClassLoader>(Arrays.asList(excludeClassLoaders));
-		final List<File> result = new ArrayList<File>();
-		for (ClassLoader loader = fromClassLoader; loader != null; loader =
-				loader.getParent()) {
-			if (exclude.contains(loader)) break;
+		try( ScanResult result = new ClassGraph()
+//				.verbose()
+//				.enableAllInfo()
+				.acceptPackages()
+				.scan()) {
 
-			if (!(loader instanceof URLClassLoader)) {
-				errors.append("Cannot add class path from ClassLoader of type ")
-				.append(fromClassLoader.getClass().getName()).append("\n");
-				continue;
-			}
-
-			for (final URL url : ((URLClassLoader) loader).getURLs()) {
-				if (!"file".equals(url.getProtocol())) {
-					errors.append("Not a file URL! ").append(url).append("\n");
-					continue;
-				}
-				result.add(new File(url.getPath()));
-				final String path = url.getPath();
-				if (path.matches(".*/target/surefire/surefirebooter[0-9]*\\.jar")) try {
-					final JarFile jar = new JarFile(path);
-					final Manifest manifest = jar.getManifest();
-					if (manifest != null) {
-						final String classPath =
-							manifest.getMainAttributes().getValue(Name.CLASS_PATH);
-						if (classPath != null) {
-							for (final String element : classPath.split(" +"))
-								try {
-									final URL url2 = new URL(element);
-									if (!"file".equals(url2.getProtocol())) {
-										errors.append("Not a file URL! ").append(url2).append("\n");
-										continue;
-									}
-									result.add(new File(url2.getPath()));
-								}
-								catch (final MalformedURLException e) {
-									e.printStackTrace();
-								}
-						}
-					}
-				}
-				catch (final IOException e) {
-					System.err
-						.println("Warning: could not add plugin class path due to ");
-					e.printStackTrace();
-				}
-
-			}
+			return result.getClasspathFiles();
 		}
-		return result;
 	}
 
 	/**
