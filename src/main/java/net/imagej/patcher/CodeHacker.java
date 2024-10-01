@@ -824,18 +824,19 @@ class CodeHacker {
 				: "/path/to/ij1-patcher.jar";
 
 		return new RuntimeException(message + "\n" +
-				"It appears that this class was already defined in the class loader!\n" +
-				"Please make sure that you initialize the LegacyService before using\n" +
-				"any ImageJ 1.x class. You can do that by adding this static initializer:\n\n" +
-				"\tstatic {\n" +
-				"\t\tLegacyInjector.preinit();\n" +
-				"\t}\n\n" +
-				"To debug this issue, start the JVM with the option:\n\n" +
-				"\t-javaagent:" +
-				path +
-				"\n\n" +
-				"To enforce pre-initialization, start the JVM with the option:\n\n" +
-				"\t-javaagent:" + path + "=init\n", cause);
+				"Attempting to modify a class that was already defined in the class loader!\n" +
+				"We make significant edits to ImageJ 1.x classes to ensure cross-compatibility.\n" +
+				"However, these edits must happen before class loading (i.e. \"preinitialization\")\n" +
+				"- as loading \"finalizes\" the state of a class.\n" +
+				"This error commonly appears when using a custom main class.\n"+
+				"You should modify your code such that:\n"+
+				"1. Your main class DOES NOT import ANY classes from ij.*\n" +
+				"2. You call LegacyInjector.preinit() before passing control to a class with ij.* imports\n\n" +
+				"To test this fix without code changes, you can force the preinit process by\n" +
+				"starting your JVM with the following option:\n\n" +
+				"\t-javaagent:" + path + "=init\n\n" +
+				"Or, to debug this issue further, start the JVM with the option:\n\n" +
+				"\t-javaagent:" + path + "\n", cause);
 	}
 
 	public void loadClasses() {
