@@ -204,6 +204,9 @@ public class LegacyInjector {
 		hacker.insertAtBottomOfMethod("ij.IJ",
 				"static void init(ij.ImageJ imagej, java.applet.Applet theApplet)",
 				"ij.IJ._hooks.initialized();");
+		hacker.insertAtTopOfMethod("ij.IJ",
+				"public static long maxMemory()",
+				"if (maxMemory==0L) maxMemory = new ij.plugin.Memory().maxMemory();");
 
 		// override behavior of ij.ImagePlus
 		hacker.insertAtBottomOfMethod("ij.ImagePlus",
