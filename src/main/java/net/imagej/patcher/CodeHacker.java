@@ -38,11 +38,13 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarOutputStream;
@@ -823,20 +825,41 @@ class CodeHacker {
 				url.getPath().endsWith(".jar") ? url.getPath()
 				: "/path/to/ij1-patcher.jar";
 
+		final List<String> hints = new ArrayList<>();
+		String javaVersion = System.getProperty("java.version");
+		if (javaVersion != null) {
+			final int dot = javaVersion.indexOf(".");
+			if (dot >= 0) {
+				final String majorVersion = javaVersion.substring(0, dot);
+				try {
+					final int mv = Integer.parseInt(majorVersion);
+					if (mv >= 17) {
+						hints.add("You are using Java " + mv + ", but Java 17+'s " +
+							"module system disallows bytecode patching by default; " +
+							"try adding '--add-opens=java.base/java.lang=ALL-UNNAMED' " +
+							"to your program's launch arguments.");
+					}
+				}
+				catch (NumberFormatException exc) { }
+			}
+		}
+		hints.add("Are you launching with a custom main class? If so, please " +
+			"ensure that your main class DOES NOT import ANY classes from ij.*.");
+		hints.add("Try adding " +
+			"`static { net.imagej.patcher.LegacyInjector.preinit(); }` to your " +
+			"main class definition, to force the ImageJ patcher to run sooner.");
+		hints.add("To test this fix without code changes, you can force the " +
+			"preinit process by starting the JVM with option " +
+			"'-javaagent:" + path + "=init'");
+		hints.add("To debug this issue further, start the JVM with the option " +
+				"'-javaagent:" + path + "'");
 		return new RuntimeException(message + "\n" +
-				"Attempting to modify a class that was already defined in the class loader!\n" +
-				"We make significant edits to ImageJ 1.x classes to ensure cross-compatibility.\n" +
-				"However, these edits must happen before class loading (i.e. \"preinitialization\")\n" +
-				"- as loading \"finalizes\" the state of a class.\n" +
-				"This error commonly appears when using a custom main class.\n"+
-				"You should modify your code such that:\n"+
-				"1. Your main class DOES NOT import ANY classes from ij.*\n" +
-				"2. You call LegacyInjector.preinit() before passing control to a class with ij.* imports\n\n" +
-				"To test this fix without code changes, you can force the preinit process by\n" +
-				"starting your JVM with the following option:\n\n" +
-				"\t-javaagent:" + path + "=init\n\n" +
-				"Or, to debug this issue further, start the JVM with the option:\n\n" +
-				"\t-javaagent:" + path + "\n", cause);
+				"Failed to patch ImageJ, because an ImageJ class was already loaded.\n\n" +
+				"ImageJ2 makes significant edits to ImageJ 1.x classes for cross-compatibility.\n" +
+				"However, these edits must happen before loading of any ImageJ classes,\n" +
+				"as loading \"finalizes\" the state of each class.\n" +
+				"See https://github.com/imagej/ij1-patcher#readme for details.\n\n" +
+				"Hints to solve:\n* " + String.join("\n* ", hints) + "\n", cause);
 	}
 
 	public void loadClasses() {
