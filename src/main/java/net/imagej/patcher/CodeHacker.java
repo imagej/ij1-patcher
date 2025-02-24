@@ -837,7 +837,7 @@ class CodeHacker {
 						hints.add("You are using Java " + mv + ", but Java 17+'s " +
 							"module system disallows bytecode patching by default; " +
 							"try adding '--add-opens=java.base/java.lang=ALL-UNNAMED' " +
-							"to your program's launch arguments.");
+							"to the Java VM options of your program launch settings.");
 					}
 				}
 				catch (NumberFormatException exc) { }
