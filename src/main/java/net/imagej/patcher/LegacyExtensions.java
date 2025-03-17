@@ -794,7 +794,7 @@ class LegacyExtensions {
 				"ij.io.Opener", "open",
 				"Object result = ij.IJ._hooks.interceptOpenRecent(path);" +
 				"if (result == null) o.open(path);" +
-				"else if (result instanceof java.lang.String) o.open(result);" +
+				"else if (result instanceof java.lang.String) o.open((String) result);" +
 				"else if (! (result instanceof ij.ImagePlus)) return;");
 
 		// Intercept DragAndDrop openings
