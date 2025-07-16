@@ -1,5 +1,5 @@
 [![](https://img.shields.io/maven-central/v/net.imagej/ij1-patcher.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22net.imagej%22%20AND%20a%3A%22ij1-patcher%22)
-[![](https://github.com/imagej/ij1-patcher/actions/workflows/build-main.yml/badge.svg)](https://github.com/imagej/ij1-patcher/actions/workflows/build-main.yml)
+[![](https://github.com/imagej/ij1-patcher/actions/workflows/build.yml/badge.svg)](https://github.com/imagej/ij1-patcher/actions/workflows/build.yml)
 
 # Welcome to the ImageJ patcher
 
