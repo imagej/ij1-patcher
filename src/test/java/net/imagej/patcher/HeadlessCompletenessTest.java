@@ -141,6 +141,7 @@ public class HeadlessCompletenessTest {
 			"keyTyped(java.awt.event.KeyEvent)", //
 			"paint(java.awt.Graphics)", //
 			"parseDouble(java.lang.String)", //
+			"parseHex(java.lang.String)", //
 			"repaint()", //
 			"setCancelLabel(java.lang.String)", //
 			"setFont(java.awt.Font)", //
