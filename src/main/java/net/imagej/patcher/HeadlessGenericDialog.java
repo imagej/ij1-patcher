@@ -313,7 +313,7 @@ public class HeadlessGenericDialog {
 	public boolean isPreviewActive() { return false; }
 
 	/**
-	 * Gets a macro parameter of type <i>boolean</i>.
+	 * Gets a macro parameter of type {@code boolean}.
 	 * 
 	 * @param label
 	 *            the name of the macro parameter
@@ -367,7 +367,7 @@ public class HeadlessGenericDialog {
 	}
 
 	/**
-	 * Gets a macro parameter of type <i>double</i>.
+	 * Gets a macro parameter of type {@code double}.
 	 * 
 	 * @param label
 	 *            the name of the macro parameter
