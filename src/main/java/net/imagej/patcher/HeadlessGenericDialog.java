@@ -338,7 +338,10 @@ public class HeadlessGenericDialog {
 			return false;
 		}
 		final char[] options = optionsString.toCharArray();
-		final char[] label = Macro.trimKey(labelString).toCharArray();
+		// NB: Macro.trimKey fails when passed a null. The normal GenericDialog
+		// takes care to guard against null labels in various places.
+		final String nonNullLabelString = labelString == null ? "" : labelString;
+		final char[] label = Macro.trimKey(nonNullLabelString).toCharArray();
 		for (int i = 0; i < options.length; i++) {
 			boolean match = true;
 			// match at start or after space
@@ -376,7 +379,10 @@ public class HeadlessGenericDialog {
 	 * @return the double value
 	 */
 	private static double getMacroParameter(String label, double defaultValue) {
-		String value = Macro.getValue(Macro.getOptions(), label, null);
+		// NB: Macro.getValue fails when passed a null key. The GenericDialog
+		// normally takes care to guard against null labels in various places.
+		String nonNullLabel = label == null ? "" : label;
+		String value = Macro.getValue(Macro.getOptions(), nonNullLabel, null);
 		return value != null ? Double.parseDouble(value) : defaultValue;
 	}
 
@@ -390,6 +396,9 @@ public class HeadlessGenericDialog {
 	 * @return the value
 	 */
 	private static String getMacroParameter(String label, String defaultValue) {
-		return Macro.getValue(Macro.getOptions(), label, defaultValue);
+		// NB: Macro.getValue fails when passed a null key. The GenericDialog
+		// normally takes care to guard against null labels in various places.
+		String nonNullLabel = label == null ? "" : label;
+		return Macro.getValue(Macro.getOptions(), nonNullLabel, defaultValue);
 	}
 }
