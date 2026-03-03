@@ -41,6 +41,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -96,6 +97,58 @@ import javassist.expr.NewExpr;
  * @author Johannes Schindelin
  */
 class CodeHacker {
+
+	/**
+	 * Maps each patchable IJ package to a simple, unpatched seed class in that
+	 * package. Used by {@link #loadClass} to obtain a {@code MethodHandles.Lookup}
+	 * for the package via {@code CtClass.toClass(neighbor)}, which calls
+	 * {@code MethodHandles.privateLookupIn(seed, ...)} and then
+	 * {@code Lookup.defineClass()} — no reflection into {@code ClassLoader}
+	 * internals, so this works on Java 17+ without {@code --add-opens}.
+	 *
+	 * <p>Requirements for a valid seed: (1) not itself patched; (2) no static
+	 * initializer that references a patched class; (3) supertype chain contains
+	 * no patched classes (supertypes are loaded eagerly at link time).
+	 * Interfaces with only primitive/{@code String} members are ideal.
+	 */
+	private static final Map<String, String> PACKAGE_SEEDS;
+	static {
+		final Map<String, String> m = new LinkedHashMap<>();
+		m.put("ij",               "ij.IJEventListener");
+		m.put("ij.gui",           "ij.gui.RoiListener");
+		m.put("ij.io",            "ij.io.BitBuffer");
+		m.put("ij.macro",         "ij.macro.MacroConstants");
+		m.put("ij.plugin",        "ij.plugin.PlugIn");
+		m.put("ij.plugin.filter", "ij.plugin.filter.SaltAndPepper");
+		m.put("ij.plugin.frame",  "ij.plugin.frame.PlugInFrame");
+		m.put("ij.text",          "ij.text.TextWindow");
+		// CodeHacker itself is always loaded before any patcher-package class is
+		// patched, so it is a safe, always-available seed for this package.
+		m.put("net.imagej.patcher", "net.imagej.patcher.CodeHacker");
+		PACKAGE_SEEDS = m;
+	}
+
+	/**
+	 * True when running on Java 9+, where {@code MethodHandles.privateLookupIn()}
+	 * and {@code Lookup.defineClass()} are available. On Java 8 the seed path is
+	 * skipped and the legacy {@code toClass(ClassLoader, ProtectionDomain)} path
+	 * is used instead (module encapsulation did not exist on Java 8, so reflection
+	 * into {@code ClassLoader.defineClass()} works without any flags there).
+	 */
+	private static final boolean LOOKUP_DEFINE_AVAILABLE;
+	static {
+		boolean available = false;
+		try {
+			java.lang.invoke.MethodHandles.class.getMethod(
+				"privateLookupIn", Class.class, java.lang.invoke.MethodHandles.Lookup.class);
+			available = true;
+		}
+		catch (final NoSuchMethodException ignored) {}
+		LOOKUP_DEFINE_AVAILABLE = available;
+	}
+
+	/** Cache of already-loaded seed classes, keyed by package name. */
+	private final Map<String, Class<?>> packageSeedCache = new LinkedHashMap<>();
 
 	private final ClassPool pool;
 	protected final ClassLoader classLoader;
@@ -796,8 +849,59 @@ class CodeHacker {
 	 * @param classRef class to load.
 	 * @return the loaded class
 	 */
+	/**
+	 * Returns a seed class for the package of {@code className}, loading it
+	 * from {@link #classLoader} on first use (without initialization, so no
+	 * static initializers run). Returns {@code null} if no seed is configured
+	 * for that package or if the seed class cannot be found.
+	 */
+	private Class<?> getPackageSeed(final String className) {
+		final int dot = className.lastIndexOf('.');
+		if (dot < 0) return null;
+		final String pkg = className.substring(0, dot);
+		if (!LOOKUP_DEFINE_AVAILABLE) return null;
+		if (packageSeedCache.containsKey(pkg)) return packageSeedCache.get(pkg);
+		final String seedName = PACKAGE_SEEDS.get(pkg);
+		Class<?> seed = null;
+		if (seedName != null) {
+			try {
+				seed = Class.forName(seedName, false, classLoader);
+			}
+			catch (final ClassNotFoundException e) {
+				System.err.println("Warning: seed class " + seedName +
+					" not found; falling back to legacy toClass() for package " + pkg);
+			}
+		}
+		packageSeedCache.put(pkg, seed);
+		return seed;
+	}
+
 	public Class<?> loadClass(final CtClass classRef) {
 		try {
+			// For LegacyClassLoader, pre-register the bytes so that findClass() picks
+			// them up and calls defineClass() from within the classloader itself — no
+			// reflection required, works on all Java versions.
+			if (classLoader instanceof LegacyClassLoader) {
+				((LegacyClassLoader) classLoader).storePatchedClass(
+					classRef.getName(), classRef.toBytecode());
+				return classLoader.loadClass(classRef.getName());
+			}
+			// Primary path for other classloaders: toClass(seed) uses
+			// MethodHandles.privateLookupIn(seed, ...) followed by Lookup.defineClass().
+			// No reflection into ClassLoader internals — works on Java 17+ without
+			// --add-opens. The seed is a simple, unpatched class pre-loaded from the
+			// same package (see PACKAGE_SEEDS).
+			final Class<?> seed = getPackageSeed(classRef.getName());
+			if (seed != null) {
+				return classRef.toClass(seed);
+			}
+			// Fallback: Java agent — hand bytes to a ClassFileTransformer so the JVM
+			// defines the class itself when it is first loaded.
+			if (JavaAgent.getInstrumentation() != null) {
+				JavaAgent.storePatchedClass(classRef.getName(), classRef.toBytecode());
+				return null; // defined lazily on first class load
+			}
+			// Last resort: toClass(classLoader, null) requires --add-opens on Java 17+.
 			return classRef.toClass(classLoader, null);
 		}
 		catch (final CannotCompileException e) {
@@ -807,6 +911,28 @@ class CodeHacker {
 				throw javaAgentHint("Cannot load class: " + classRef.getName() +
 					" (loader: " + classLoader + ")", e.getCause());
 			}
+			System.err.println("Warning: Cannot load class: " + classRef.getName() +
+				" into " + classLoader);
+			e.printStackTrace();
+			return null;
+		}
+		catch (final LinkageError e) {
+			// On Java 17+, bytecode verification is eager: when defining a patched
+			// class, the JVM verifier may load classes it references from the JAR
+			// (unpatched) before we get a chance to define our patched versions.
+			// When we then try to define the patched version, we get a
+			// "duplicate class definition" LinkageError. Log a warning and continue
+			// so that the remaining patches (especially the critical ij.IJ._hooks
+			// field) can still be applied.
+			if (e.getMessage() != null && e.getMessage().contains("duplicate class definition")) {
+				System.err.println("Warning: Cannot define patched class " +
+					classRef.getName() + " (already loaded by JVM verifier): " +
+					e.getMessage());
+				return null;
+			}
+			throw e;
+		}
+		catch (final Exception e) {
 			System.err.println("Warning: Cannot load class: " + classRef.getName() +
 				" into " + classLoader);
 			e.printStackTrace();
@@ -835,9 +961,11 @@ class CodeHacker {
 					final int mv = Integer.parseInt(majorVersion);
 					if (mv >= 17) {
 						hints.add("You are using Java " + mv + ", but Java 17+'s " +
-							"module system disallows bytecode patching by default; " +
-							"try adding '--add-opens=java.base/java.lang=ALL-UNNAMED' " +
-							"to the Java VM options of your program launch settings.");
+							"strong encapsulation disallows bytecode patching via " +
+							"reflection. The cleanest fix is to start the JVM with " +
+							"'-javaagent:" + path + "=init' (no --add-opens needed). " +
+							"Alternatively, add '--add-opens=java.base/java.lang=ALL-UNNAMED' " +
+							"to your VM options if you cannot use the agent.");
 					}
 				}
 				catch (NumberFormatException exc) { }
@@ -870,13 +998,32 @@ class CodeHacker {
 			// ignore
 		}
 
+		// Collect modified classes, then sort them so that patcher-package
+		// (net.imagej.patcher.*) classes are defined before ij.* classes.
+		// This prevents the JVM's bytecode verifier from loading unpatched
+		// patcher classes when it resolves references inside ij.* bytecode
+		// (e.g. "new EssentialLegacyHooks()" in ij.IJ's static initializer).
+		final List<CtClass> toLoad = new ArrayList<>();
 		final Iterator<CtClass> iter = handledClasses.values().iterator();
 		while (iter.hasNext()) {
 			final CtClass classRef = iter.next();
 			if (!classRef.isFrozen() && classRef.isModified()) {
-				loadClass(classRef);
+				toLoad.add(classRef);
 			}
 			iter.remove();
+		}
+		toLoad.sort(new Comparator<CtClass>() {
+			@Override
+			public int compare(final CtClass a, final CtClass b) {
+				// Patcher classes (net.imagej.patcher.*) come before ij.* classes.
+				final boolean aIsPatcher = a.getName().startsWith("net.imagej.patcher.");
+				final boolean bIsPatcher = b.getName().startsWith("net.imagej.patcher.");
+				if (aIsPatcher == bIsPatcher) return 0;
+				return aIsPatcher ? -1 : 1;
+			}
+		});
+		for (final CtClass classRef : toLoad) {
+			loadClass(classRef);
 		}
 	}
 

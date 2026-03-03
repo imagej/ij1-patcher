@@ -64,6 +64,26 @@ public class JavaAgent implements ClassFileTransformer {
 	private static Instrumentation instrumentation;
 	private static JavaAgent agent;
 	private static Transformer transformer;
+	private static PatchingTransformer patchingTransformer;
+
+	static Instrumentation getInstrumentation() {
+		return instrumentation;
+	}
+
+	/**
+	 * Registers patched bytecode for a class so that the JVM's class-loading
+	 * machinery (via the {@link PatchingTransformer}) will use the patched bytes
+	 * the first time the class is loaded. This completely avoids reflecting into
+	 * {@code ClassLoader.defineClass()}, which Java 17+ forbids without
+	 * {@code --add-opens java.base/java.lang=ALL-UNNAMED}.
+	 */
+	static void storePatchedClass(final String name, final byte[] bytes) {
+		if (patchingTransformer == null) {
+			patchingTransformer = new PatchingTransformer();
+			instrumentation.addTransformer(patchingTransformer);
+		}
+		patchingTransformer.store(name, bytes);
+	}
 
 	public static void stop() {
 		if (instrumentation != null && agent != null) {
@@ -71,6 +91,8 @@ public class JavaAgent implements ClassFileTransformer {
 			agent = null;
 		}
 		transformer = null;
+		// Note: patchingTransformer is intentionally NOT removed here because
+		// patched classes may still be loaded after stop() is called.
 	}
 
 	/**
@@ -220,6 +242,28 @@ public class JavaAgent implements ClassFileTransformer {
 				e.printStackTrace();
 				return null;
 			}
+		}
+	}
+
+	/**
+	 * A {@link ClassFileTransformer} that intercepts loading of pre-patched
+	 * classes and returns their patched bytecode to the JVM. The JVM then
+	 * handles class definition itself — no reflective {@code defineClass()} call
+	 * is needed, so this path works on Java 17+ without {@code --add-opens}.
+	 */
+	private static class PatchingTransformer implements ClassFileTransformer {
+		private final java.util.concurrent.ConcurrentHashMap<String, byte[]> patches =
+			new java.util.concurrent.ConcurrentHashMap<>();
+
+		void store(final String className, final byte[] bytes) {
+			patches.put(className.replace('.', '/'), bytes);
+		}
+
+		@Override
+		public byte[] transform(final ClassLoader loader, final String className,
+				final Class<?> classBeingRedefined, final ProtectionDomain protectionDomain,
+				final byte[] classfileBuffer) throws IllegalClassFormatException {
+			return patches.remove(className);
 		}
 	}
 

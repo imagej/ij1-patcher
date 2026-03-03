@@ -36,7 +36,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 import javassist.ClassPool;
 import javassist.NotFoundException;
@@ -49,6 +52,15 @@ import javassist.NotFoundException;
  * @author Curtis Rueden
  */
 public class LegacyInjector {
+
+	/**
+	 * Classloaders that have already had hooks injected. Used on Java 17+ where
+	 * {@code ClassLoader.findLoadedClass()} is inaccessible, so
+	 * {@link #alreadyPatched} cannot detect repeated calls via reflection alone.
+	 * WeakHashMap ensures classloaders can be garbage-collected when no longer used.
+	 */
+	private static final Set<ClassLoader> patchedClassLoaders =
+		Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
 
 	/**
 	 * This constant is used in place of EssentialLegacyHooks.class.getName() to
@@ -112,6 +124,11 @@ public class LegacyInjector {
 
 		// commit patches
 		hacker.loadClasses();
+
+		// Record this classloader so repeated calls are detected on Java 17+
+		// (where findLoadedClass() is inaccessible and alreadyPatched() returns
+		// false even after a successful patching round).
+		patchedClassLoaders.add(classLoader);
 	}
 
 	/**
@@ -407,17 +424,25 @@ public class LegacyInjector {
 	}
 
 	static boolean alreadyPatched(final ClassLoader classLoader) {
+		if (patchedClassLoaders.contains(classLoader)) return true;
 		Class<?> ij = null;
+		boolean checkedViaReflection = false;
 		try {
 			final Method findLoadedClass = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
 			findLoadedClass.setAccessible(true);
+			checkedViaReflection = true;
 			for (ClassLoader loader = classLoader; loader != null; loader = loader.getParent()) {
 				ij = (Class<?>)findLoadedClass.invoke(loader, "ij.IJ");
 				if (ij != null) break;
 			}
 			if (ij == null) return false;
 		} catch (Exception e) {
-			// fall through
+			// Java 17+: findLoadedClass is inaccessible due to strong encapsulation.
+			// We cannot safely check whether ij.IJ is loaded without triggering its
+			// loading, which would prevent patching. Return false so patching can proceed.
+			// If ij.IJ was already loaded and patched, loadClasses() will get a
+			// LinkageError and report it clearly.
+			if (!checkedViaReflection) return false;
 		}
 
 		if (ij == null) try {

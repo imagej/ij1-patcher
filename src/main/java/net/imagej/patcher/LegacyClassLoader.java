@@ -37,8 +37,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.ProtectionDomain;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A special purpose class loader to encapsulate ImageJ 1.x "instances" from
@@ -54,12 +58,22 @@ public class LegacyClassLoader extends URLClassLoader {
 	 * LegacyClassLoader class itself is defined. That way, code inside
 	 * the LegacyClassLoader can refer to the very same classes as code outside.
 	 *
-	 * Known classes contain the shared classes, but also classes whose bytecode
-	 * comes from outside the URLs known to the LegacyClassLoader. The non-shared
-	 * known classes *cannot* be used to communicate between classes inside and
-	 * outside of the LegacyClassLoader.
+	 * Local classes have their bytecode bundled in the same jar as
+	 * LegacyClassLoader (ij1-patcher.jar), but are NOT shared — each
+	 * LegacyClassLoader instance gets its own definition. We store only their
+	 * names here (not Class<?> references) so that loading LegacyClassLoader
+	 * does NOT eagerly load those classes into the system classloader, which
+	 * would prevent CodeHacker from later defining patched versions of them.
 	 */
-	private final static Map<String, Class<?>> knownClasses, sharedClasses;
+	private final static Map<String, Class<?>> sharedClasses;
+	private final static Set<String> localClassNames;
+
+	/**
+	 * Patched class bytes pre-registered by {@link CodeHacker} to be defined
+	 * when first requested, avoiding the need to call {@code ClassLoader.defineClass()}
+	 * via reflection (which is blocked by Java 17+'s strong encapsulation).
+	 */
+	private final Map<String, byte[]> patchedClasses = new HashMap<>();
 
 	static {
 		sharedClasses = new HashMap<String, Class<?>>();
@@ -67,11 +81,14 @@ public class LegacyClassLoader extends URLClassLoader {
 		for (final Class<?> clazz : LegacyHooks.class.getClasses()) {
 			sharedClasses.put(clazz.getName(), clazz);
 		}
-		knownClasses = new HashMap<String, Class<?>>(sharedClasses);
-		knownClasses.put(EssentialLegacyHooks.class.getName(),
-			EssentialLegacyHooks.class);
-		knownClasses.put(HeadlessGenericDialog.class.getName(),
-			HeadlessGenericDialog.class);
+		// NB: EssentialLegacyHooks and HeadlessGenericDialog are intentionally
+		// stored by name only. Referencing their Class<?> objects here would
+		// eagerly load them into the system classloader, which would prevent
+		// CodeHacker from later defining patched versions of those classes.
+		localClassNames = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+			LegacyInjector.ESSENTIAL_LEGACY_HOOKS_CLASS,
+			"net.imagej.patcher.HeadlessGenericDialog"
+		)));
 	}
 
 	public LegacyClassLoader(final boolean headless)
@@ -87,24 +104,48 @@ public class LegacyClassLoader extends URLClassLoader {
 
 	@Override
 	public URL getResource(final String name) {
-		final Class<?> knownClass = !name.endsWith(".class")? null :
-			knownClasses.get(name.substring(0, name.length() - 6).replace('/', '.'));
-		if (knownClass != null) {
-			return knownClass.getResource("/" + name);
+		if (name.endsWith(".class")) {
+			final String className = name.substring(0, name.length() - 6).replace('/', '.');
+			final Class<?> sharedClass = sharedClasses.get(className);
+			if (sharedClass != null) {
+				return sharedClass.getResource("/" + name);
+			}
+			if (localClassNames.contains(className)) {
+				return LegacyClassLoader.class.getResource("/" + name);
+			}
 		}
 		return super.getResource(name);
+	}
+
+	/**
+	 * Pre-registers patched bytecode for a class so it is used when the class is
+	 * first loaded via {@link #findClass}. This lets {@link CodeHacker} inject
+	 * patched classes without calling {@code ClassLoader.defineClass()} via
+	 * reflection, bypassing Java 17+'s strong-encapsulation restriction.
+	 */
+	void storePatchedClass(final String name, final byte[] bytes) {
+		patchedClasses.put(name, bytes);
 	}
 
 	@Override
 	public Class<?> findClass(final String className)
 		throws ClassNotFoundException
 	{
-		final Class<?> knownClass = knownClasses.get(className);
-		if (knownClass != null) try {
-			final Class<?> sharedClass = sharedClasses.get(className);
-			if (sharedClass != null) return sharedClass;
-			final ProtectionDomain domain = knownClass.getProtectionDomain();
-			final InputStream in = knownClass.getResourceAsStream("/" + className.replace('.', '/') + ".class");
+		final byte[] patched = patchedClasses.remove(className);
+		if (patched != null) {
+			return defineClass(className, patched, 0, patched.length);
+		}
+		final Class<?> sharedClass = sharedClasses.get(className);
+		if (sharedClass != null) return sharedClass;
+		if (localClassNames.contains(className)) try {
+			// Load bytecode from ij1-patcher.jar resources; no Class<?> reference
+			// needed, so these classes are not eagerly loaded into the system CL.
+			final ProtectionDomain domain = LegacyClassLoader.class.getProtectionDomain();
+			final InputStream in = LegacyClassLoader.class.getResourceAsStream(
+				"/" + className.replace('.', '/') + ".class");
+			if (in == null) {
+				throw new ClassNotFoundException("Resource not found for " + className);
+			}
 			final ByteArrayOutputStream out = new ByteArrayOutputStream();
 			byte[] buffer = new byte[65536];
 			for (;;) {
